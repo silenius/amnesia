@@ -1,0 +1,6 @@
+Chameleon==2.11
+CherryPy==3.2.2
+SQLAlchemy==0.7.9
+distribute==0.6.19
+filemagic==1.2
+psycopg2==2.4.5
