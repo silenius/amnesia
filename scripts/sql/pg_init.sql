@@ -246,6 +246,7 @@ create table folder (
     content_id          integer not null,
     index_content_id    integer,
     max_children        integer,
+    default_order       bytea,
 
     constraint pk_folder
         primary key(content_id),
