@@ -1,3 +1,0 @@
-[submodule "vendor/cputils"]
-	path = vendor/cputils
-	url = git@github.com:silenius/cputils.git
