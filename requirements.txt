@@ -1,6 +1,6 @@
 Chameleon==2.11
 CherryPy==3.2.2
-SQLAlchemy==0.7.9
+SQLAlchemy==0.8.0
 distribute==0.6.34
 filemagic==1.5
 psycopg2==2.4.6
