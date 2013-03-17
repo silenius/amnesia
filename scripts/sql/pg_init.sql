@@ -51,8 +51,9 @@ create unique index u_idx_content_type_name
 
 insert into content_type(name, icon) values ('folder', 'folder.png');
 insert into content_type(name, icon) values ('page', 'page.png');
-insert into content_type(name, icon) values ('news', 'news.png');
 insert into content_type(name, icon) values ('event', 'event.png');
+insert into content_type(name, icon) values ('news', 'news.png');
+insert into content_type(name, icon) values ('file', 'file.png');
 
 -----------
 -- state --
@@ -205,24 +206,6 @@ create table content_tag (
         foreign key (tag_id) references tag(id)
 );
 
--------------------------------------
--- content polymorphic content type --
--------------------------------------
-
-create table content_polymorphic (
-    content_id      integer not null,
-    content_type_id integer not null,
-
-    constraint pk_content_polymorphic
-        primary key(content_id, content_type_id),
-
-    constraint fk_content
-        foreign key(content_id) references content(id),
-
-    constraint fk_content_type
-        foreign key(content_type_id) references content_type(id)
-);
-
 ----------
 -- page --
 ----------
@@ -246,6 +229,7 @@ create table folder (
     content_id          integer not null,
     index_content_id    integer,
     max_children        integer,
+    polymorphic_loading boolean,
     default_order       bytea,
 
     constraint pk_folder
@@ -262,6 +246,24 @@ insert into folder(content_id) values (1);
 
 alter table content add constraint fk_folder 
     foreign key(container_id) references folder(content_id);
+
+--------------------------------
+-- folder polymorphic loading --
+--------------------------------
+
+create table folder_polymorphic (
+    folder_id       integer not null,
+    content_type_id integer not null,
+
+    constraint pk_folder_polymorphic
+        primary key(folder_id, content_type_id),
+
+    constraint fk_folder
+        foreign key(folder_id) references folder(content_id),
+
+    constraint fk_content_type
+        foreign key(content_type_id) references content_type(id)
+);
 
 ----------------
 -- mime_major --
