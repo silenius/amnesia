@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 from datetime import datetime
 
 from sqlalchemy import orm, sql, schema, types, event as sa_event
@@ -57,12 +59,23 @@ def update_FTS_listener(mapper, connection, target):
 # MODELS #
 ##########
 
+class JSONEncodedDict(types.TypeDecorator):
+
+    impl = types.TEXT
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value) if value is not None else None
+
+    def process_result_value(self, value, dialect):
+        return json.loads(value) if value is not None else None
+
+
 def init_models(*args, **kwargs):
 
     table = db.meta.tables
 
     schema.Table('folder', db.meta,
-        schema.Column('default_order', types.PickleType()),
+        schema.Column('default_order', JSONEncodedDict()),
         autoload=True,
         extend_existing=True,
         autoload_replace=True,

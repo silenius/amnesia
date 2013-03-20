@@ -229,8 +229,8 @@ create table folder (
     content_id          integer not null,
     index_content_id    integer,
     max_children        integer,
-    polymorphic_loading boolean,
-    default_order       bytea,
+    polymorphic_loading boolean default false,
+    default_order       text,
 
     constraint pk_folder
         primary key(content_id),
@@ -251,11 +251,11 @@ alter table content add constraint fk_folder
 -- folder polymorphic loading --
 --------------------------------
 
-create table folder_polymorphic (
+create table folder_polymorphic_loading (
     folder_id       integer not null,
     content_type_id integer not null,
 
-    constraint pk_folder_polymorphic
+    constraint pk_folder_polymorphic_loading
         primary key(folder_id, content_type_id),
 
     constraint fk_folder
