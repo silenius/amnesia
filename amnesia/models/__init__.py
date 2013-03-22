@@ -2,6 +2,7 @@
 
 import json
 
+from array import array
 from datetime import datetime
 
 from sqlalchemy import orm, sql, schema, types, event as sa_event
@@ -35,7 +36,7 @@ def update_updated_listener(mapper, connection, target):
 def update_FTS_listener(mapper, connection, target):
     """ Set the 'fts' column (full text search) """
 
-    weights = frozenset(('a', 'b', 'c', 'd'))
+    weights = array('c', ('a', 'b', 'c', 'd'))
     default_weight = 'd'
     fts = None
 
