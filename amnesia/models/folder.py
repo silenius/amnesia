@@ -18,6 +18,8 @@ class FolderQuery(content.ContentQuery):
 class Folder(content.Content):
 
     query = db.Session.query_property(FolderQuery)
+    pl_order_keys = frozenset(('key', 'polymorphic_identity', 'weight', 
+                               'order'))
 
     def __init__(self, **kwargs):
         super(Folder, self).__init__(**kwargs)
@@ -98,20 +100,9 @@ class Folder(content.Content):
         """ Ensure consistency of the Folder.default_order column.
 
         This function checks the value that will be serialized in
-        the default_order column. """
+        the default_order column. 
 
-        orders = [order for order in value if\
-                  self.to_polymorphic_order(order) is not None]
-
-        # Stores the list sorted on the 'weight' column
-        orders.sort(key=itemgetter('weight'))
-
-        return orders if orders else None
-
-    def to_polymorphic_order(self, order):
-        """ Check a polymorphic order.
-
-        The order must be a dict with the following keys:
+        Each order must be a dict with the following keys:
 
         'key' : the column on which we plan to ORDER BY.
 
@@ -141,16 +132,26 @@ class Folder(content.Content):
         A polymorphic_identity of None correspond to the base-most Mapper in
         the inheritance chain (Content in this case) """
 
-        keys = frozenset(('key', 'polymorphic_identity', 'weight', 'order'))
+        orders = [order for order in value if\
+                  frozenset(order) == self.pl_order_keys and\
+                  self.to_polymorphic_order(order) is not None]
 
-        if frozenset(order) == keys:
-            pl_cfg = self.polymorphic_config
-            identity = order['polymorphic_identity']
-            if identity in pl_cfg.pm or identity is None:
-                cls = pl_cfg.pm.get(identity, pl_cfg.base).class_
-                col = getattr(cls, order['key'], None)
+        # Stores the list sorted on the 'weight' column
+        orders.sort(key=itemgetter('weight'))
 
-                if col is not None and col in cls._SORTS_:
-                    return col.desc() if order['order'] == 'desc' else col
+        return orders if orders else None
+
+    def to_polymorphic_order(self, order):
+        """ Check a polymorphic order. """
+
+        pl_cfg = self.polymorphic_config
+        identity = order['polymorphic_identity']
+
+        if identity in pl_cfg.pm or identity is None:
+            cls = pl_cfg.pm.get(identity, pl_cfg.base).class_
+            col = getattr(cls, order['key'], None)
+
+            if col is not None and col in cls._SORTS_:
+                return col.desc() if order['order'] == 'desc' else col
 
         return None
