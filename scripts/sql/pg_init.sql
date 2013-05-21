@@ -1,3 +1,18 @@
+-------------
+-- DOMAINS --
+-------------
+
+create domain url as text
+    constraint check_proto_length check (
+        value ~* '^https?://' and
+        length(value) > 10
+    );
+
+
+------------
+-- TABLES --
+------------
+
 ------------
 -- passwd --
 ------------
@@ -185,7 +200,7 @@ $weight$ language plpgsql;
 create trigger compute_weight before insert or update on content
     for each row execute procedure compute_weight();
 
-insert into content (title, content_type_id, owner_id, state_id) 
+insert into content (title, content_type_id, owner_id, state_id)
 values ('Home', (select id from content_type where name='folder'), (select id from passwd where login='admin'), (select id from state where name='published'));
 
 -----------------
@@ -345,7 +360,7 @@ create table event (
     address             text,
     address_latitude    float,
     address_longitude   float,
-    url                 text,
+    url                 url,
     body                text            not null,
     attendees           text,
     contact_name        varchar(128),
@@ -383,7 +398,7 @@ create index idx_event_starts
 create table news (
     content_id  integer         not null,
     body        text            not null,
-    url         text,
+    url         url,
 
     constraint pk_news
         primary key(content_id),
