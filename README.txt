@@ -1,14 +1,15 @@
-amnesia README
-==================
+   __    __  __  _  _  ____  ___  ____    __
+  /__\  (  \/  )( \( )( ___)/ __)(_  _)  /__\
+ /(__)\  )    (  )  (  )__) \__ \ _)(_  /(__)\
+(__)(__)(_/\/\_)(_)\_)(____)(___/(____)(__)(__)
 
-Getting Started
----------------
+ ... just another CMS, based on Pyramid, Chameleon, and SQLAlchemy.
 
-- cd <directory containing this file>
 
-- $VENV/bin/python setup.py develop
+Main objectives are:
+- polymorphic associations at its core
+- lightweight and easy to install
+- (try to) suck less at the database level
+- use all the power of PostgreSQL
 
-- $VENV/bin/initialize_amnesia_db development.ini
-
-- $VENV/bin/pserve development.ini
-
+This is a work in progress.
