@@ -72,7 +72,7 @@ insert into state(name) values ('published');
 create table account (
     id          serial      not null,
     login       smalltext   not null,
-    password    char(40)    not null,
+    password    char(60)    not null,
     first_name  text        not null,
     last_name   text        not null,
     gender      char,
@@ -84,7 +84,7 @@ create table account (
         primary key(id),
 
     constraint check_account_length_password
-        check (length(password) = 40),
+        check (length(password) = 60),
 
     constraint u_idx_account_login
         unique(login),
@@ -109,12 +109,6 @@ create table mime_major (
 create unique index u_idx_mime_major_name
     on mime_major(lower(name));
 
-insert into mime_major(name, icon) values ('application', 'application.png');
-insert into mime_major(name, icon) values ('audio', 'audio.png');
-insert into mime_major(name, icon) values ('image', 'image.png');
-insert into mime_major(name, icon) values ('text', 'text.png');
-insert into mime_major(name, icon) values ('video', 'video.png');
-
 ----------
 -- mime --
 ----------
@@ -122,6 +116,7 @@ insert into mime_major(name, icon) values ('video', 'video.png');
 create table mime (
     id          smallserial not null,
     name        smalltext   not null,
+    template    smalltext   not null,
     major_id    smallint    not null,
     icon        text,
     ext         smalltext,
@@ -132,6 +127,10 @@ create table mime (
     constraint fk_mime_major
         foreign key(major_id) references mime_major(id)
 );
+
+create index idx_mime_major_id
+    on mime(major_id);
+
 
 ---------
 -- tag --

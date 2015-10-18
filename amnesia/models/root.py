@@ -5,7 +5,6 @@ from sqlalchemy import orm
 class RootModel:
 
     def __init__(self, **kwargs):
-        super(RootModel, self).__init__(**kwargs)
         self.feed(**kwargs)
 
     def feed(self, **kwargs):

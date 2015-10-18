@@ -44,5 +44,6 @@ setup(name='amnesia',
       main = amnesia:main
       [console_scripts]
       initialize_amnesia_db = amnesia.scripts.initializedb:main
+      initialize_amnesia_mime = amnesia.scripts.initializemime:main
       """,
       )

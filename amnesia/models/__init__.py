@@ -21,7 +21,7 @@ from .country import Country
 from .event import Event
 from .file import File
 from .folder import Folder
-from .mime import Mime, MimeMajor
+from .mime import Mime
 from .mime import MimeMajor
 from .news import News
 from .page import Page
@@ -30,13 +30,13 @@ from .tag import Tag
 
 from ..utils import UniqueDict
 
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-meta = MetaData()
+DBSession=scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+meta=MetaData()
 
-__all__ = ['Account', 'ContentType', 'Content', 'Country', 'Event', 'File',
+__all__=['Account', 'ContentType', 'Content', 'Country', 'Event', 'File',
            'Folder', 'Mime', 'MimeMajor', 'News', 'Page', 'State', 'Tag']
 
-orders = UniqueDict()
+orders=UniqueDict()
 
 #############
 # LISTENERS #
@@ -45,31 +45,31 @@ orders = UniqueDict()
 def update_updated_listener(mapper, connection, target):
     """ When an object is modified adjust the Content.updated column """
 
-    target.updated = datetime.now(timezone('Europe/Brussels'))
+    target.updated=datetime.now(timezone('Europe/Brussels'))
 
 # TODO: update only if content changed.
 def update_FTS_listener(mapper, connection, target):
     """ Set the 'fts' column (full text search) """
 
-    weights = ('a', 'b', 'c', 'd')
-    default_weight = 'd'
-    fts = None
+    weights=('a', 'b', 'c', 'd')
+    default_weight='d'
+    fts=None
 
     if target.is_fts:
         # Check which columns should be indexed
         for i in getattr(target.__class__, '_FTS_', ()):
-            (field, weight) = i
+            (field, weight)=i
 
             if weight.lower() not in weights:
-                weight = default_weight
+                weight=default_weight
 
-            _fts = sql.func.coalesce(getattr(target, field, ''), '')
-            _fts = sql.func.to_tsvector(_fts)
-            _fts = sql.func.setweight(_fts, weight)
+            _fts=sql.func.coalesce(getattr(target, field, ''), '')
+            _fts=sql.func.to_tsvector(_fts)
+            _fts=sql.func.setweight(_fts, weight)
 
-            fts = _fts if fts is None else fts.op('||')(_fts)
+            fts=_fts if fts is None else fts.op('||')(_fts)
 
-    target.fts = fts
+    target.fts=fts
 
 ##########
 # MODELS #
@@ -78,7 +78,7 @@ def update_FTS_listener(mapper, connection, target):
 #class JSONEncodedDict(types.TypeDecorator):
 #    """ Represents an immutable structure as a JSON-encoded string. """
 #
-#    impl = types.TEXT
+#    impl=types.TEXT
 #
 #    def process_bind_param(self, value, dialect):
 #        return json.dumps(value) if value is not None else None
@@ -88,7 +88,7 @@ def update_FTS_listener(mapper, connection, target):
 
 #class DefaultOrder(types.TypeDecorator):
 #
-#    impl = JSON
+#    impl=JSON
 #
 #    def process_bind_param(self, value, dialect):
 #        cherrypy.log(str(value))
@@ -100,15 +100,15 @@ def update_FTS_listener(mapper, connection, target):
 #        if not value:
 #            return None
 #
-#        result = []
+#        result=[]
 #
 #        for d in value:
-#            o = orders.get(d['key'])
+#            o=orders.get(d['key'])
 #
 #            if not o:
 #                continue
 #
-#            d['obj'] = o
+#            d['obj']=o
 #            result.append(d)
 #
 #        return result
@@ -116,7 +116,7 @@ def update_FTS_listener(mapper, connection, target):
 
 def init_models(*args, **kwargs):
 
-    table = meta.tables
+    table=meta.tables
 
 #    schema.Table('folder', db.meta,
 #        schema.Column('default_order', DefaultOrder()),
@@ -128,14 +128,14 @@ def init_models(*args, **kwargs):
     def _get_type_id(name):
         """ This function returns the content_type id for a given name """
 
-        t = table["content_type"]
+        t=table["content_type"]
 
-        q = sql.select([t.c.id]).where(t.c.name == name)
+        q=sql.select([t.c.id]).where(t.c.name == name)
 
-        content_type_id = DBSession.execute(q).scalar()
+        content_type_id=DBSession.execute(q).scalar()
 
         if not content_type_id:
-            raise ValueError('Missing content type : %s' % name)
+            raise ValueError('Missing content type: %s' % name)
 
         return content_type_id
 
@@ -163,68 +163,68 @@ def init_models(*args, **kwargs):
 
     orm.mapper(Tag, table['tag'])
 
-    orm.mapper(Account, table['human'],
-        properties = {
-            'count_content' : orm.column_property(
+    orm.mapper(Account, table['account'],
+        properties={
+            'count_content': orm.column_property(
                 sql.select(
                     [sql.func.count()],
-                    table['human'].c.id == table['content'].c.owner_id
+                    table['account'].c.id == table['content'].c.owner_id
                 ).label('count_content'),
-                deferred = True
+                deferred=True
             )
         })
 
     orm.mapper(MimeMajor, table['mime_major'])
 
     orm.mapper(Mime, table['mime'],
-        properties = {
-            'major' : orm.relationship(MimeMajor, lazy = 'joined')
+        properties={
+            'major': orm.relationship(MimeMajor, lazy='joined')
         })
 
     # Joined table inheritance is used.
-    _count_alias = table['content'].alias('_count_children')
+    _count_alias=table['content'].alias('_count_children')
     orm.mapper(Content, table['content'],
-        polymorphic_on = table['content'].c.content_type_id,
-        properties = {
+        polymorphic_on=table['content'].c.content_type_id,
+        properties={
 
             # no need to load this column by default
-            'fts' : orm.deferred(table['content'].c.fts),
+            'fts': orm.deferred(table['content'].c.fts),
 
             #################
             # RELATIONSHIPS #
             #################
 
-            'owner' : orm.relationship(
+            'owner': orm.relationship(
                 Account,
-                lazy = 'joined',
-                innerjoin = True,
-                backref = orm.backref('contents', lazy = 'dynamic',
+                lazy='joined',
+                innerjoin=True,
+                backref=orm.backref('contents', lazy='dynamic',
                                       cascade='all, delete-orphan')
             ),
 
-            'state' : orm.relationship(
+            'state': orm.relationship(
                 State,
-                lazy = 'joined',
-                innerjoin = True
+                lazy='joined',
+                innerjoin=True
             ),
 
-            'type' : orm.relationship(
+            'type': orm.relationship(
                 ContentType,
-                lazy = 'joined',
-                innerjoin = True
+                lazy='joined',
+                innerjoin=True
             ),
 
-            'tags' : orm.relationship(
+            'tags': orm.relationship(
                 Tag,
-                secondary = table['content_tag']
+                secondary=table['content_tag']
             ),
 
-            'parent' : orm.relationship(
+            'parent': orm.relationship(
                 Folder,
-                foreign_keys = table['content'].c.container_id,
-                innerjoin = True,
-                uselist = False,
-                backref = orm.backref('children', cascade='all, delete-orphan')
+                foreign_keys=table['content'].c.container_id,
+                innerjoin=True,
+                uselist=False,
+                backref=orm.backref('children', cascade='all, delete-orphan')
             ),
 
             #####################
@@ -232,66 +232,67 @@ def init_models(*args, **kwargs):
             #####################
 
             # TODO: move this to Folder class
-            'count_children' : orm.column_property(
+            'count_children': orm.column_property(
                 sql.select([sql.func.count()]).where(
                     _count_alias.c.container_id == table['content'].c.id
                 ).correlate(table['content']).label('count_children'),
-                deferred = True
+                deferred=True
             ),
 
-            'position_in_container' : orm.column_property(
+            'position_in_container': orm.column_property(
                 sql.func.row_number().\
                 over(partition_by=table['content'].c.container_id,
                      order_by=table['content'].c.weight.desc()),
-                deferred = True,
-                group = 'window_func'
+                deferred=True,
+                group='window_func'
             )
 
         })
 
-    orm.mapper(File, table['data'], inherits = Content,
-        polymorphic_identity = _get_type_id('file'),
-        inherit_condition = table['data'].c.content_id ==\
-                            table['content'].c.id,
-        properties = {
-            'mime' : orm.relationship(
+    orm.mapper(File, table['data'], inherits=Content,
+        polymorphic_identity=_get_type_id('file'),
+        inherit_condition=table['data'].c.content_id ==
+                          table['content'].c.id,
+        properties={
+            'mime': orm.relationship(
                 Mime,
-                lazy = 'joined'
+                lazy='joined'
             )
         })
 
-    orm.mapper(Event, table['event'], inherits = Content,
-        polymorphic_identity = _get_type_id('event'),
-        properties = {
-            'country' : orm.relationship(Country, lazy = 'joined')
+    orm.mapper(Event, table['event'], inherits=Content,
+        polymorphic_identity=_get_type_id('event'),
+        properties={
+            'country': orm.relationship(Country, lazy='joined')
         })
 
-    orm.mapper(Folder, table['folder'], inherits = Content,
-        polymorphic_identity = _get_type_id('folder'),
-        inherit_condition = table['folder'].c.content_id ==\
-                            table['content'].c.id,
-        properties = {
-            'alternate_index' : orm.relationship(
+    orm.mapper(Folder, table['folder'], inherits=Content,
+        polymorphic_identity=_get_type_id('folder'),
+        inherit_condition=table['folder'].c.content_id ==
+               table['content'].c.id,
+        properties={
+            'alternate_index': orm.relationship(
                 Content,
-                primaryjoin = table['folder'].c.index_content_id == \
-                              table['content'].c.id,
-                innerjoin = True,
-                uselist = False,
-                post_update = True,
-                backref = orm.backref('indexes')
+                primaryjoin=table['folder'].c.index_content_id ==
+                table['content'].c.id,
+
+                innerjoin=True,
+                uselist=False,
+                post_update=True,
+                backref=orm.backref('indexes')
             ),
 
-            'polymorphic_children' : orm.relationship(
+            'polymorphic_children': orm.relationship(
                 ContentType,
-                secondary = table['folder_polymorphic_loading']
+                secondary=table['folder_polymorphic_loading']
             )
         }
     )
 
-    orm.mapper(Page, table['page'], inherits = Content,
-        polymorphic_identity = _get_type_id('page'))
+    orm.mapper(Page, table['page'], inherits=Content,
+               polymorphic_identity=_get_type_id('page'))
 
-    orm.mapper(News, table['news'], inherits = Content)
+    orm.mapper(News, table['news'], inherits=Content)
 
     ###################
     # EVENT LISTENERS #
@@ -310,7 +311,7 @@ def init_models(*args, **kwargs):
     # FULLTEXT SEARCH #
     ###################
 
-    Content._FTS_ =  (('title', 'A'), ('description', 'B'))
+    Content._FTS_ = (('title', 'A'), ('description', 'B'))
     News._FTS_ = (('title', 'A'), ('description', 'B'), ('body', 'C'))
     Page._FTS_ = (('title', 'A'), ('description', 'B'), ('body', 'C'))
     Event._FTS_ = (('title', 'A'), ('description', 'B'), ('location', 'B'),
@@ -323,33 +324,32 @@ def init_models(*args, **kwargs):
     from amnesia.order import EntityOrder, Path
 
     orders.update({
-        'title' : EntityOrder(Content, 'title', 'asc', doc='title'),
+        'title': EntityOrder(Content, 'title', 'asc', doc='title'),
 
-        'weight' : EntityOrder(Content, 'weight', 'desc', doc='default'),
+        'weight': EntityOrder(Content, 'weight', 'desc', doc='default'),
 
-        'update' : EntityOrder(Content, 'last_update', 'desc',
-                               doc='last update'),
+        'update': EntityOrder(Content, 'last_update', 'desc',
+                              doc='last update'),
 
-        'added' : EntityOrder(Content, 'added', 'desc', doc='added date'),
+        'added': EntityOrder(Content, 'added', 'desc', doc='added date'),
 
-        'type' : EntityOrder(ContentType, 'name', 'asc', path=[Path(Content,
-                                                                    'type')],
-                             doc='content type'),
+        'type': EntityOrder(ContentType, 'name', 'asc', path=[Path(Content,
+                                                                   'type')],
+                            doc='content type'),
 
-        'owner' : EntityOrder(Account, 'full_name', 'asc', path=[Path(Content,
-                                                                    'owner')],
-                              doc='owner'),
+        'owner': EntityOrder(Account, 'full_name', 'asc', path=[Path(Content,
+                                                                     'owner')],
+                             doc='owner'),
 
-        'starts' : EntityOrder(Event, 'starts', 'desc', doc='event starts'),
+        'starts': EntityOrder(Event, 'starts', 'desc', doc='event starts'),
 
-        'ends' : EntityOrder(Event, 'ends', 'desc', doc='event ends'),
+        'ends': EntityOrder(Event, 'ends', 'desc', doc='event ends'),
 
-        'country' : EntityOrder(Country, 'name', 'asc', path=[Path(Event,
-                                                                   'country')],
-                                doc='event country'),
+        'country': EntityOrder(Country, 'name', 'asc', path=[Path(Event,
+                                                                  'country')],
+                               doc='event country'),
 
-        'major' : EntityOrder(MimeMajor, 'name', 'asc',
-                              path=[Path(File, 'mime'), Path(Mime, 'major')],
-                              doc='mime')
+        'major': EntityOrder(MimeMajor, 'name', 'asc',
+                             path=[Path(File, 'mime'), Path(Mime, 'major')],
+                             doc='mime')
     })
-

@@ -14,6 +14,9 @@ class MimeMajor(RootModel):
 
     """Mime major"""
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 class Mime(RootModel):
 
