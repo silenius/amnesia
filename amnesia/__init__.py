@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.decorator import reify
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
 from .models import DBSession
 from .models import Folder
+from .models import Content
 from .models import meta
 from .models import init_models
 
+from .resources import Root
+from .resources import ContentResource
 
-class DefaultRoot():
 
-    def get_root(self):
-        return DBSession.query(Folder).filter_by(container_id=None).one()
+# Pyramid will happily call __getitem__ as many times as it needs to, until it
+# runs out of path segments or until a resource raises a KeyError. Each
+# resource only needs to know how to fetch its immediate children, the
+# traversal algorithm takes care of the rest.
 
-    def __call__(self, request=None):
-        return self.get_root()
+# A context resource becomes the subject of a view, and often has security
+# information attached to it
 
-get_root = DefaultRoot()
 
 def main(global_config, **settings):
     """
@@ -32,11 +34,12 @@ def main(global_config, **settings):
 
     init_models()
 
-    config = Configurator(root_factory=get_root, settings=settings)
+    config = Configurator(root_factory=Root, settings=settings)
     config.include('pyramid_chameleon')
+
     config.add_static_view('static', 'static', cache_max_age=3600)
 
 #    config.add_route('home', '/')
-#    config.scan()
+    config.scan()
 
     return config.make_wsgi_app()
