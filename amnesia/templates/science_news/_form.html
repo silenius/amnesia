@@ -1,0 +1,23 @@
+<metal:block use-macro="load: ../news/_form.html">
+    <metal:block fill-slot="section-default">
+
+        <!-- AUTHORS -->
+
+        <div class="form_section">
+            <div class="form_title">Authors</div>
+            <div class="form_description">Article authors.</div>
+            <div><textarea name="author" rows="2" style="width:100%"></textarea></div>
+        </div>
+
+        <!-- PUBLISHED DATE -->
+
+        <div class="form_section" >
+            <div class="form_title"><img src="${url('/images/calendar.png')}" />Published date.</div>
+            <div class="form_description">Published date of the article.</div>
+            <div>
+                <metal:block use-macro="load: ../_split_date.html" tal:define="name 'published'" />
+            </div>
+        </div>
+    </metal:block>
+
+</metal:block>

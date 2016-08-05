@@ -1,0 +1,11 @@
+<div>
+    <ul style="padding:0;list-style-type:none;list-style-image:none">
+        <li tal:repeat="content news" style="padding-bottom:5px;padding-top:2px;" class="clear">
+            <div style="margin-top:0px">
+                <div class="posted right">${h.format_date(content.added)}</div>
+                <a class="nodec bold" href="${content.url_for('show')}">${content.title}</a>
+            </div>
+            <div class="posted" tal:condition="content.description">${h.wrap(content.description, 200)}</div>
+        </li>
+    </ul>
+</div>

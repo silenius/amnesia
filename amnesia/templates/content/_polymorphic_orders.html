@@ -1,0 +1,38 @@
+<?python import json ?>
+<table xmlns="http://www.w3.org/1999/xhtml" class="browse">
+    <thead>
+        <tr>
+            <th>enable</th>
+            <th class="align_left">column</th>
+            <th>direction</th>
+            <th>nulls</th>
+            <th>priority</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr tal:repeat="order orders" data-json="${json.dumps(order)}">
+            <td class="align_center">
+                <input type="checkbox" tal:attributes="checked order['checked']" />
+            </td>
+            <td>
+                ${order['doc']}
+            </td>
+            <td class="align_center">
+                <select>
+                    <option value="asc" selected="${'selected' if order['order'] == 'asc' else None}">asc</option>
+                    <option value="desc" selected="${'selected' if order['order'] == 'desc' else None}">desc</option>
+                </select>
+            </td>
+            <td class="align_center">
+                <select>
+                    <option value="first" selected="${'selected' if order['nulls'] == 'first' else None}">first</option>
+                    <option value="last" selected="${'selected' if order['nulls'] == 'last' else None}">last</option>
+                </select>
+            </td>
+            <td class="align_center">
+                <a href="#sort" data-move="down"><img src="${url('/images/go-down.png')}" style="vertical-align:bottom" /></a>
+                <a href="#sort" data-move="up"><img src="${url('/images/go-up.png')}" style="vertical-align:top" /></a>
+            </td>
+        </tr>
+    </tbody>
+</table>

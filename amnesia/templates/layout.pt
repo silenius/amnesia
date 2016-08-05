@@ -1,0 +1,164 @@
+<metal:block define-macro="page" tal:define="user None; json import: json">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+    <head>
+
+        <!--[if lt IE 9]>
+            <style>html{display:none!important;}</style>
+            <META http-equiv="refresh" content="0;URL=${request.static_url('amnesia:static/ie.html')}">
+        <![endif]-->
+
+        <meta charset="utf-8" />
+
+        <title metal:define-slot="title">
+            Belgian Biodiversity Platform <metal:block define-slot="title_more" />
+        </title>
+        <metal:block define-slot="head-top" />
+        <link rel="stylesheet" href="${request.static_url('amnesia:static/fonts/open_sans/stylesheet.css')}" type="text/css" />
+        <link rel="stylesheet" href="${request.static_url('amnesia:static/fonts/open_sans_condensed/stylesheet.css')}" type="text/css" />
+        <link rel="stylesheet" href="${request.static_url('amnesia:static/styles/bbpf.css')}" type="text/css" />
+        <link rel="stylesheet" href="${request.static_url('amnesia:static/styles/_mce.css')}" type="text/css" />
+        <link rel="shortcut icon" href="${request.static_url('amnesia:static/images/BBPF.ico')}" />
+        <script type="text/javascript" src="${request.static_url('amnesia:static/js/yeti/core.js')}"></script>
+        <script type="text/javascript" src="${request.static_url('amnesia:static/js/yeti/ui.js')}"></script>
+        <script type="text/javascript" src="${request.static_url('amnesia:static/js/bbpf.js')}"></script>
+        <script tal:condition="js_tinymce | nothing" type="text/javascript" src="${request.static_url('amnesia:static/js/tinymce/tinymce.min.js')}"></script>
+        <script tal:condition="js_google_maps | nothing" type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script tal:condition="js_sha1 | nothing" type="text/javascript" src="${request.static_url('amnesia:static/js/sha/src/sha1.js')}"></script>
+
+        <script type="text/javascript">
+
+            /* <![CDATA[ */
+
+            Bbpf.config.urls = {
+                host : "${request.application_url}",
+                prefix : "${request.script_name}"
+            }
+
+            var site = {};
+
+            document.addEventListener("DOMContentLoaded", function(e) {
+
+                /* TABS */
+
+                var tab_container = Yeti.Element('toptabs'),
+                    lis = tab_container.getElementsByTagName('li')
+                ; // var
+
+                for (var i=0, _len = lis.length; i<_len; i++) {
+                    (function(el) {
+                        var ul = Yeti.DOM.firstElementTag(el, 'ul');
+
+                        if (ul !== null) {
+                            el.addEventListener('mouseover', function() {
+                                el.style.transitionDuration = '1s';
+                                ul.style.display = 'block';
+                            });
+
+                            el.addEventListener('mouseout', function() {
+                                ul.style.display = 'none';
+                            });
+                        }
+                    })(lis[i]);
+                }
+
+            /* ]]> */
+
+                <metal:block tal:condition="user">
+
+                /* <![CDATA[ */
+
+                /* CLIPBOARD */
+
+                site.clipboard = new Bbpf.Clipboard({
+                    container : 'clipboard',
+                    images : {
+                        filled : "${request.static_url('amnesia:static/images/document-copy-red.png')}",
+                        empty : "${request.static_url('amnesia:static/images/document-copy.png')}",
+                        trash : "${request.static_url('amnesia:static/images/mini-trash.png')}"
+                    },
+                    ids: ${json.dumps(cherrypy.session.get('obj_ids', []))}
+                });
+
+                /* ]]> */
+
+                </metal:block>
+                /* <![CDATA[ */
+
+            });
+
+            /* ]]> */
+        </script>
+        <metal:block define-slot="head-bottom" />
+    </head>
+
+    <body>
+        <metal:block define-slot="body" />
+        <div id="container">
+            <div id="topmenu">
+                <div class="right">
+
+                    <!-- SEARCH -->
+
+                    <img src="${request.static_url('amnesia:static/images/magnifier.png')}" class="title" />Search:
+                    <form action="${request.static_url('amnesia:static/search')}" method="get" style="display:inline"><input type="text" name="query" style="text-align:center;height:12px;border:1px solid #e0e0e0;background-color:#f7f7f7" /></form>
+                </div>
+
+                <div class="left">
+
+                    <metal:block tal:condition="user">
+
+                        <!-- LOGOUT -->
+
+                        <img src="${request.static_url('amnesia:static/images/locked.png')}" class="title"/>Hello ${user.first_name} - <a href="${request.static_url('amnesia:static/human/logout')}">logout</a>
+
+                        <!-- CLIPBOARD -->
+
+                        <span id="clipboard"></span>
+
+                    </metal:block>
+
+                    <metal:block tal:condition="not user">
+                        <img src="${request.static_url('amnesia:static/images/unlock.png')}" class="title" /><a href="${request.static_url('amnesia:static/human/login')}">Login</a>
+                    </metal:block>
+
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="logo">
+                <a href="${request.static_url('amnesia:static/')}"><img src="${request.static_url('amnesia:static/images/logo_bbpf.png')}" /></a>
+            </div>
+
+            <div id="toptabs">
+                <!--!
+                ${structure: widgets.Tabs(1)}
+                -->
+                <br style="clear:both" />
+            </div>
+
+            <metal:block define-slot="navigation" tal:condition="content | nothing">
+                <div id="nav">
+                    <span class="bold">Navigation: &#160;</span>
+                    <!--!
+                    ${structure: widgets.Navigation(content)}
+                    -->
+                </div>
+            </metal:block>
+
+            <metal:block define-slot="before-content" />
+
+            <metal:block define-slot="content" />
+
+            <metal:block define-slot="before-footer">
+                <div tal:condition="content | nothing"><span tal:condition="content.type.name != 'folder' or (content.type.name == 'folder' and content.alternate_index)" class="posted right" style="margin-right:10px;">last modified on ${content.last_update}</span></div>
+            </metal:block>
+
+            <div id="footer" metal:define-slot="footer">
+                v20131021 &#169; Belgian Biodiversity Platform - <a href="${request.static_url('amnesia:static/1867')}">copyrights</a>
+                <br />Powered by <a href="https://github.com/BelgianBiodiversityPlatform/amnesia">Amnesia CMS</a>
+            </div>
+        </div>
+    </body>
+</html>
+</metal:block>

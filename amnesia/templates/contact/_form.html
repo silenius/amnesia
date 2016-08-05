@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/">
+
+    <div class="form_section">
+        <div class="form_title"><img src="${h.url_for('/images/vcard.png')}" />Name</div>
+        <div class="form_description">Please enter your full name.</div>
+        <div><input type="text" name="name" /></div>
+    </div>
+
+    <div class="form_section">
+        <div class="form_title"><img src="${h.url_for('/images/email.png')}" />E-mail</div>
+        <div class="form_description">Please enter your e-mail address.</div>
+        <div><input type="text" name="email" /></div>
+    </div>
+
+    <div class="form_section">
+        <div class="form_title"><img src="${h.url_for('/images/page_white_text.jpg')}" />Subject</div>
+        <div class="form_description">Please enter the subject of the message you want to send.</div>
+        <div><input type="text" name="subject" style="width:500px" /></div>
+    </div>
+
+    <div class="form_section">
+        <div class="form_title"><img src="${h.url_for('/images/application_view_columns.png')}" />Message</div>
+        <div class="form_description">Please enter the message you want to send.</div>
+        <div><textarea name="message" style="width:500px;height:100px"></textarea></div>
+    </div>
+
+    <div class="form_section">
+        <div class="form_title"><img src="${h.url_for('/images/application_view_columns.png')}" />Spam</div>
+        <div class="form_description">To avoid SPAM, please enter <span style="color:red;font-size:14px;padding:2px">${c.code}</span> in the following box: <input type="text" name="code" maxlength="3" style="width:50px;text-align:center" /></div>
+    </div>
+
+</html>

@@ -1,0 +1,18 @@
+<?python
+    from itertools import cycle
+?>
+<tbody xmlns="http://www.w3.org/1999/xhtml" 
+       xmlns:py="http://genshi.edgewall.org/"
+       py:with="odd_even = cycle(['odd', 'even'])">
+    <!-- $Id: _browse.html 4281 2011-03-21 19:51:42Z jcigar $ -->
+    <tr py:for="role in c.results" id="role_${role.id}" class="${odd_even.next()}">
+        <td class="bold" style="white-space:nowrap">
+            ${role.name} <img py:if="role.locked" src="${h.url_for('/images/lock_tiny.png')}" />
+        </td>
+        <td>${role.description}</td>
+        <td class="align_center" style="white-space:nowrap">
+            <a href="${h.url_for('/role/edit/%s' % role.id)}"><img class="icon_tab link" src="${h.url_for('/images/application_form_edit.png')}" /></a>
+            <a py:if="not role.locked" href="#" class="role_delete"><img src="${h.url_for('/images/application_form_delete.png')}" class="icon_tab link" /></a>
+        </td>
+    </tr>
+</tbody>

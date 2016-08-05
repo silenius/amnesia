@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <xi:include href="../layout.html" />
+
+    <!-- $Id: edit.html 4252 2011-02-14 16:26:15Z jcigar $ -->
+
+    <head py:with="tinymce=True">
+        <title>Human</title>
+        <script type="text/javascript">
+            Yeti.Evt.bind(window, 'load', function() {
+                Bbpf.utils.form_tabs('tabs', 'general');
+            });
+        </script>
+    </head>
+
+    <body py:with="navigation=c.widgets.Navigation(1, after_text=[('Control panel', '/controlpanel/index'), ('User management', '/controlpanel/users'), ('Users', '/human/admin'), c.item.login if c.item else 'new' ])">
+        <div class="title human_title">
+            <h2 py:choose="True if c.item and c.item.id else False">
+                <py:when test="True">Edit</py:when>
+                <py:otherwise>Add</py:otherwise>
+                an account
+            </h2>
+            <div class="posted">Human account.</div>
+        </div>
+
+        <div>
+            <form method="post" action="${h.url_for('/human/save')}">
+                <div id="section-default">
+                    <xi:include href="_form_register.html" />
+                </div>
+                <input type="hidden" name="id" />
+                <input type="submit" value="send" />
+            </form>
+        </div>
+
+    </body>
+
+</html>

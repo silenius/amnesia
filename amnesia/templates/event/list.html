@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <xi:include href="../layout.html" />
+
+    <!-- $Id$ -->
+
+    <head>
+        <title>${c.item.title}</title>
+    </head>
+
+    <!--<body py:with="navigation=c.widgets.Navigation(c.item) ; tabs = c.widgets.Tabs(c.item)">-->
+    <body>
+
+        <!-- BEGIN: BODY -->
+
+        <div class="title event_title">
+
+            <div class="right">
+                <xi:include href="../content/_share_buttons.html" />
+            </div>
+
+            <h2>Events list</h2>
+            <div class="posted left">${c.results.count()} event(s) on this day</div>
+
+            <div style="clear:both" />
+
+        </div>
+
+        <h3>Events which starts at ${c.day}</h3>
+
+        <div id="content">
+            <xi:include href="../folder/_child_content.html" />
+        </div>
+
+        <!-- END: BODY -->
+
+    </body>
+
+</html>

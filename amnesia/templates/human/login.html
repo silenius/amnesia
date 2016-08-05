@@ -1,0 +1,44 @@
+<metal:block use-macro="load: ../layout.html" tal:define="js_sha1 True">
+<html>
+    <head>
+        <metal:block fill-slot="title_more">: login</metal:block>
+
+        <script type="text/javascript" metal:fill-slot="head-bottom">
+            /* <![CDATA[ */
+            document.addEventListener("DOMContentLoaded", function(e) {
+                Yeti.Element('form_login').addEventListener('submit', function() {
+                    var salt = "${salt}",
+                        password = Yeti.Element('password'),
+                        password_sha = new jsSHA(password.value, 'TEXT').getHash('SHA-1', 'HEX'),
+                        hashed_password = new jsSHA(salt + password_sha, 'TEXT')
+                    ;
+
+                    password.value = hashed_password.getHash('SHA-1', 'HEX');
+
+                    return true;
+                });
+            });
+            /* ]]> */
+        </script>
+    </head>
+
+    <body>
+    <div metal:fill-slot="content" id="main">
+        <div class="title login_title">
+            <h1>Login</h1>
+            <div class="posted">Login onto the website</div>
+        </div>
+
+        <h2>This section enables you to login onto the website. Please enter your username and password.</h2>
+
+        <div>
+            <form id="form_login" method="post" action="${url('/human/login')}">
+                ${structure: form}
+                <input type="submit" value="login" />
+            </form>
+        </div>
+    </div>
+    </body>
+
+</html>
+</metal:block>

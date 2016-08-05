@@ -1,0 +1,51 @@
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:strip="True">
+
+    <!-- $Id: _form.html 4273 2011-03-02 16:28:32Z jcigar $ -->
+
+    <ul class="formTabs" id="tabs">
+        <li id="tab-general" class="formTab current"><span>General</span></li>
+        <li id="tab-permission" class="formTab"><span>Permissions</span></li>
+    </ul>
+
+    <!-- GENERAL -->
+
+    <div id="section-general">
+
+        <div class="form_section">
+            <div class="form_title"><img src="${h.url_for('/images/vcard1.png')}" />Name</div>
+            <div class="form_description">Role name.</div>
+            <div><input type="text" name="name" class="medium" maxlength="32" /></div>
+        </div>
+
+        <div class="form_section">
+            <div class="form_title"><img src="${h.url_for('/images/page_white_text.jpg')}" />Description</div>
+            <div class="form_description">A short description of the role.</div>
+            <div><textarea name="description" cols="40"></textarea></div>
+        </div>
+
+    </div>
+
+    <!-- PERMISSIONS -->
+
+    <div id="section-permission" style="display:none">
+        <p>
+            Permissions let you control what users can do on your site. Each user role (defined on the user roles page) has its own set of permissions. For example, you could give users classified as "Administrators" permission to "administer nodes" but deny this power to ordinary, "authenticated" users. You can use permissions to reveal new features to privileged users (those with subscriptions, for example). Permissions also allow trusted users to share the administrative burden of running a busy site.
+        </p>
+        <div class="form_section">
+            <div class="form_title"><img src="${h.url_for('/images/medal_gold_3.png')}" />Permissions</div>
+            <div class="form_description">Permissions set here apply directly to a role.</div>
+            <table style="font-size:12px">
+                <tr py:for="perm in c.permissions">
+                    <td><input type="checkbox" name="permissions" value="${perm.id}" /></td>
+                    <td><a href="${h.url_for('/permission/show/%s' % perm.id)}">${perm.name}</a></td>
+                    <td>${perm.description}</td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+</html>

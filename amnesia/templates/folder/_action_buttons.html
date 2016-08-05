@@ -1,0 +1,49 @@
+<metal:block use-macro="load: ../content/_action_buttons.html">
+
+    <span metal:fill-slot="top" tal:condition="content.alternate_index">
+        <a title="Edit alternate content" href="${content.alternate_index.url_for('edit')}"><img src="${url('/images/page_edit.png')}" /></a>
+    </span>
+
+    <span metal:fill-slot="bottom">
+        <a id="button_add" title="Add a new document to this folder" href="#"><img src="${url('/images/application_form_add.png')}" class="link" /></a>
+        <script type="text/javascript">
+            /* <![CDATA[ */
+            document.addEventListener("DOMContentLoaded", function(e) {
+
+                if (site.clipboard && site.clipboard.count() > 0) {
+                    var paste = Yeti.Element('object_paste');
+                    paste.style.display = '';
+
+                    paste.addEventListener('click', function() {
+                        site.clipboard.dispatcher.fire('object_paste', {
+                            objs : site.clipboard.ids
+                        });
+                    });
+                }
+
+                Yeti.Element('button_add').addEventListener('click', function() {
+                    var frame = new Yeti.UI.Frame({
+                        width: 500,
+                        height: 300,
+                        title: 'Add content'
+                    });
+                    frame.attach();
+                    Yeti.AjaxRequest("${url('/folder/get_allowed_content_types/%s' % content.id)}", {
+                        onreadystatechange: function(req) {
+                            if (req.success()) {
+                                frame.body.innerHTML = req.o.responseText;
+                            }
+                        }
+
+                    })
+                });
+            });
+            /* ]]> */
+        </script>
+        <tal:block switch="mode | 'browse'">
+            <a tal:case="'browse'" title="Browse this folder" href="${content.url_for('admin')}"><img src="${url('/images/application_form_magnify.png')}" class="link" /></a>
+            <a tal:case="'view'" title="View this folder" href="${content.url_for('show')}"><img src="${url('/images/page_white_magnify.png')}" class="link" /></a>
+        </tal:block>
+        <a title="Paste documents which have been cutted" id="object_paste" href="#" style="display:none"><img src="${url('/images/application_form_paste.png')}" class="link" /></a>
+    </span>
+</metal:block>

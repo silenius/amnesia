@@ -1,0 +1,6 @@
+<metal:block use-macro="load: ../../content/view/_tabular.html">
+    <span metal:fill-slot="title">
+        <a class="object_admin" href="${url('/%s/admin' % content.id)}">${h.wrap(content.title, 60)}</a>
+        <span class="posted" style="font-size:10px"> (${content.count_children or 0})</span>
+    </span>
+</metal:block>

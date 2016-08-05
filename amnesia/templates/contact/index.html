@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/" 
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <xi:include href="../layout.html" />
+
+    <!-- $Id: index.html 4348 2011-05-18 15:17:35Z jcigar $ -->
+
+    <head>
+        <title>Contact us</title>
+    </head>
+
+    <body py:with="navigation=c.widgets.Navigation(1, after_text=['Contact us'])">
+        <div class="title contact_title">
+            <h2>Contact us</h2>
+            <div class="posted">Contact the Belgian Biodiversity Platform</div>
+        </div>
+        
+        <py:if test="not c.sent and not c.error">
+            <h3>Fill in this form to contact the site owners.</h3>
+
+            <div>
+                <img src="${h.url_for('/images/logobbpf_big.jpg')}" class="right" style="margin-right:50px" />
+                <form method="post" action="${h.url_for('/contact/send')}" enctype="multipart/form-data">
+                    <xi:include href="_form.html" />
+                    <input type="submit" value="send" />
+                </form>
+            </div>
+        </py:if>
+
+        <py:if test="c.sent">
+            <h3>Site Administrator has been contacted.</h3>
+            <img src="${h.url_for('/images/face-grin.png')}" class="title" />A mail has now been sent to the site administrator regarding your questions and/or comments.
+        </py:if>
+
+        <py:if test="c.error">
+            <h3>Oops, it seems that an error occured ...</h3>
+            <img src="${h.url_for('/images/face-sad.png')}" class="title" />Unfortunately your mail cannot be send for the moment. It is probably due to a temporatry technical problem ... sorry.
+        </py:if>
+
+
+    </body>
+
+</html>

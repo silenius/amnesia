@@ -1,0 +1,36 @@
+<metal:block use-macro="load: ../layout.html" 
+             tal:define="js_tinymce True ; js_google_maps True">
+<html>
+    <head >
+        <metal:block fill-slot="title_more">: event</metal:block>
+
+        <script type="text/javascript" metal:fill-slot="head-bottom">
+            /* <![CDATA[ */
+            Yeti.Evt.bind(window, 'load', function() {
+                Bbpf.utils.init_tinyMCE();
+
+                var evt = new Bbpf.Event();
+                evt.GeocodingHandler(document.forms.form_event, 'event_map');
+            });
+            /* ]]> */
+        </script>
+    </head>
+
+    <body>
+    <div metal:fill-slot="content" id="main">
+        <div class="title event_title">
+            <h1>Add or Edit an event</h1>
+            <div class="posted">
+                Information about an upcoming event, which can be displayed in the calendar.
+            </div>
+        </div>
+
+        <form method="post" action="${url('/event/save')}" id="form_event">
+            ${structure: form}
+            <input type="submit" value="send" />
+        </form>
+    </div>
+    </body>
+
+</html>
+</metal:block>

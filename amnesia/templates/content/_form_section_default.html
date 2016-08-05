@@ -1,0 +1,148 @@
+<!-- TITLE -->
+
+<div class="form_section" metal:define-slot="content_title">
+    <div class="form_title"><img src="${url('/images/application.png')}" />Title</div>
+    <div class="form_description">Title for the item, it will be shown throughout the site.</div>
+    <div><input type="text" name="title" maxlength="200" style="width:100%" /></div>
+</div>
+
+<!-- DESCRIPTION -->
+
+<div class="form_section">
+    <div class="form_title"><img src="${url('/images/page_white_text.jpg')}" />Description</div>
+    <div class="form_description">A short summary of the content.</div>
+    <div><textarea name="description" style="width:100%"></textarea></div>
+</div>
+
+<!-- CUSTOM ICON -->
+
+<div class="form_section">
+    <div class="form_title"><img src="${url('/images/image.png')}" />Custom icon</div>
+    <div class="form_description">You can link a picture with this object.</div>
+    <div>
+        <img id="icon_content_img" src="#" />
+    </div>
+    <img id="icon_button" src="${url('/images/picture_add.png')}" class="link" />
+    <img id="icon_remove_button" src="${url('/images/picture_delete.png')}" class="link" />
+</div>
+
+<input type="hidden" name="icon_content_id" id="icon_content_id" />
+<input type="hidden" name="container_id" />
+<input type="hidden" id="object_id" name="id" />
+
+<!-- END: content/_form -->
+
+<script type="text/javascript">
+
+    /* <![CDATA[ */
+
+    // TODO: cleanup this whole shit.
+
+    Yeti.Evt.bind(window, 'load', function() {
+        var icon_id = Yeti.Element('icon_content_id'),
+            icon_img = Yeti.Element('icon_content_img'),
+            _frame = document.createElement('div'),
+            _folder_navigation = document.createElement('div'),
+            _folder_main = document.createElement('div'),
+            _folder_pagination = document.createElement('div')
+        ;
+
+        _frame.appendChild(_folder_navigation);
+        _frame.appendChild(_folder_main);
+        _frame.appendChild(_folder_pagination);
+
+
+        /* If the content has already an image, display it */
+        if (icon_id.value) {
+            icon_img.src = "${url('/')}" + icon_id.value + '/download/inline';
+        }
+
+        Yeti.Evt.bind(Yeti.Element('icon_remove_button'), 'click', function() {
+            icon_id.value = null;
+            icon_img.src = "#";
+        });
+
+        Yeti.Evt.bind(Yeti.Element('icon_button'), 'click', function() {
+            var object_id = 1,
+                frame = new Yeti.UI.Frame({
+                    title : 'Browse content',
+                    width : '90%',
+                    height : '90%',
+                    body : _frame
+                }),
+                pagination = new Bbpf.Pagination({}),
+                browser = new Bbpf.FolderController({
+                    url : "${url('/')}" + object_id + '/browse',
+                    components : {
+                        main : new Bbpf.Component({
+                            container: _folder_main
+                        }),
+                        pagination : new Bbpf.PaginationComponent({
+                            container : _folder_pagination,
+                            pagination : pagination
+                        }),
+                        navigation : new Bbpf.NavigationComponent({
+                            container : _folder_navigation
+                        })
+                    },
+                    parameters : {
+                        display : 'thumbnail',
+                        filter_content_type : ['folder'],
+                        filter_mime : ['image/*'],
+                        framed : true
+                    }
+                })
+            ; // var
+
+            browser.load();
+            frame.attach();
+
+            browser.dispatcher.add('after_load_success', function() {
+                var links = Yeti.Element(this.components.main.container).getElementsByTagName('a');
+                for (var i=0, _len = links.length; i<_len; i++) {
+                    (function(elem) {
+                        Yeti.Evt.bind(elem, 'click', function(e) {
+
+                            Yeti.Evt.preventDefault(e);
+
+                            var obj_meta = Yeti.JSON.parse(this.getAttribute('data-obj'));
+
+                            switch(obj_meta.type.name) {
+                                case 'file':
+                                    icon_id.value = obj_meta.id;
+                                    icon_img.src = "${url('/')}" + obj_meta.id + '/download/inline';
+                                    frame.detach();
+                                    break;
+                                case 'folder':
+                                    browser.url = "${url('/folder/browse/')}" + obj_meta.id;
+                                    browser.load();
+                                    frame.set_title(obj_meta.title);
+                                    break;
+                            }
+                        });
+                    })(links[i]);
+                }
+
+                var links = Yeti.Element(this.components.navigation.container).getElementsByTagName('a');
+                for (var i=0, _len = links.length; i<_len; i++) {
+                    (function(elem) {
+                        Yeti.Evt.bind(elem, 'click', function(e) {
+
+                            Yeti.Evt.preventDefault(e);
+
+                            var obj_meta = Yeti.JSON.parse(this.getAttribute('data-obj'));
+
+                            browser.url = "${url('/folder/browse/')}" + obj_meta.id;
+                            browser.load();
+                            frame.set_title(obj_meta.title);
+                        });
+                    })(links[i]);
+                }
+            });
+
+        });
+    });
+
+    /* ]]> */
+
+</script>

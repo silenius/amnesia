@@ -1,0 +1,15 @@
+<!-- EFFECTIVE DATE -->
+
+<div class="form_section">
+    <div class="form_title"><img src="${url('/images/calendar_view_day.jpg')}" />Publishing date</div>
+    <div class="form_description">If this date is in the future, the content will not show up in listings and searches until this date.</div>
+    <metal:block use-macro="load: ../_split_datetime.html" tal:define="name 'effective'" />
+</div>
+
+<!-- EXPIRATION DATE -->
+
+<div class="form_section">
+    <div class="form_title"><img src="${url('/images/calendar_view_day.jpg')}" />Expiration date</div>
+    <div class="form_description">When this date is reached, the content will nolonger be visible in listings and searches.</div>
+    <metal:block use-macro="load: ../_split_datetime.html" tal:define="name 'expiration'" />
+</div>

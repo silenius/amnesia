@@ -1,0 +1,34 @@
+<metal:block use-macro="load: ../layout.html"
+             tal:define="content item">
+<html>
+    <head>
+        <metal:block fill-slot="title_more">: ${item.title}</metal:block>
+    </head>
+
+    <body>
+    <div metal:fill-slot="content" id="main">
+
+        <div class="title platform_news_title">
+
+            <div class="right">
+                <metal:block use-macro="load: ../content/_share_buttons.html" />
+            </div>
+
+            <div class="right" style="margin-right:10px" tal:condition="user">
+                <metal:block use-macro="load: ../content/_action_buttons.html" tal:define="content item" />
+            </div>
+
+            <h1>${item.title}</h1>
+
+        </div>
+
+        <h2>${item.description}</h2>
+
+        <div>
+            ${structure: item.body}
+        </div>
+
+    </div>
+    </body>
+</html>
+</metal:block>

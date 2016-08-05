@@ -1,0 +1,22 @@
+<tr data-obj="${h.dump_obj(content, 'json', include_columns=['id', 'weight'], include_relations=False)}" class="${'odd' if repeat.content.odd else 'even'}">
+    <td class="align_center" style="padding-left:5px;padding-right:5px">
+        <input type="checkbox" data-purpose="select_object" style="margin:0px;vertical-align:middle" />
+    </td>
+    <td class="bold">
+        <span metal:define-slot="title">
+            ${h.wrap(content.title, 60)}
+        </span>
+    </td>
+    <td class="align_center">
+        <img src="${content.type_icon('16x16')}" class="title" />
+    </td>
+    <td class="no_wrap align_center">${h.format_datetime(content.last_update)}</td>
+    <td class="align_center">${content.owner.first_name} ${content.owner.name}</td>
+    <td class="align_center">${content.position_in_container}</td>
+    <td class="align_center state_${content.state.name}">${content.state.name}</td>
+    <td class="no_wrap align_center">
+        <a href="${content.url_for('show')}"><img class="icon_tab link" src="${url('/images/page_white_magnify.png')}" /></a>
+        <a href="${content.url_for('edit')}"><img class="icon_tab link" src="${url('/images/application_form_edit.png')}" /></a>
+        <a href="#" data-purpose="move_object"><img class="icon_tab link" src="${url('/images/application_form_move.png')}" /></a>
+    </td>
+</tr>

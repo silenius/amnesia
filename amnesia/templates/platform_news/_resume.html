@@ -1,0 +1,11 @@
+<div xmlns="http://www.w3.org/1999/xhtml" 
+     xmlns:py="http://genshi.edgewall.org/">
+
+    <img py:if="content.icon" src="${h.url_for('/files/')}${content.icon.filename}" class="right" style="width:60px;height:40px;"/>
+    <img py:if="not content.icon" src="${h.url_for('/images/photo1.jpg')}" class="right" style="width:60px;height:40px;"/>
+    <img src="${content.type_icon}" class="title" />
+    <a class="bold" href="${content.url_for('show')}">${content.title}</a> - 
+    <span class="posted">last modified ${h.format_date(content.last_update)}</span>
+    <div style="margin-left: 23px;margin-top:3px">${content.description}</div>
+
+</div>

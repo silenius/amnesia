@@ -1,0 +1,66 @@
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:strip="True">
+
+    <!-- $Id: _home.html 4343 2011-05-10 07:55:24Z jcigar $ -->
+
+    <?python
+        from math import ceil
+    ?>
+
+    <div>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+
+            <!-- PREVIOUS -->
+            
+            <py:if test="c.offset &gt; 0">
+            <td width="15%">
+            <a href="#"><img src="${h.url_for('/images/previous.jpg')}" width="16" height="17" border="0" onclick="science_news_fetcher('${c.offset - c.limit}')"/></a></td>
+            <td width="30%" class="previous"><a href="#" class="previous" onclick="science_news_fetcher('${c.offset - c.limit}')">Previous</a></td>
+            </py:if>
+
+            <py:if test="c.offset == 0">
+            <td width="15%">
+            <img src="${h.url_for('/images/previous_gray.jpg')}" width="16" height="17" border="0"/></td>
+            <td width="30%" class="previous">Previous</td>
+            </py:if>
+
+            <td width="10%" align="center" class="previous">${c.offset/c.limit+1}/${int(ceil(float(c.total)/c.limit))}</td>
+
+            <!-- NEXT -->
+
+            <py:if test="c.total - c.offset &gt; c.limit">
+            <td width="30%" align="right" class="previous"><a href="#" class="previous" onclick="science_news_fetcher('${c.offset + c.limit}')">Next</a></td>
+            <td width="15%" align="right"><a href="#"><img src="${h.url_for('/images/next.jpg')}" width="16" height="17" border="0" onclick="science_news_fetcher('${c.offset + c.limit}')"/></a></td>
+            </py:if>
+
+            <py:if test="c.total - c.offset &lt;= c.limit">
+            <td width="30%" align="right" class="previous">Next</td>
+            <td width="15%" align="right"><img src="${h.url_for('/images/next_gray.jpg')}" width="16" height="17" border="0"/></td>
+            </py:if>
+        </tr>
+    </table>
+
+    <br/>
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr py:for="news in c.news" id="science_news_${news.id}">
+            <td width="25" valign="top"><img src="${h.url_for('/images/bullet3.jpg')}" class="title"/></td>
+            <td width="100%" class="boxnews2">
+            <div align="justify">
+            <a py:if="c.user.can_edit(news)" href="${news.url_for('edit')}"><img class="link" src="${h.url_for('/images/application_form_edit.png')}" /></a>
+            <a py:if="c.user.can_delete(news)" href="#" onclick="Bbpf.Content.remove({'id' : '${news.id}', 'onSuccess' : function() {science_news_fetcher('${c.offset}')}})"><img class="link" src="${h.url_for('/images/application_form_delete.png')}" /></a>
+            <strong>
+                <a class="newslink" href="${news.url_for('show')}">${h.wrap(news.title, 100)}</a></strong> <br/>
+            ${h.wrap(news.description, 100)}
+            <p align="right" class="posted"><a href="#" class="posted">Posted on ${news.added.strftime('%d %b %Y')}</a></p>
+            <p align="center" class="posted"><img src="${h.url_for('/images/separator.jpg')}" width="214" height="10" vspace="3"/></p>
+            </div>
+            </td>
+        </tr>
+    </table> 
+    </div>
+
+</html>

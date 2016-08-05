@@ -1,0 +1,110 @@
+<metal:block use-macro="load: ../content/_form.html">
+    <metal:block fill-slot="section-default">
+
+        <!-- STARTS / ENDS DATES -->
+
+        <div class="form_section" >
+            <div class="form_title"><img src="${url('/images/calendar.png')}" />Dates</div>
+            <div class="form_description">Starting and ending date.</div>
+            <table style="border: 1px solid #b3b3b3">
+                <tr>
+                    <td style="text-align:right">From : </td>
+                    <td><metal:block use-macro="load: ../_split_datetime.html" tal:define="name 'starts'" /></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right">To : </td>
+                    <td><metal:block use-macro="load: ../_split_datetime.html" tal:define="name 'ends'" /></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- BODY -->
+
+        <div class="form_section" style="clear:both;">
+            <div class="form_title"><img src="${url('/images/application_view_columns.png')}" />Body</div>
+            <div class="form_description">Main content.</div>
+            <div><textarea name="body" class="mceEditor"></textarea></div>
+        </div>
+
+        <!-- MAP -->
+
+        <div class="right">
+            <div id="event_map"></div>
+        </div>
+
+        <!-- COUNTRY -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/world.png')}" />Country</div>
+            <div class="form_description">Country where the event takes place.</div>
+            <div>
+                <select name="country_id" id="country_id">
+                    <option>-- select a country --</option>
+                    <option tal:repeat="country countries" value="${country.id}">${country.name} (${country.iso_code})</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ADDRESS -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/world.png')}" />Address</div>
+            <div class="form_description">Address where the event takes place.</div>
+            <div><input type="text" name="address" id="address" class="medium" /></div>
+        </div>
+
+        <!-- LOCATION -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/building.png')}" />Location</div>
+            <div class="form_description">Where the event takes place (university, institution, building or ...).</div>
+            <div><input type="text" name="location" maxlength="1024" class="medium" /></div>
+        </div>
+
+        <!-- CONTACT NAME -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/vcard.png')}" />Contact name</div>
+            <div class="form_description">The person to contact for more information.</div>
+            <div><input type="text" name="contact_name" maxlength="128" class="medium" /></div>
+        </div>
+
+        <!-- CONTACT EMAIL -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/email.png')}" />Contact email</div>
+            <div class="form_description">An email address for more information.</div>
+            <div><input type="text" name="contact_email" maxlength="128" class="medium" /></div>
+        </div>
+
+        <!-- CONTACT PHONE -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/telephone.png')}" />Contact phone</div>
+            <div class="form_description">A telephone number.</div>
+            <div><input type="text" name="contact_phone" maxlength="128" class="medium" /></div>
+        </div>
+
+        <!-- ATTENDEES -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/user_gray.png')}" />Attendees</div>
+            <div class="form_description">Awaited people.</div>
+            <div><input type="text" name="attendees" maxlength="1024" class="medium" /></div>
+        </div>
+
+        <!-- URL -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/world_link.png')}" />Url</div>
+            <div class="form_description">Web address with more info about the event.</div>
+            <div><input type="text" name="url" maxlength="128" class="medium" /></div>
+        </div>
+
+        <!-- HIDDEN FIELDS -->
+
+        <input type="hidden" name="address_latitude" />
+        <input type="hidden" name="address_longitude" />
+
+    </metal:block>
+</metal:block>

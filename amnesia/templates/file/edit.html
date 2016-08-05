@@ -1,0 +1,22 @@
+<metal:block use-macro="load: ../layout.html">
+<html>
+    <head >
+        <metal:block fill-slot="title_more">: file</metal:block>
+    </head>
+
+    <body>
+    <div metal:fill-slot="content" id="main">
+        <div class=" title file_title">
+            <h1>Add or Edit a file</h1>
+            <div class="posted">An external file uploaded to the site.</div>
+        </div>
+
+        <form method="post" action="${url('/file/save')}" enctype="multipart/form-data">
+            ${structure: form}
+            <input type="submit" value="send" />
+        </form>
+    </div>
+    </body>
+
+</html>
+</metal:block>

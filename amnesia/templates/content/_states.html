@@ -1,0 +1,27 @@
+<?python
+    from amnesia.model.state import State
+?>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:py="http://genshi.edgewall.org/"
+      py:strip="True">
+
+    <!-- $Id: _states.html 4329 2011-05-03 09:06:55Z jcigar $ -->
+
+    <div class="dropdown-header">
+        <a class="dropdown-select" href="#"><span class="bold">state: </span><span class="dropdown-select-by bold">...</span> <img src="${h.url_for('/images/sort_quantity_descending.png')}" style="vertical-align:middle" /></a>
+    </div>
+
+    <div class="dropdown-body states" style="display:none;">
+        <ul class="dropdown-values">
+            <li py:for="state in State.query.order_by(State.name)" value="${state.id}" py:choose="c.user.has_perm(('manager', 'change state'))">
+                <py:when test="True">
+                    <a class="state_${state.name}" href="#">${state.name}</a>
+                </py:when>
+                <py:otherwise>
+                    <a py:if="state.name != 'published'" class="state_${state.name}" href="#">${state.name}</a>
+                </py:otherwise>
+            </li>
+        </ul>
+    </div>
+
+</html>

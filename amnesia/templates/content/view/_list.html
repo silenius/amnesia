@@ -1,0 +1,9 @@
+<div class="view_list ${'odd' if repeat.content.odd else 'even'}">
+    <span class="posted right">${h.format_date(content.added)}</span>
+    <metal:block define-slot="before-icon" />
+    <img src="${content.type_icon()}" class="content_type" />
+    <a metal:define-slot="title" href="${content.url_for('show')}">${content.title}</a>
+    <metal:block define-slot="after-title" />
+    <div class="description">${content.description}</div>
+    <metal:block define-slot="after-description" />
+</div>

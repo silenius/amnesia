@@ -1,0 +1,30 @@
+<div id="content_${content.id}" class="view_${display}" tal:define="json obj_dump(content)">
+    <table>
+        <thead></thead>
+        <tbody>
+            <metal:block define-slot="top-table" />
+            <tr class="icon">
+                <td>
+                    <a metal:define-slot="link_to_object" href="${content.url_for('show')}" data-obj="${json}">
+                        <img src="${content.type_icon('128x128')}" class="title" />
+                    </a>
+                </td>
+            </tr>
+            <tr class="title align_top" metal:define-slot="title">
+                <td class="bold">${h.wrap(content.title, 50)}</td>
+            </tr>
+            <tr class="footer align_top" metal:define-slot="description">
+                <td>${h.wrap(content.description, 70) if content.description else None}</td>
+            </tr>
+            <tr tal:switch="sort" style="font-size:10px">
+                <td tal:case="'date'"><img src="${url('/images/clock.gif')}" /> ${h.format_date(content.last_update)}</td>
+                <td tal:case="'owner'"><img src="${url('/images/person.gif')}" /> ${content.owner.first_name} ${content.owner.name}</td>
+            </tr>
+            <tr tal:condition="(content.type.name == 'file' and content.mime.major.name == 'image' and 'tinymce_image' in options) or ('tinymce_file' in options) or (content.type.name == 'file' and content.mime.major.name == 'video' and 'tinymce_media' in options)">
+                <td><button class="select" data-obj="${json}">select</button></td>
+            </tr>
+            <metal:block define-slot="bottom-table" />
+        </tbody>
+        <tfoot></tfoot>
+    </table>
+</div>

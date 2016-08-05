@@ -1,0 +1,31 @@
+<metal:block use-macro="load: ../layout.html"
+       tal:define="js_tinymce True">
+<html>
+    <head >
+        <metal:block fill-slot="title_more">: folder</metal:block>
+
+        <script type="text/javascript" metal:fill-slot="head-bottom">
+            /* <![CDATA[ */
+            Yeti.Evt.bind(window, 'load', function() {
+                Bbpf.utils.init_tinyMCE();
+            });
+            /* ]]> */
+        </script>
+    </head>
+
+    <body>
+    <div metal:fill-slot="content" id ="main">
+        <div class="title folder_title">
+            <h1>Add or Edit a folder</h1>
+            <div class="posted">A folder which can contain other items.</div>
+        </div>
+
+        <form id="folder_form" method="post" action="${url('/folder/save')}">
+            ${structure: form}
+            <input type="submit" value="send" />
+        </form>
+    </div>
+    </body>
+
+</html>
+</metal:block>

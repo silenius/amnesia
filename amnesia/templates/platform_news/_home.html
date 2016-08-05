@@ -1,0 +1,45 @@
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:strip="True">
+
+      <!-- $Id: _home.html 4343 2011-05-10 07:55:24Z jcigar $ -->
+
+    <div>
+        <div style="margin-bottom:10px">
+            <div style="float:right">
+
+                <!-- PREVIOUS -->
+            
+                <img py:if="c.offset &lt;= 0" src="${h.url_for('/images/previous_gray.jpg')}" />
+                <img class="link" py:if="c.offset &gt; 0" src="${h.url_for('/images/previous.jpg')}" id="link_next" onclick="platform_news_fetcher('${c.offset - c.limit}')" />
+
+                <!-- NEXT -->
+
+                <img class="link" py:if="c.total - c.offset &gt; c.limit" src="${h.url_for('/images/next.jpg')}" onclick="platform_news_fetcher('${c.offset + c.limit}')" />
+                <img py:if="c.total - c.offset &lt;= c.limit" src="${h.url_for('/images/next_gray.jpg')}" />
+            </div>
+            <img src="${h.url_for('/images/beplatform.jpg')}" width="164" height="39" />
+        </div>
+        <div id="platform_news" style="clear:both">
+            <div py:for="news in c.news" style="margin-bottom:10px;" id="platform_news_${news.news_id}">
+                <py:if test="news.type.name != 'newsflash'">
+                <div style="float:right" py:if="not news.icon" ><img src="${h.url_for('/images/photo1.jpg')}" class="platform_news_icon" /></div>
+                <div style="float:right" py:if="news.icon"><img src="${h.url_for('/files/%s' % str(news.icon.filename))}" class="platform_news_icon" /></div>
+                </py:if>
+                <py:if test="news.type.name == 'newsflash'">
+                <div style="float:right"><img src="${h.url_for('/images/icon_newsflash.jpg')}" class="platform_news_icon" /></div>
+                </py:if>
+                <div>
+                    <div style="font-weight:bold;margin-bottom:5px">
+                        <a py:if="c.user.can_edit(news)" href="${news.url_for('edit')}"><img class="link" src="${h.url_for('/images/application_form_edit.png')}" /></a>
+                        <a py:if="c.user.can_delete(news)" href="#" onclick="Bbpf.Content.remove({'id' : '${news.id}', 'onSuccess' : function() {platform_news_fetcher('${c.offset}')}})"><img class="link" src="${h.url_for('/images/application_form_delete.png')}" /></a>
+                        <a class="newslink" href="${news.url_for('show')}">${h.wrap(news.title, 100)}</a>
+                    </div>
+                    <div py:if="news.description">${h.wrap(news.description, 100)}</div>
+                </div>
+                <div style="clear:both"></div>
+            </div>
+        </div>
+    </div>
+</html>

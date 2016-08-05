@@ -1,0 +1,55 @@
+<metal:block define-macro="form">
+<div class="content-form">
+
+    <div class="content-form-tabs">
+        <ul class="formtab" id="form-section-tabs">
+            <li data-section="default" class="current">Default</li>
+            <li data-section="dates">Dates</li>
+            <li data-section="settings">Settings</li>
+            <li data-section="tags">Tags</li>
+            <metal:block define-slot="tabs" />
+        </ul>
+        <script type="text/javascript">
+            /* <![CDATA[ */
+            document.addEventListener('DOMContentLoaded', function() {
+                Bbpf.utils.form_tabs('data-section', 'default');
+            });
+            /* ]]> */
+        </script>
+    </div>
+
+    <div class="content-form-main">
+
+        <!-- DEFAULT -->
+
+        <div data-section="default">
+            <metal:block use-macro="load: _form_section_default.html" />
+            <metal:block define-slot="section-default" />
+        </div>
+
+        <!-- DATES -->
+
+        <div data-section="dates" class="hidden">
+            <metal:block use-macro="load: _form_section_dates.html" />
+            <metal:block define-slot="section-dates" />
+        </div>
+
+        <!-- SETTINGS -->
+
+        <div data-section="settings" class="hidden">
+            <metal:block use-macro="load: _form_section_settings.html" />
+            <metal:block define-slot="section-settings" />
+        </div>
+
+        <!-- TAGS -->
+
+        <div data-section="tags" class="hidden">
+            <metal:block use-macro="load: _form_section_tags.html" />
+            <metal:block define-slot="section-tags" />
+        </div>
+
+        <metal:block define-slot="sections" />
+
+    </div>
+</div>
+</metal:block>

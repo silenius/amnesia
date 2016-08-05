@@ -1,0 +1,109 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/" 
+      xmlns:xi="http://www.w3.org/2001/XInclude"      
+      py:strip="True">
+
+    <!-- The HTML code is ugly, blame Dogstudio for that.  -->
+
+    <!-- $Id: layout.html 4348 2011-05-18 15:17:35Z jcigar $ -->
+
+  <py:match path="head" once="true">
+    <head py:attrs="select('@*')">
+
+      <title py:with="title = list(select('title/text()'))">
+        Belgian Biodiversity Platform<py:if test="title">: ${title}</py:if>
+      </title>
+
+      <link rel="stylesheet" href="${h.url_for('/styles/screen.css')}" type="text/css" />
+      <link rel="shortcut icon" href="${h.url_for('/images/BBPF.ico')}" />
+      <link rel="alternate" type="application/rss+xml"  href="${h.url_for('/news/rss')}" title="News" />
+      <link rel="alternate" type="application/rss+xml"  href="${h.url_for('/event/rss')}" title="Events" />
+      <script py:if="value_of('google_maps')" type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=${config.get('google_map_key')}"></script>
+      <script py:if="value_of('tinymce')" type="text/javascript" src="${h.url_for('/js/tinymce/tiny_mce.js')}"></script>
+      <script py:if="value_of('sha1')" type="text/javascript" src="${h.url_for('/js/sha1.js')}"></script>
+
+      <script type="text/javascript" src="${h.url_for('/js/yeti.js')}"></script>
+      <script type="text/javascript" src="${h.url_for('/js/yeti.ui.js')}"></script>
+      <script type="text/javascript" src="${h.url_for('/js/bbpf.js')}"></script>
+      <script type="text/javascript">
+            /* <![CDATA[ */
+
+            Bbpf.urls = {
+                'prefix' : "${request.environ['SCRIPT_NAME']}",
+                'host' : "${request.environ['HTTP_HOST']}"
+            }
+
+            var _is_ie = /(MSIE\s(\d\.\d))/gi,
+                _match = _is_ie.exec(window.navigator.userAgent),
+                _ie_version = undefined
+            ;
+
+            // Check if browser sucks (== Internet Explorer)
+            if (_match) {
+                _ie_version = parseInt(_match[2]);
+            }
+
+            /* ]]> */
+
+            <py:if test="c.user.logged">
+            /* <![CDATA[ */
+                Yeti.Evt.bind(window, 'load', function() {
+                    Bbpf.clipboard = new Bbpf.Clipboard({
+                        'container' : 'clipboard',
+                        'images' : {
+                            'filled' : "${h.url_for('/images/document-copy-red.png')}",
+                            'empty' : "${h.url_for('/images/document-copy.png')}",
+                            'trash' : "${h.url_for('/images/mini-trash.png')}"
+                        },
+                        'ids' : ${c.clipboard_count}
+                    });
+                });
+            /* ]]> */
+            </py:if>
+      </script>
+      ${select('*[local-name() != "title"]')}
+    </head>
+  </py:match>
+
+  <py:match path="body" once="true">
+    <body py:attrs="select('@*')">
+        <div id="container" style="width:1024px;margin:auto">
+
+            <div id="userbar">
+                <div class="left" py:if="c.user.logged">
+                    <img src="${h.url_for('/images/locked.png')}" style="vertical-align:middle;margin-right:2px"/>Hello ${c.user.first_name} 
+
+                    &nbsp;|&nbsp;
+
+                    <a href="${h.url_for('/human/edit/%s' % session['user_id'])}"><img src="${h.url_for('/images/profile.png')}" style="vertical-align:middle;margin-right:2px"/>Personal Preferences</a>
+
+                    &nbsp;|&nbsp;
+
+                    <!-- CLIPBOARD -->
+
+                    <span id="clipboard"></span>
+
+                </div>
+
+                <div class="right" py:if="c.user.has_perm(('manager',))">
+                    <a href="${h.url_for('/controlpanel/index')}"><img src="${h.url_for('/images/monitor.png')}" style="vertical-align:middle;margin-right:2px"/>Control Panel</a>
+                </div>
+            </div>
+
+            <div id="banner" style="background-image: url(${h.url_for('/images/banner.jpg')});height:153px">
+                <div id="tabs" style="position:relative;background-color:red;color:red">
+                    <div style="position:absolute;bottom:0;">
+                    <ul style="list-style-type:none;">
+                        <li>Home</li>
+                        <li>Data</li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+    </body>
+</py:match>
+</html>

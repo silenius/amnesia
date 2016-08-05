@@ -1,0 +1,44 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/" 
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <xi:include href="../layout.html" />
+
+    <!-- $Id$ -->
+
+    <head>
+        <title>User management</title>
+    </head>
+
+    <body py:with="navigation=c.widgets.Navigation(1, after_text=[('Control panel', '/controlpanel/index'), 'User management'])">
+        <div class="title human_title">
+            <h2>User management</h2>
+            <div class="posted">Manage your users, groups and access to site features.</div>
+        </div>
+
+        <div style="margin-top:30px">
+
+            <!-- USERS -->
+
+            <div class="panel_section">
+                <a href="${h.url_for('/human/admin')}">
+                    <img src="${h.url_for('/images/evolution-contacts.png')}" />
+                    <div class="bold">Users</div>
+                </a>
+            </div>
+
+            <!-- ROLES -->
+
+            <div class="panel_section">
+                <a href="${h.url_for('/role/admin')}">
+                    <img src="${h.url_for('/images/kcoloredit.png')}" />
+                    <div class="bold">Roles</div>
+                </a>
+            </div>
+
+
+        </div>
+        
+    </body>
+
+</html>

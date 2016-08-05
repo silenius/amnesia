@@ -1,0 +1,24 @@
+<metal:block use-macro="load: ../content/_form.html">
+    <metal:block fill-slot="section-default">
+
+        <!-- BODY -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/application_view_columns.png')}" />Body</div>
+            <div class="form_description">Main content.</div>
+            <div><textarea name="body" class="mceEditor"></textarea></div>
+        </div>
+
+        <!-- URL -->
+
+        <div class="form_section">
+            <div class="form_title"><img src="${url('/images/world_link.png')}" />Url</div>
+            <div class="form_description">Web address with more info about this news.</div>
+            <div><input type="text" name="url" maxlength="1024" size="50" /></div>
+        </div>
+
+        <metal:block define-slot="section-default" />
+
+    </metal:block>
+
+</metal:block>

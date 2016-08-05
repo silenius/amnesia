@@ -1,0 +1,13 @@
+<?python
+    import itertools
+?>
+<tbody xmlns="http://www.w3.org/1999/xhtml" 
+       xmlns:py="http://genshi.edgewall.org/"
+       py:with="odd_even = itertools.cycle(['odd', 'even'])">
+    <!-- $Id$ -->
+    <tr py:for="human in c.results">
+        <td>${human.login}</td>
+        <td class="${'blocked' if human.blocked else 'notblocked'}">${human.blocked}</td>
+
+    </tr>
+</tbody>
