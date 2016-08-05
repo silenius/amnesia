@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from amnesia.models.root import RootModel
+from .. import Base
 
 
-class Tag(RootModel):
+class Tag(Base):
 
-    def __init__(self, **kwargs):
-        super(Tag, self).__init__(**kwargs)
+    """ Tag """

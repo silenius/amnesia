@@ -5,23 +5,17 @@ from sqlalchemy import orm
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from .root import RootModel
+from .. import Base
 
 # http://www.iana.org/assignments/media-types/media-types.xhtml
 
 
-class MimeMajor(RootModel):
+class MimeMajor(Base):
 
     """Mime major"""
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
-
-class Mime(RootModel):
-
-    def __init__(self, **kwargs):
-        super(Mime, self).__init__(**kwargs)
+class Mime(Base):
 
     @property
     def full(self):

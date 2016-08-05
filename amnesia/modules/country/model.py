@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from amnesia.models.root import RootModel
+from .. import Base
 
 
-class Country(RootModel):
+class Country(Base):
 
-    def __init__(self, **kwargs):
-        super(Country, self).__init__(**kwargs)
+    """ Country """

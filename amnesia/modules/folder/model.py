@@ -5,7 +5,7 @@ from operator import itemgetter
 
 from sqlalchemy import orm
 
-from .content import Content
+from ..content import Content
 
 
 class Folder(Content):

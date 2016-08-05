@@ -7,13 +7,13 @@ from sqlalchemy import sql, orm
 from sqlalchemy.types import Interval, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from amnesia.models.root import RootModel
-from .state import State
-from .account import Account
-from .tag import Tag
+from .. import Base
+from ..state import State
+from ..account import Account
+from ..tag import Tag
 
 
-class Content(RootModel):
+class Content(Base):
     """This is the base class for all the different types of Content (Event,
         News, Page, etc)"""
 

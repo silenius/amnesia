@@ -14,19 +14,19 @@ from zope.sqlalchemy import ZopeTransactionExtension
 
 from pytz import timezone
 
-from .account.model import Account
-from .content_type.model import ContentType
-from .content.model import Content
-from .country.model import Country
-from .event.model import Event
-from .file.model import File
-from .folder.model import Folder
-from .mime.model import Mime
-from .mime.model import MimeMajor
-from .news.model import News
-from .page.model import Page
-from .state.model import State
-from .tag.model import Tag
+from .modules.account.model import Account
+from .modules.content_type.model import ContentType
+from .modules.content.model import Content
+from .modules.country.model import Country
+from .modules.event.model import Event
+from .modules.file.model import File
+from .modules.folder.model import Folder
+from .modules.mime.model import Mime
+from .modules.mime.model import MimeMajor
+from .modules.news.model import News
+from .modules.page.model import Page
+from .modules.state.model import State
+from .modules.tag.model import Tag
 
 from ..utils import UniqueDict
 

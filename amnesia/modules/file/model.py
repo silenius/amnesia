@@ -3,7 +3,7 @@
 import os
 import os.path
 
-from .content import Content
+from ..content import Content
 
 class File(Content):
 

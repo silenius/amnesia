@@ -4,7 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import sql
 
-from .content import Content
+from ..content import Content
 
 
 class Event(Content):

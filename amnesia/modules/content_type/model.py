@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from amnesia.models.root import RootModel
+from .. import Base
 
-class ContentType(RootModel):
+class ContentType(Base):
 
     """ Content type """

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from amnesia.models.root import RootModel
+from .. import Base
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
-class Account(RootModel):
+class Account(Base):
 
     @hybrid_property
     def full_name(self):
