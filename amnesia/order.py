@@ -8,7 +8,7 @@ from operator import attrgetter
 from sqlalchemy import inspect
 from sqlalchemy import orm
 
-from .models import Content
+from .modules.content import Content
 
 
 class Order(metaclass=ABCMeta):

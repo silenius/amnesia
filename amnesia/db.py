@@ -14,21 +14,21 @@ from zope.sqlalchemy import ZopeTransactionExtension
 
 from pytz import timezone
 
-from .modules.account.model import Account
-from .modules.content_type.model import ContentType
-from .modules.content.model import Content
-from .modules.country.model import Country
-from .modules.event.model import Event
-from .modules.file.model import File
-from .modules.folder.model import Folder
-from .modules.mime.model import Mime
-from .modules.mime.model import MimeMajor
-from .modules.news.model import News
-from .modules.page.model import Page
-from .modules.state.model import State
-from .modules.tag.model import Tag
+from .modules.account import Account
+from .modules.content_type import ContentType
+from .modules.content import Content
+from .modules.country import Country
+from .modules.event import Event
+from .modules.file import File
+from .modules.folder import Folder
+from .modules.mime import Mime
+from .modules.mime import MimeMajor
+from .modules.news import News
+from .modules.page import Page
+from .modules.state import State
+from .modules.tag import Tag
 
-from ..utils import UniqueDict
+from .utils import UniqueDict
 
 DBSession=scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 meta=MetaData()
