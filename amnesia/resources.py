@@ -14,6 +14,9 @@ class Resource:
 
 class Root(Resource):
 
+    __name__ = ''
+    __parent__ = None
+
     def __init__(self, request):
         self.request = request
 
@@ -23,8 +26,6 @@ class Root(Resource):
             if obj:
                 if isinstance(obj, Folder):
                     return FolderResource(obj)
-                elif isinstance(obj, Page):
-                    return PageResource(obj)
 
         raise KeyError(path)
 
@@ -37,7 +38,5 @@ class ContentResource(Resource):
 
 class FolderResource(ContentResource):
     """ Folder resource """
-
-
-class PageResource(ContentResource):
-    """ Page resource """
+    __name__ = 'folder'
+    __parent__ = Root

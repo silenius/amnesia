@@ -26,15 +26,17 @@ class RESTContent:
 @view_defaults(context=FolderResource)
 class RESTFolder(RESTContent):
 
-    @view_config()
-    def get(self):
-        return Response('GET')
-
     @view_config(name='post')
-    def post(self):
+    def POST(self):
         return Response('POST')
 
 
 @view_defaults(context=PageResource)
 class RESTPage(RESTContent):
     """ REST Page """
+
+    @view_config(request_method='GET', accept='text/html',
+                 renderer='templates/page/show.pt')
+    def get(self):
+        return {'item': self.context.obj}
+

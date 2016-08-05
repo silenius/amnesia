@@ -8,14 +8,19 @@ create domain url as text
         length(value) > 10
     );
 
+create domain tinytext as text
+    constraint check_length check(
+        length(value) <= 32
+    );
+
 create domain smalltext as text
     constraint check_length check(
         length(value) <= 128
     );
 
-create domain tinytext as text
+create domain mediumtext as text
     constraint check_length check(
-        length(value) <= 32
+        length(value) <= 512
     );
 
 ------------
@@ -93,6 +98,9 @@ create table account (
         check(lower(gender) in ('m', 'f'))
 );
 
+insert into account(login, password, first_name, last_name, email)
+values ('admin', '$2b$12$vx/HBrgoKLP3z5.f6vfRbOlxBI0OOrESvPTpI3V4R84/D477YxMnS', 'admin', 'admin', 'admin@change.this');
+
 ----------------
 -- mime_major --
 ----------------
@@ -131,14 +139,13 @@ create table mime (
 create index idx_mime_major_id
     on mime(major_id);
 
-
 ---------
 -- tag --
 ---------
 
 create table tag (
     id          serial      not null,
-    name        smalltext    not null,
+    name        smalltext   not null,
     description text,
 
     constraint pk_tag
@@ -156,7 +163,7 @@ create table content (
     id                  serial      not null,
     added               timestamptz not null    default current_timestamp,
     updated             timestamptz,
-    title               text        not null,
+    title               mediumtext  not null,
     description         text,
     effective           timestamptz,
     expiration          timestamptz,
@@ -218,7 +225,7 @@ create index idx_content_fts
     on content using gin(fts);
 
 insert into content (title, content_type_id, owner_id, state_id, weight) 
-values ('Home', (select id from content_type where name='folder'), 1, (select id from state where name='published'), 1);
+values ('Home', (select id from content_type where name='folder'), (select id from account where login='admin'), (select id from state where name='published'), 1);
 
 create or replace function compute_weight() returns trigger as $weight$
     begin
