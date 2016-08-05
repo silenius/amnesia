@@ -1,6 +1,0 @@
-<metal:block use-macro="load: ../../content/view/_thumbnail.html">
-    <a href="${content.url_for('show')}" tal:switch="content.mime.major.name" metal:fill-slot="link_to_object" tal:attributes="data-obj obj_dump(content)">
-        <img tal:case="'image'" src="${content.url_for('download/inline')}" class="title thumbnail" />
-        <img tal:case="not 'image'" src="${content.type_icon('128x128')}" class="title" />
-    </a>
-</metal:block>

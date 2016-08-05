@@ -1,5 +1,0 @@
-<metal:block use-macro="load: ../_rss.xml">
-    <title metal:fill-slot="title">${folder.title}</title>
-    <link metal:fill-slot="link">${folder.url_for('show')}</link>
-    <description metal:fill-slot="description">${folder.description}</description>
-</metal:block>
