@@ -48,17 +48,17 @@ class FolderBrowser:
             # We have to JOIN some tables/entities, in other words we have to
             # find a "path".
             for path in s.path:
-                innerjoin = path.mapper.attrs[path.prop].innerjoin
+                #innerjoin = path.mapper.attrs[path.prop].innerjoin
+                if path.mapper.attrs[path.prop].innerjoin:
+                    join = q.join
+                else:
+                    join = q.outerjoin
 
                 # Case 1: the sort is on a mapped class which is directly
                 # available from the base class through a property.
                 # ex: ContentType.name (Content -> "type").
                 if path.mapper.entity is pl_cfg.base_mapper.entity:
-                    if innerjoin:
-                        q = q.join(path.prop)
-                    else:
-                        q = q.outerjoin(path.prop)
-
+                    q = join(path.prop)
                     contains_eager = orm.contains_eager(path.prop)
 
                 # Case 2: the sort is on a mapped class which is reachable
@@ -73,11 +73,7 @@ class FolderBrowser:
 
                     # Fetch the given prop from the entity
                     prop = attrgetter(prop)
-
-                    if innerjoin:
-                        q = q.join(prop(entity))
-                    else:
-                        q = q.outerjoin(prop(entity))
+                    q = join(prop(entity))
 
                     if not contains_eager:
                         contains_eager = orm.contains_eager(prop(entity))
@@ -91,10 +87,7 @@ class FolderBrowser:
                 else:
                     prop = attrgetter(path.prop)
 
-                    if innerjoin:
-                        q = q.join(prop(path.class_))
-                    else:
-                        q = q.outerjoin(prop(path.class_))
+                    q = join(prop(path.class_))
 
                     contains_eager = contains_eager.contains_eager(
                         prop(path.class_))
