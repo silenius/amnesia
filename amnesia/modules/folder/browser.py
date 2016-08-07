@@ -6,7 +6,7 @@ from sqlalchemy import orm
 from sqlalchemy import sql
 
 from .model import Folder
-from ... import db
+from amnesia import db
 
 
 class FolderBrowser:
