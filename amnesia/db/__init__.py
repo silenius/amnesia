@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from sqlalchemy import engine_from_config
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import sessionmaker
