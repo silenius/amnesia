@@ -9,18 +9,21 @@ import sys
 import transaction
 
 from sqlalchemy import engine_from_config
-from sqlalchemy import orm, sql
+from sqlalchemy import orm
+from sqlalchemy import sql
 from sqlalchemy.orm.exc import NoResultFound
 
+from pyramid.config import Configurator
 from pyramid.scripts.common import parse_vars
 from pyramid.paster import get_appsettings
 from pyramid.paster import setup_logging
 
-from ..models import DBSession
-from ..models import MimeMajor
-from ..models import Mime
-from ..models import init_models
-from ..models import meta
+from ..db import get_engine
+from ..db import get_session_factory
+from ..db import get_tm_session
+
+from ..modules.mime import Mime
+from ..modules.mime import MimeMajor
 
 TYPES = {'application', 'audio', 'image', 'message', 'model', 'multipart',
          'text', 'video'}
@@ -44,39 +47,40 @@ def main(argv=sys.argv):
     options = parse_vars(argv[2:])
     setup_logging(config_uri)
     settings = get_appsettings(config_uri, options=options)
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    DBSession.configure(bind=engine)
-    meta.bind = engine
-    meta.reflect()
+    config = Configurator(settings=settings)
+    config.include('..db')
+    config.include('..modules.mime.mapper')
+    engine = get_engine(settings)
+    session_factory = get_session_factory(engine)
 
-    init_models()
+    with transaction.manager:
+        dbsession = get_tm_session(session_factory, transaction.manager)
 
-    for t in sorted(TYPES):
-        try:
-            major = DBSession.query(MimeMajor).filter_by(name=t).one()
-        except NoResultFound:
-            major = MimeMajor(name=t)
+        for t in sorted(TYPES):
+            try:
+                major = dbsession.query(MimeMajor).filter_by(name=t).one()
+            except NoResultFound:
+                major = MimeMajor(name=t)
 
-            DBSession.add(major)
+                dbsession.add(major)
 
-        url = '{0}{1}.csv'.format(SRC, t)
-        print('===>>> Process {}'.format(url))
+            url = '{0}{1}.csv'.format(SRC, t)
+            print('===>>> Process {}'.format(url))
 
-        with urllib.request.urlopen(url) as f:
-            for row in csv.DictReader(io.StringIO(f.read().decode('utf-8'))):
-                try:
-                    filters = sql.and_(
-                        sql.func.lower(Mime.name) == row['Name'].lower(),
-                        Mime.major == major
-                    )
+            with urllib.request.urlopen(url) as f:
+                for row in csv.DictReader(io.StringIO(f.read().decode('utf-8'))):
+                    try:
+                        filters = sql.and_(
+                            sql.func.lower(Mime.name) == row['Name'].lower(),
+                            Mime.major == major)
 
-                    minor = DBSession.query(Mime).join(Mime.major)\
-                        .options(orm.contains_eager(Mime.major))\
-                        .filter(filters).one()
-                except NoResultFound:
-                    minor = Mime(name=row['Name'], template=row['Template'],
-                                 major=major)
+                        dbsession.query(Mime)\
+                            .join(Mime.major)\
+                            .options(orm.contains_eager(Mime.major))\
+                            .filter(filters)\
+                            .one()
+                    except NoResultFound:
+                        minor = Mime(name=row['Name'], template=row['Template'],
+                                     major=major)
 
-                    DBSession.add(minor)
-
-        transaction.commit()
+                        dbsession.add(minor)

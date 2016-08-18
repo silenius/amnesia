@@ -11,11 +11,20 @@ from .. import Base
 
 
 class MimeMajor(Base):
-
     """Mime major"""
+
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
 
 
 class Mime(Base):
+
+    def __init__(self, name, template, major):
+        super().__init__()
+        self.name = name
+        self.template = template
+        self.major = major
 
     @property
     def full(self):
