@@ -1,5 +1,14 @@
+# -*- coding: utf-8 -*-
+
+from datetime import datetime
+
+from pyramid.threadlocal import get_current_registry
+
+from pytz import timezone
+
 from sqlalchemy import orm
 from sqlalchemy import sql
+from sqlalchemy import event
 
 from .model import Content
 from ..account import Account
@@ -7,6 +16,13 @@ from ..state import State
 from ..content_type import ContentType
 from ..tag import Tag
 from ..folder import Folder
+
+
+@event.listens_for(Content, 'before_update', propagate=True)
+def updated_listener(mapper, connection, target, **kwargs):
+    registry = get_current_registry()
+    tz = registry.settings.get('timezone', 'UTC')
+    target.updated=datetime.now(timezone(tz))
 
 
 def includeme(config):
@@ -60,25 +76,19 @@ def includeme(config):
                 uselist=False,
                 backref=orm.backref('children', cascade='all, delete-orphan')
             ),
-#
-#            #####################
-#            # COLUMN PROPERTIES #
-#            #####################
-#
-#            # TODO: move this to Folder class
-#            'count_children': orm.column_property(
-#                sql.select([sql.func.count()]).where(
-#                    _count_alias.c.container_id == tables['content'].c.id
-#                ).correlate(tables['content']).label('count_children'),
-#                deferred=True
-#            ),
-#
-#            'position_in_container': orm.column_property(
-#                sql.func.row_number().\
-#                over(partition_by=tables['content'].c.container_id,
-#                     order_by=tables['content'].c.weight.desc()),
-#                deferred=True,
-#                group='window_func'
-#            )
+
+            #####################
+            # COLUMN PROPERTIES #
+            #####################
+
+            'position_in_container': orm.column_property(
+                sql.func.row_number().
+                over(partition_by=tables['content'].c.container_id,
+                     order_by=tables['content'].c.weight.desc()),
+                deferred=True,
+                group='window_func'
+            )
 
         })
+
+
