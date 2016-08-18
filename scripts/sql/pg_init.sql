@@ -404,19 +404,3 @@ create index idx_event_starts
 
 create index idx_event_country_iso
     on event(country_iso);
-
-----------
--- news --
-----------
-
-create table news (
-    content_id  integer         not null,
-    body        text            not null,
-    url         url,
-
-    constraint pk_news
-        primary key(content_id),
-
-    constraint fk_content
-        foreign key(content_id) references content(id)
-);
