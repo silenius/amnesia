@@ -27,6 +27,18 @@ create domain mediumtext as text
 -- TABLES --
 ------------
 
+create table schema_version (
+    version     integer     not null,
+    applied_at  timestamptz not null default now(),
+    notes       text
+
+    constraint pk__meta
+        primary key(version)
+);
+
+insert into schema_version(version, notes)
+values (1, 'init');
+
 ------------------
 -- content_type --
 ------------------
