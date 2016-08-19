@@ -41,7 +41,7 @@ class Folder(Content):
         # should be joined, if not then "pm" will be empty.
         pm = base_mapper.polymorphic_map if self.polymorphic_loading else {}
 
-        if self.polymorphic_children:
+        if pm and self.polymorphic_children:
             # Remove mappers from the original polymorphic_map for which
             # identity is not found in polymorphic_children.
             identities = {i.id for i in self.polymorphic_children}
