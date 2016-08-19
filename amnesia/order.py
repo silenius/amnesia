@@ -2,21 +2,23 @@
 
 import json
 
-from abc import ABCMeta, abstractmethod
 from operator import attrgetter
 
 from sqlalchemy import inspect
 from sqlalchemy import orm
 
+from zope.interface import Interface
+from zope.interface import implementer
+
 from .modules.content import Content
 
 
-class Order(metaclass=ABCMeta):
-    """ Base class for all ordering stuff """
+class IOrder(Interface):
+    """ Represents an order by clause """
 
-    @abstractmethod
     def to_sql(self):
-        """ Returns an SQL clause """
+        """ Returns the order as an SQL clause """
+
 
 class Path:
 
@@ -48,19 +50,75 @@ class Path:
         }
 
 
-# TODO: make this immutable!
-class EntityOrder(Order):
+@implementer(IOrder)
+class EntityOrder:
 
-    def __init__(self, src, prop, dir='asc', nulls=None, doc=None, path=None):
+    def __init__(self, src, prop, direction='asc', nulls=None, doc=None,
+                 path=None):
         insp = inspect(src)
         self._mapper = insp.mapper
         self.prop = prop
-        self.dir = dir
+        self.direction = direction
         self.nulls = nulls
         self.doc = doc
 
         # If a path is required, the first one should be a polymorphic entity
         self.path = path if path is not None else []
+
+    #########################################################################
+    ### PROPERTIES ##########################################################
+    #########################################################################
+
+    @property
+    def direction(self):
+        return self._direction
+
+    @direction.setter
+    def direction(self, value):
+        if value.lower() == 'desc':
+            self.direction = 'desc'
+        else:
+            self.direction = 'asc'
+
+    @property
+    def nulls(self):
+        return self._nulls
+
+    @nulls.setter
+    def nulls(self, value):
+        try:
+            value = value.lower()
+
+            if value in ('first', 'last'):
+                self._nulls = value
+            else:
+                raise ValueError
+        except:
+            self._nulls = None
+
+    @property
+    def doc(self):
+        if self._doc:
+            return self._doc
+
+        doc = [self.prop.replace('_', ' ')]
+        return ' '.join(doc)
+
+    @doc.setter
+    def doc(self, value):
+        try:
+            value = value.strip()
+
+            if value:
+                self._doc = value
+            else:
+                raise ValueError
+        except:
+            self._doc = None
+
+
+    #########################################################################
+
 
     def __eq__(self, other):
         if self.class_ == other.class_ and self.prop == other.prop:
@@ -95,7 +153,7 @@ class EntityOrder(Order):
             'identity': self.mapper.polymorphic_identity,
             'cls': self.mapper.entity.__name__,
             'prop': self.prop,
-            'order': self.dir,
+            'order': self.direction,
             'nulls': self.nulls,
             'doc': self.doc,
             'path': [p.to_dict() for p in self.path]
@@ -111,7 +169,7 @@ class EntityOrder(Order):
         col = self.col
 
         if not order:
-            order = self.dir
+            order = self.direction
 
         if not nulls:
             nulls = self.nulls
@@ -140,7 +198,7 @@ class EntityOrder(Order):
         return cls(
             src = mapper,
             prop = data['prop'],
-            dir = data['order'],
+            direction = data['order'],
             nulls = data['nulls'],
             doc = 'FIXME',
             path = path
@@ -168,45 +226,6 @@ class EntityOrder(Order):
             return self.path[0].mapper.entity
 
         return None
-
-    #################
-    # getter/setter #
-    #################
-
-    @property
-    def dir(self):
-        return self._dir
-
-    @dir.setter
-    def dir(self, value):
-        self._dir = 'desc' if value.lower() in ('-', 'desc') else 'asc'
-
-    @property
-    def nulls(self):
-        return self._nulls
-
-    @nulls.setter
-    def nulls(self, value):
-        if value not in ('last', 'first'):
-            # Default in PostgreSQL
-            value = 'last' if self.dir == 'asc' else 'first'
-
-        self._nulls = value
-
-    @property
-    def doc(self):
-        if self._doc:
-            return self._doc
-        else:
-            doc = [self.prop.replace('_', ' ')]
-            return ' '.join(doc)
-
-    @doc.setter
-    def doc(self, value):
-        if value:
-            value = value.strip()
-
-        self._doc = value if value else None
 
 
 def for_entity(entity, orders):

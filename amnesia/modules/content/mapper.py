@@ -19,7 +19,7 @@ from ..folder import Folder
 
 
 @event.listens_for(Content, 'before_update', propagate=True)
-def updated_listener(mapper, connection, target, **kwargs):
+def updated_listener(mapper, connection, target):
     registry = get_current_registry()
     tz = registry.settings.get('timezone', 'UTC')
     target.updated=datetime.now(timezone(tz))

@@ -69,11 +69,12 @@ def main(argv=sys.argv):
 
             with urllib.request.urlopen(url) as f:
                 for row in csv.DictReader(io.StringIO(f.read().decode('utf-8'))):
-                    try:
-                        filters = sql.and_(
-                            sql.func.lower(Mime.name) == row['Name'].lower(),
-                            Mime.major == major)
+                    filters = sql.and_(
+                        sql.func.lower(Mime.name) == row['Name'].lower(),
+                        Mime.major == major
+                    )
 
+                    try:
                         dbsession.query(Mime)\
                             .join(Mime.major)\
                             .options(orm.contains_eager(Mime.major))\

@@ -37,8 +37,9 @@ class Folder(Content):
 
         base_mapper = orm.object_mapper(self).base_mapper
 
-        # If polymorphic loading is enabled pm will contain the mappers that
-        # should be joined, if not then "pm" will be empty.
+        # If polymorphic loading is enabled for this folder then "pm" will
+        # contain the mappers that should be joined, if not then "pm" will be
+        # empty.
         pm = base_mapper.polymorphic_map if self.polymorphic_loading else {}
 
         if pm and self.polymorphic_children:

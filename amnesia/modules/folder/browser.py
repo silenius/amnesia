@@ -38,7 +38,7 @@ class FolderBrowser:
             # Join entities if needed
             entity = orm.with_polymorphic(entity, with_polymorphic)
 
-        q = db.DBSession.query(entity)
+        q = dbsession.query(entity)
 
         for s in sort_by:
             contains_eager = None
@@ -86,7 +86,6 @@ class FolderBrowser:
                 # ex: MimeMajor.name (Content -> File -> Mime -> MimeMajor)
                 else:
                     prop = attrgetter(path.prop)
-
                     q = join(prop(path.class_))
 
                     contains_eager = contains_eager.contains_eager(
@@ -95,79 +94,16 @@ class FolderBrowser:
             if contains_eager:
                 q = q.options(contains_eager)
 
-        ###########
-        # FILTERS #
-        ###########
-
-        # Base filters
-        filters = sql.and_(Content.filter_published(),
-                           Content.filter_in_container(folder_id))
-
-        # Filter on mime and/or on content type
-        filter_type = sql.or_()
-
-        # Filter on mime type (image/*, application/pdf, etc).
-        if params['filter_mime']:
-            q = q.outerjoin(entity.File.mime, Mime.major).\
-                options(orm.contains_eager(entity.File.mime, Mime.major))
-
-            for mime in params['filter_mime']:
-                filter_type.append(Mime.filter_mime(mime))
-
-            filter_type = sql.and_(ContentType.name == 'file', filter_type)
-
-        # Filter on content type (folder, file, etc)
-        if params['filter_content_type']:
-            filter_type = sql.or_(
-                ContentType.name.in_(params['filter_content_type']),
-                filter_type
-            )
-
-        filters.append(filter_type)
-
-        bool_filters = params['filters']
-
-        # Show only my items
-        if 'mine' in bool_filters:
-            filters.append(Content.filter_only_mine())
-
-        # Temporals filters
-        if 'month' in bool_filters:
-            filters.append(Content.filter_modified_month())
-        elif 'week' in bool_filters:
-            filters.append(Content.filter_modified_week())
-        elif 'today' in bool_filters:
-            filters.append(Content.filter_modified_today())
-
         # Apply filters
-        q = q.filter(filters)
+        #q = q.filter(filters)
 
         # Count how much children we have in this container (used for
         # pagination)
-        count_filtered = q.count()
+        #count_filtered = q.count()
 
         ##########################
         # ORDER / LIMIT / OFFSET #
         ##########################
-
-        # If an explicit order is requested, use it.
-    #        if sort_by:
-    #            sort_by = sort_by.fmt_sql()
-    #            if not isinstance(sort_by, (tuple, list)):
-    #                sort_by = [sort_by]
-    #
-    #            if params['order'] == 'desc':
-    #                sort_by = [i.desc() for i in sort_by]
-    #
-    #        # If no explicit order is requested, then use the default folder order.
-    #        elif folder.default_order:
-    #            sort_by = [orders[x['key']].fmt_sql(x['order'], x['nulls'])
-    #                       for x in folder.default_order]
-    #
-    #        # If no default order is specified, order by the weight column (last
-    #        # added will appear first).
-    #        else:
-    #            sort_by = [Content.weight.desc()]
 
         sort_by = [o.to_sql() for o in sort_by]
 
