@@ -25,67 +25,26 @@ class Root(Resource):
         self.request = request
 
     def __getitem__(self, path):
-        log.info('{} : {}'.format(self.__class__, path))
-
-        #/1?obj_type=page               POST
-        #/model/page?container_id=1     POST
-
-        # /456
         if path.isdigit():
             entity = self.request.dbsession.query(Content).get(path)
-            if not entity:
-                return HTTPNotFound()
-
-            # FIXME: replace this with adapters or singledispatch
-            # (@functools.singledispatch(default))
-            if isinstance(entity, Folder):
-                return FolderResource(self.request, entity)
-            elif isinstance(entity, Page):
-                return PageResource(self.request, entity)
-            else:
-                return HTTPNotFound()
-        elif path == 'model':
-            return ModelDispatcher(self.request)
+            if entity:
+                if isinstance(entity, Folder):
+                    return FolderResource(entity)
+            raise KeyError
+        if path == 'folders':
+            return FolderList(self.request)
 
 
-class FolderResource:
+class FolderList:
 
-    __name__ = 'folder'
+    __name__ = 'folders'
     __parent__ = Root
-
-    def __init__(self, request, entity=None):
-        self.request = request
-        self.entity = entity
-
-    def __getitem__(self, path):
-        log.info('{} : {}'.format(self.__class__, path))
-
-
-class PageResource:
-
-    __name__ = 'page'
-    __parent__ = Root
-
-    def __init__(self, request, entity=None):
-        self.request = request
-        self.entity = entity
-
-    def __getitem__(self, path):
-        log.info('{} : {}'.format(self.__class__, path))
-
-
-
-
-class EntityResource(Resource):
 
     def __init__(self, request):
         self.request = request
 
     def __getitem__(self, path):
-        log.info('{} : {}'.format(self.__class__, path))
-
-
-class ContentResource(Resource):
-
-    def __init__(self, obj):
-        self.obj = obj
+        if path.isdigit():
+            entity = self.request.dbsession.query(Folder).get(path)
+            if entity:
+                return FolderResource(entity)

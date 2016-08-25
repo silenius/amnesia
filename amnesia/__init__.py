@@ -22,8 +22,8 @@ def main(global_config, **settings):
     config.include('.modules.folder.mapper')
     config.include('.modules.event.mapper')
 
-    config.add_view(view="amnesia.modules.folder.crud.read",
-                    context='amnesia.resources.FolderResource',
-                    request_method='GET')
+#    config.add_view(view="amnesia.modules.folder.crud.read",
+#                    context='amnesia.resources.FolderResource',
+#                    request_method='GET')
 
     return config.make_wsgi_app()
