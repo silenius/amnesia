@@ -9,6 +9,7 @@ from pyramid.httpexceptions import HTTPNotFound
 
 from amnesia.modules.content import Content
 from amnesia.modules.folder import Folder
+from amnesia.modules.folder import FolderResource
 from amnesia.modules.page import Page
 
 
@@ -29,7 +30,7 @@ class Root(Resource):
             entity = self.request.dbsession.query(Content).get(path)
             if entity:
                 if isinstance(entity, Folder):
-                    return FolderResource(entity)
+                    return FolderResource(entity, self.request)
             raise KeyError
         if path == 'folders':
             return FolderList(self.request)

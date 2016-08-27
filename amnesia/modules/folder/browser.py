@@ -6,12 +6,15 @@ from sqlalchemy import orm
 from sqlalchemy import sql
 
 from .model import Folder
-from amnesia import db
 
 
 class FolderBrowser:
 
-    def __call__(self, folder, sort_by=None, offset=0, limit=50, **kwargs):
+    def __init__(self, folder, dbsession):
+        self.folder = folder
+        self.dbsession = dbsession
+
+    def query(self, sort_by=None, offset=0, limit=50):
         if sort_by is None:
             sort_by = ()
 
@@ -20,7 +23,7 @@ class FolderBrowser:
         #########
 
         # Polymorphic configuration of the folder
-        pl_cfg = folder.polymorphic_config
+        pl_cfg = self.folder.polymorphic_config
 
         # Polymorphic entities that should be loaded. Order doesn't matter as
         # they will be loaded (LEFT JOIN) from the root entity (Content)
@@ -38,7 +41,7 @@ class FolderBrowser:
             # Join entities if needed
             entity = orm.with_polymorphic(entity, with_polymorphic)
 
-        q = dbsession.query(entity)
+        q = self.dbsession.query(entity)
 
         for s in sort_by:
             contains_eager = None
