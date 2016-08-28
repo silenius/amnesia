@@ -4,6 +4,7 @@ from sqlalchemy import orm
 
 from .model import Folder
 from ..content import Content
+from ..content_type.utils import get_type_id
 from ..content_type import ContentType
 
 
@@ -14,7 +15,7 @@ def includeme(config):
     config.include('amnesia.modules.content_type.mapper')
 
     orm.mapper(Folder, tables['folder'], inherits=Content,
-        polymorphic_identity=1,
+        polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=tables['folder'].c.content_id ==
                tables['content'].c.id,
         properties={

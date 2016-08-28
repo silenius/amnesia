@@ -5,6 +5,7 @@ from sqlalchemy import orm
 from .model import Event
 from ..content import Content
 from ..content_type import ContentType
+from ..content_type.utils import get_type_id
 from ..country import Country
 
 
@@ -16,7 +17,7 @@ def includeme(config):
     config.include('amnesia.modules.country.mapper')
 
     orm.mapper(Event, tables['event'], inherits=Content,
-        polymorphic_identity=3,
+        polymorphic_identity=get_type_id(config, 'event'),
         properties={
             'country': orm.relationship(Country, lazy='joined')
         })
