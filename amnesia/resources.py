@@ -50,5 +50,5 @@ class FolderList:
             if entity:
                 return FolderResource(entity)
 
-def get_root():
-    return Root()
+def get_root(request=None):
+    return Root(request)
