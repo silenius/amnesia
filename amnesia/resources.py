@@ -49,3 +49,6 @@ class FolderList:
             entity = self.request.dbsession.query(Folder).get(path)
             if entity:
                 return FolderResource(entity)
+
+def get_root():
+    return Root()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.config import Configurator
-from .resources import Root
+from .resources import get_root
 
 # Pyramid will happily call __getitem__ as many times as it needs to, until it
 # runs out of path segments or until a resource raises a KeyError. Each
@@ -17,7 +17,7 @@ def main(global_config, **settings):
     This function returns a Pyramid WSGI application.
     """
 
-    config = Configurator(settings=settings, root_factory=Root)
+    config = Configurator(settings=settings, root_factory=get_root)
     config.include('.db')
     config.include('.modules.folder.mapper')
     config.include('.modules.file.mapper')
