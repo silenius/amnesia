@@ -12,6 +12,14 @@ class FolderResource:
         self.request = request
 
     @property
+    def __name__(self):
+        return self.entity.id
+
+    @property
+    def __parent__(self):
+        return FolderResource(self.parent, self.request)
+
+    @property
     def mapper(self):
         return orm.object_mapper(self.entity)
 
