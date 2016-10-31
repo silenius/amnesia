@@ -57,7 +57,7 @@ create unique index u_idx_content_type_name
     on content_type(lower(name));
 
 insert into content_type(name, icon) values('folder', 'folder.png');
-insert into content_type(name, icon) values('page', 'page.png');
+insert into content_type(name, icon) values('document', 'document.png');
 insert into content_type(name, icon) values('event', 'event.png');
 insert into content_type(name, icon) values('news', 'news.png');
 insert into content_type(name, icon) values('file', 'file.png');
@@ -277,15 +277,15 @@ create table content_tag (
         foreign key (tag_id) references tag(id)
 );
 
-----------
--- page --
-----------
+--------------
+-- document --
+--------------
 
-create table page (
+create table document (
     content_id  integer not null,
     body        text    not null,
 
-    constraint pk_page
+    constraint pk_document
         primary key(content_id),
 
     constraint fk_content

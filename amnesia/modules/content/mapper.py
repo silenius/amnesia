@@ -22,7 +22,7 @@ from ..folder import Folder
 def updated_listener(mapper, connection, target):
     registry = get_current_registry()
     tz = registry.settings.get('timezone', 'UTC')
-    target.updated=datetime.now(timezone(tz))
+    target.updated = datetime.now(timezone(tz))
 
 
 def includeme(config):
@@ -34,8 +34,8 @@ def includeme(config):
     config.include('amnesia.modules.tag.mapper')
 
     orm.mapper(Content, tables['content'],
-        polymorphic_on=tables['content'].c.content_type_id,
-        properties={
+               polymorphic_on=tables['content'].c.content_type_id,
+               properties={
 
             # no need to load this column by default
             'fts': orm.deferred(tables['content'].c.fts),
@@ -49,7 +49,7 @@ def includeme(config):
                 lazy='joined',
                 innerjoin=True,
                 backref=orm.backref('contents', lazy='dynamic',
-                                      cascade='all, delete-orphan')
+                                    cascade='all, delete-orphan')
             ),
 
             'state': orm.relationship(

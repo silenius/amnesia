@@ -23,11 +23,13 @@ def main(global_config, **settings):
     config.include('.modules.file.mapper')
     config.include('.modules.event.mapper')
 
-    config.add_view(name='browse',
-                    view="amnesia.modules.folder.views.browse",
-                    context="amnesia.modules.folder.resources.FolderResource",
-                    request_method="GET",
-                    renderer='json')
+    config.add_view(
+        name='browse',
+        view="amnesia.modules.folder.views.browse",
+        context="amnesia.modules.folder.resources.FolderResource",
+        request_method="GET",
+        renderer='json'
+    )
 
 #    config.add_view(view="amnesia.modules.folder.crud.read",
 #                    context='amnesia.resources.FolderResource',
