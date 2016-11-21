@@ -30,7 +30,7 @@ create domain mediumtext as text
 create table schema_version (
     version     integer     not null,
     applied_at  timestamptz not null default now(),
-    notes       text
+    notes       text,
 
     constraint pk__meta
         primary key(version)
@@ -59,7 +59,6 @@ create unique index u_idx_content_type_name
 insert into content_type(name, icon) values('folder', 'folder.png');
 insert into content_type(name, icon) values('document', 'document.png');
 insert into content_type(name, icon) values('event', 'event.png');
-insert into content_type(name, icon) values('news', 'news.png');
 insert into content_type(name, icon) values('file', 'file.png');
 
 -----------
