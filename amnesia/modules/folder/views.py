@@ -9,6 +9,5 @@ def browse(context, request):
     folder = context.entity
     json = []
     for f in FolderBrowser(folder, request.dbsession).query().all():
-        json.append(Serializer(f).dict(exclude_columns="*",
-                                       include_relations=['type']))
+        json.append(Serializer(f).dict())
     return json
