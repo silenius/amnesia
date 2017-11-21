@@ -46,7 +46,7 @@ values (1, 'init');
 create table content_type (
     id          smallserial not null,
     name        smalltext   not null,
-    icon        text        not null,
+    icons       json,
     description text,
 
     constraint pk_content_type
@@ -56,10 +56,10 @@ create table content_type (
 create unique index u_idx_content_type_name
     on content_type(lower(name));
 
-insert into content_type(name, icon) values('folder', 'folder.png');
-insert into content_type(name, icon) values('document', 'document.png');
-insert into content_type(name, icon) values('event', 'event.png');
-insert into content_type(name, icon) values('file', 'file.png');
+insert into content_type(name) values('folder');
+insert into content_type(name) values('document');
+insert into content_type(name) values('event');
+insert into content_type(name) values('file');
 
 -----------
 -- state --
@@ -81,9 +81,9 @@ insert into state(name) values ('private');
 insert into state(name) values ('pending');
 insert into state(name) values ('published');
 
------------
+-------------
 -- account --
------------
+-------------
 
 create table account (
     id          serial      not null,
@@ -91,10 +91,10 @@ create table account (
     password    char(60)    not null,
     first_name  text        not null,
     last_name   text        not null,
-    gender      char,
-    email       text        not null,
+    email       smalltext   not null,
     created     timestamptz not null    default current_timestamp,
-    blocked     boolean     not null    default false,
+    enabled     boolean     not null    default false,
+    lost_token 	char(32),
 
     constraint pk_account
         primary key(id),
@@ -105,12 +105,50 @@ create table account (
     constraint u_idx_account_login
         unique(login),
 
-    constraint check_account_gender
-        check(lower(gender) in ('m', 'f'))
+    constraint u_idx_account_lost_token
+        unique(lost_token)
 );
 
-insert into account(login, password, first_name, last_name, email)
-values ('admin', '$2b$12$vx/HBrgoKLP3z5.f6vfRbOlxBI0OOrESvPTpI3V4R84/D477YxMnS', 'admin', 'admin', 'admin@change.this');
+create unique index u_idx_account_email on account(lower(email));
+
+insert into account(login, password, first_name, last_name, email, enabled)
+values ('admin', '$2b$12$vx/HBrgoKLP3z5.f6vfRbOlxBI0OOrESvPTpI3V4R84/D477YxMnS', 'admin', 'admin', 'admin@change.this', true);
+
+----------
+-- role --
+----------
+
+create table role (
+    id          serial      not null,
+    name        smalltext   not null,
+    created     timestamptz not null    default current_timestamp,
+    enabled     boolean     not null    default false,
+    description text,
+
+    constraint pk_role
+        primary key(id)
+);
+
+create unique index u_idx_role_name on role(lower(name));
+
+------------------
+-- account_role --
+------------------
+
+create table account_role (
+    account_id  integer     not null,
+    role_id     integer     not null,
+    created     timestamptz not null    default current_timestamp,
+
+    constraint pk_account_role
+        primary key(account_id, role_id),
+
+    constraint fk_account
+        foreign key (account_id) references account(id),
+
+    constraint fk_role
+        foreign key(role_id) references role(id)
+);
 
 ----------------
 -- mime_major --
@@ -214,14 +252,17 @@ create table content (
         check(updated > added),
 
     constraint check_effective_expiration
-        check(expiration > effective)
---
---    constraint content_unique_weight_container_id
---        unique(container_id, weight)
+        check(expiration > effective),
+
+    constraint content_unique_weight_container_id
+        unique(container_id, weight) deferrable initially deferred
 );
 
 create index idx_content_container_id
     on content(container_id);
+
+create unique index u_idx_content_container_id
+    on content((1)) where container_id is null; 
 
 create index idx_content_owner_id
     on content(owner_id);
@@ -241,6 +282,12 @@ values ('Home', (select id from content_type where name='folder'), (select id fr
 create or replace function compute_weight() returns trigger as $weight$
     begin
         if (TG_OP = 'INSERT' or (TG_OP = 'UPDATE' and NEW.container_id is distinct from OLD.container_id)) then
+            
+            PERFORM 1 
+            FROM folder
+            WHERE content_id = NEW.container_id 
+            FOR UPDATE;
+            
             NEW.weight := (
                 select
                     coalesce(max(weight) + 1, 1)
@@ -310,7 +357,7 @@ create table folder (
         foreign key(content_id) references content(id),
 
     constraint fk_content_index_view
-        foreign key(index_content_id) references content(id)
+        foreign key(index_content_id) references document(content_id)
 );
 
 insert into folder(content_id) values (1);
