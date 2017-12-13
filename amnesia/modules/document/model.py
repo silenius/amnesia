@@ -2,6 +2,6 @@
 
 from ..content import Content
 
-class Page(Content):
+class Document(Content):
 
-    """ A page """
+    """ A document """
