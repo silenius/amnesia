@@ -1,14 +1,24 @@
 # -*- coding: utf-8 -*-
 
-import os
+# pylint: disable=E1101
+
 import os.path
 
-from ..content import Content
+from amnesia.modules.content import Content
+
 
 class File(Content):
 
-    def __init__(self, **kwargs):
-        super(File, self).__init__(**kwargs)
+    @property
+    def fa_icon(self):
+        if self.mime.major.name == 'image':
+            return 'fa-file-image-o'
+        elif self.mime.major.name == 'video':
+            return 'fa-file-video-o'
+        elif self.mime.full == 'application/pdf':
+            return 'fa-file-pdf-o'
+        else:
+            return super().fa_icon
 
     @property
     def extension(self):
@@ -16,18 +26,8 @@ class File(Content):
 
     @property
     def filename(self):
-        return '%s%s' % (self.id, self.extension)
+        return '{0}{1}'.format(self.id, self.extension)
 
     @property
     def subpath(self):
         return os.path.join(*((str(self.id))[0:3].zfill(3)))
-
-    def type_icon(self, size='16x16'):
-        if self.mime.major.icon:
-            if self.mime.icon:
-                return cherrypy.url('/images/mimes/%s/%s/%s' %\
-                       (size, self.mime.major.name, self.mime.icon))
-            return cherrypy.url('/images/mimes/%s/%s' %\
-                   (size, self.mime.major.icon))
-        return cherrypy.url('/images/content_types/%s/%s' %\
-               (size, self.type.icon))

@@ -2,21 +2,28 @@
 
 from sqlalchemy import orm
 
-from .model import File
-from ..content import Content
+from amnesia.modules.mime import Mime
+from amnesia.modules.file import File
+from amnesia.modules.content import Content
+
 from ..content_type.utils import get_type_id
-from ..content_type import ContentType
 
 
 def includeme(config):
+    ''' Pyramid includeme '''
     tables = config.registry['metadata'].tables
 
     config.include('amnesia.modules.content.mapper')
     config.include('amnesia.modules.content_type.mapper')
+    config.include('amnesia.modules.mime.mapper')
 
-    orm.mapper(File, tables['data'], inherits=Content,
+    orm.mapper(
+        File,
+        tables['data'],
+        inherits=Content,
         polymorphic_identity=get_type_id(config, 'file'),
-        inherit_condition=tables['data'].c.content_id ==
-               tables['content'].c.id
+        #inherit_condition=tables['data'].c.content_id == tables['content'].c.id
+        properties={
+            'mime': orm.relationship(Mime, lazy='joined')
+        }
     )
-
