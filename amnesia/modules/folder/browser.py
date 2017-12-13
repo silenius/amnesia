@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+
+from collections import namedtuple
 from operator import attrgetter
 
 from sqlalchemy import orm
 from sqlalchemy import sql
 
-from .model import Folder
+from amnesia.modules.content_type import ContentType
 
+FolderBrowserResult = namedtuple(
+    'FolderBrowserResult',
+    ['query', 'sort', 'count']
+)
 
 class FolderBrowser:
 
@@ -14,9 +21,9 @@ class FolderBrowser:
         self.folder = folder
         self.dbsession = dbsession
 
-    def query(self, sort_by=None, offset=0, limit=50):
-        if sort_by is None:
-            sort_by = ()
+    def query(self, sort_by=(), offset=0, limit=50, deferred=(), undeferred=(),
+              sort_folder_first=False, count=True, filter_types=(),
+              only_published=True, **kwargs):
 
         #########
         # QUERY #
@@ -34,14 +41,24 @@ class FolderBrowser:
         for s in sort_by:
             entity = s.polymorphic_entity(pl_cfg.base_mapper)
             if entity:
-                with_polymorphic.add(entity)
+                with_polymorphic.append(entity)
 
+        # A folder contains "entities" which all inherit from the same "root"
+        # base class (Content), which will be our starting point to build the
+        # query object
         entity = pl_cfg.base_mapper.entity
+
         if with_polymorphic:
-            # Join entities if needed
+            # Ensure that each descendant mapper's tables are included in the
+            # FROM clause
             entity = orm.with_polymorphic(entity, with_polymorphic)
 
+        # Ok, now we have our base entity \o/
         q = self.dbsession.query(entity)
+
+        #########
+        # SORTS #
+        #########
 
         for s in sort_by:
             contains_eager = None
@@ -51,11 +68,8 @@ class FolderBrowser:
             # We have to JOIN some tables/entities, in other words we have to
             # find a "path".
             for path in s.path:
-                #innerjoin = path.mapper.attrs[path.prop].innerjoin
-                if path.mapper.attrs[path.prop].innerjoin:
-                    join = q.join
-                else:
-                    join = q.outerjoin
+                _is_innerjoin = path.mapper.attrs[path.prop].innerjoin
+                join = q.join if _is_innerjoin else q.outerjoin
 
                 # Case 1: the sort is on a mapped class which is directly
                 # available from the base class through a property.
@@ -97,24 +111,48 @@ class FolderBrowser:
             if contains_eager:
                 q = q.options(contains_eager)
 
+        ###########
+        # FILTERS #
+        ###########
+
+        filters = entity.parent == self.folder
+
+        if only_published:
+            filters = sql.and_(filters, entity.filter_published())
+
+        if filter_types:
+            q = q.join(entity.type).options(orm.contains_eager(entity.type))
+
+            filters = sql.and_(
+                sql.func.lower(ContentType.name).in_(filter_types),
+                filters
+            )
+
         # Apply filters
-        #q = q.filter(filters)
+        q = q.filter(filters)
 
         # Count how much children we have in this container (used for
         # pagination)
-        #count_filtered = q.count()
+        count = q.count() if count else None
 
         ##########################
         # ORDER / LIMIT / OFFSET #
         ##########################
 
-        sort_by = [o.to_sql() for o in sort_by]
+        if sort_by:
+            sort_by = [o.to_sql() for o in sort_by]
+        else:
+            sort_by = [entity.weight.desc()]
 
-    #        if params['sort_folder_first']:
-    #            sort_by.insert(0, sql.func.lower(ContentType.name) != 'folder')
+        if sort_folder_first:
+            q = q.join(entity.type).options(orm.contains_eager(entity.type))
+            sort_by.insert(0, sql.func.lower(ContentType.name) != 'folder')
 
         # Query database
-        # TODO: pagination based on OFFSET isn't scalable
-        q = q.order_by(*sort_by).offset(offset).limit(limit)
+        # FIXME: OFFSET based pagination isn't scalable
+        q = q.options(
+            (orm.defer(p) for p in deferred),
+            (orm.undefer(p) for p in undeferred)
+        ).order_by(*sort_by).offset(offset).limit(limit)
 
-        return q
+        return FolderBrowserResult(q, sort_by, count)

@@ -1,27 +1,54 @@
-from sqlalchemy import orm
+# -*- coding: utf-8 -*-
+
+from sqlalchemy.exc import DatabaseError
+
+from amnesia.modules.content import Entity
+from amnesia.modules.content import EntityManager
+from amnesia.modules.state import State
+from amnesia.modules.folder import Folder
+from amnesia.modules.folder.validation import FolderSchema
 
 
-class FolderCollection:
-    pass
+class FolderEntity(Entity):
+    """ Folder """
+
+    def get_validation_schema(self):
+        return FolderSchema(context={'request': self.request})
 
 
-class FolderResource:
+class FolderResource(EntityManager):
 
-    def __init__(self, entity, request):
-        self.entity = entity
-        self.request = request
+    __name__ = 'folder'
 
-    @property
-    def __name__(self):
-        return self.entity.id
+    def __getitem__(self, path):
+        if path.isdigit():
+            entity = self.dbsession.query(Folder).get(path)
+            if entity:
+                return FolderEntity(self.request, entity)
 
-    @property
-    def __parent__(self):
-        return FolderResource(self.parent, self.request)
+        raise KeyError
 
-    @property
-    def mapper(self):
-        return orm.object_mapper(self.entity)
+    def get_validation_schema(self):
+        return FolderSchema(context={'request': self.request})
 
-    def add_child(self, content_type_id):
-        factory = self.mapper.polymorphic_map[content_type_id].class_
+    def query(self):
+        return self.dbsession.query(Folder)
+
+    def create(self, data):
+        state = self.dbsession.query(State).filter_by(name='published').one()
+        container = self.dbsession.query(Folder).enable_eagerloads(False).\
+            get(data['container_id'])
+
+        new_entity = Folder(
+            owner=self.request.user,
+            state=state,
+            container=container,
+            **data
+        )
+
+        try:
+            self.dbsession.add(new_entity)
+            self.dbsession.flush()
+            return new_entity
+        except DatabaseError:
+            return False

@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from collections import namedtuple
-from operator import itemgetter
+# pylint: disable=E1101
 
+from collections import namedtuple
+
+from pyramid.threadlocal import get_current_registry
 from sqlalchemy import orm
 
-from ..content import Content
+from amnesia.modules.content import Content
 
+
+PolymorphicConfig = namedtuple(
+    'PolymorphicConfig', ('pm', 'base_mapper', 'cls')
+)
 
 class Folder(Content):
-
-    default_order_keys = frozenset(('key', 'order', 'nulls'))
 
     def __init__(self, **kwargs):
         super(Folder, self).__init__(**kwargs)
@@ -21,7 +25,7 @@ class Folder(Content):
             if c in kwargs:
                 setattr(self, c, kwargs.pop(c))
 
-        super(Folder, self).feed(**kwargs)
+        super().feed(**kwargs)
 
     @property
     def polymorphic_config(self):
@@ -52,9 +56,7 @@ class Folder(Content):
         # loading. It can be directly used with orm.with_polymorphic()
         cls = [m.class_ for m in pm.values()]
 
-        cfg = namedtuple('PolymorphicConfig', ('pm', 'base_mapper', 'cls'))
-
-        return cfg(pm, base_mapper, cls)
+        return PolymorphicConfig(pm, base_mapper, cls)
 
     ##############
     # VALIDATORS #
@@ -69,17 +71,14 @@ class Folder(Content):
         table will _not_ be joined anymore in the orm.with_polymorphic()),
         ensure that no default ordering has been specified on a column of that
         table in default_order, otherwise we could end up with a missing table
-        in the final FROM clause
+        in the final FROM clause """
 
-        Parameters
-        ----------
-        value : ContentType
-
-        """
-
+        # pylint: disable=E0203
         if is_remove and self.default_order:
-            # FIXME
-            from amnesia.models import orders
+            registry = get_current_registry()
+            settings = registry.settings
+            orders = settings['amnesia:orders']
+
             self.default_order = [x for x in self.default_order
                                   if orders[x['key']].identity != value.id]
 
@@ -92,7 +91,7 @@ class Folder(Content):
         This function checks the value that will be serialized in
         the default_order column. """
 
-        orders = [order for order in value if\
-                  frozenset(order) == self.default_order_keys]
+        # TODO: add additional checks
+        orders = [order for order in value if 'key' in order]
 
         return orders if orders else None
