@@ -6,6 +6,7 @@ from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.document import Document
 from amnesia.modules.document.validation import DocumentSchema
+from amnesia.modules.document import DocumentCreatedEvent
 from amnesia.modules.state import State
 from amnesia.modules.folder import Folder
 
@@ -49,6 +50,8 @@ class DocumentResource(EntityManager):
         try:
             self.dbsession.add(new_entity)
             self.dbsession.flush()
+            event = DocumentCreatedEvent(self.request, new_entity)
+            self.request.registry.notify(event)
             return new_entity
         except DatabaseError:
             return False
