@@ -39,16 +39,10 @@
         </div>
         <p>We offer services to scientists, policy-makers, practitioners and stakeholders.<br/> Have a look:</p>
 
-        ${structure: widgets.BoxRow(request, why_choose)}
-        ${structure: widgets.Slider1(request, high_prio)}
 
       </div>
     </section>
     <!--WHY CHOOSE US SECTION START--> 
-    
-    <!--PROJECTS SECTION START-->
-    ${structure: widgets.Slider2(request, current_projects)}
-    <!--PROJECTS SECTION END--> 
     
     <!--POST AND NEWS ROW START-->
 
