@@ -89,7 +89,8 @@ def delete(context, request):
     dbsession = request.dbsession
 
     ids = result['oid']
-    query = dbsession.query(Content).filter(Content.id.in_(ids))
+    query = context.query()
+    query = query.filter(Content.id.in_(ids))
 
     for entity in query:
         dbsession.delete(entity)
