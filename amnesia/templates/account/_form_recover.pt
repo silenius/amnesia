@@ -1,0 +1,10 @@
+<div class="form-group">
+    <label for="register_password">Password</label>
+    <input type="password" id="register_password" name="password" class="form-control" placeholder="password" required />
+</div>
+
+<div class="form-group">
+    <label for="register_password_repeat">Password (repeat)</label>
+    <input type="password" id="register_password_repeat" name="password_repeat" class="form-control" placeholder="password (repeat)" required />
+</div>
+<input type="hidden" name="token" />

@@ -1,0 +1,17 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: login</metal:block>
+<metal:block define-macro="body">
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="login">
+        <div class="container">
+            <h1><i class="fa fa-check-circle-o" aria-hidden="true"></i> Registration successfull!</h1> 
+			<p>
+		        Your registration was successfull and you should be able to <a href="${'{}/auth/login'.format(request.script_name)}">log in</a> now.
+			</p>
+        </div>
+    </section>
+</div>
+</metal:block>
+</metal:block>
+</metal:block>

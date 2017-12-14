@@ -1,0 +1,24 @@
+<?python
+    from datetime import date
+    import calendar
+?>
+
+<div class="col-xs-2">
+    <select name="${name}_year" tal:define="current_year date.today().year" class="form-control">
+        <option value="">--</option>
+        <option value="${year}" tal:repeat="year range(current_year - 2, current_year + 10)">${year}</option>
+    </select>
+</div>
+
+<div class="col-xs-2">
+    <select name="${name}_month" class="form-control">
+        <option value="${int_month or ''}" tal:repeat="(month, int_month) zip(calendar.month_name, range(0,13))">${month or '--'}</option>
+    </select>
+</div>
+
+<div class="col-xs-2">
+    <select name="${name}_day" class="form-control">
+        <option value="">--</option>
+        <option value="${day}" tal:repeat="day range(1,32)">${day}</option>
+    </select>
+</div>

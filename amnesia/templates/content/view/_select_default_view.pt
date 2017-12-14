@@ -1,0 +1,10 @@
+<div class="media">
+    <div class="media-left">
+        <input name="select_obj" data-purpose="select_obj" type="radio" value="${content.id}" />
+    </div>
+    <div class="media-body">
+        <i class="fa ${content.fa_icon}"></i>
+        <a metal:define-slot="title" href="${request.resource_url(content)}"><strong>${content.title}</strong></a>
+        <div tal:condition="content.description">${h.shorten(request, content.description, 150)}</div>
+    </div>
+</div>

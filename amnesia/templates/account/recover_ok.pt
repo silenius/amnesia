@@ -1,0 +1,13 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: login</metal:block>
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="lost_password">
+        <div class="container">
+            <h3>${principal.first_name}, your password has been successfully changed.</h3>
+            <p>You can now use your new password to log in.</p>
+        </div>
+    </section>
+</div>
+</metal:block>
+</metal:block>

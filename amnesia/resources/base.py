@@ -14,11 +14,13 @@ class Resource:
     def __acl__(self):
         yield Allow, 'group:admins', ALL_PERMISSIONS
 
-        admins = self.settings.get('acl.admins', '').split(',')
         user = self.request.user
 
-        if admins and user and user.login in admins:
-            yield Allow, user.id, ALL_PERMISSIONS
+        if user:
+            admins = self.settings.get('acl.admins', '').split(',')
+
+            if admins and user.login in admins:
+                yield Allow, str(user.id), ALL_PERMISSIONS
 
         # Note: if there's no explicit permission, the default is to DENY so in
         # theory there is no need for a yield DENY_ALL (but keep it just to be

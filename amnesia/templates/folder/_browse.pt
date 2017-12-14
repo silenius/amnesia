@@ -1,0 +1,1 @@
+<metal:block use-macro="load: ../${content.type.name.replace(' ', '_')}/view/_${display}.pt | ../content/view/_${display}.pt" tal:repeat="content results" />

@@ -1,0 +1,17 @@
+<!-- EXCLUDE FROM NAV -->
+
+<div class="checkbox">
+    <label>
+        <input type="checkbox" name="exclude_nav" />
+        Exclude from navigation tree
+    </label>
+</div>
+
+<!-- FULL-TEXT INDEX -->
+
+<div class="checkbox">
+    <label>
+        <input type="checkbox" name="is_fts" />
+        Searchable through the website
+    </label>
+</div>

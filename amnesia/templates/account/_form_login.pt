@@ -1,0 +1,14 @@
+<div class="row">
+    <div class="col-md-12">
+        <input placeholder="Username" type="text" name="login" required="" type="text">
+    </div>
+    <div class="col-md-12">
+        <a href="${'{}/auth/lost'.format(request.script_name)}">Lost password?</a>
+        <input placeholder="Password" id="password" name="password" required="" type="password">
+    </div>
+    <div class="col-md-12">
+        <div class="btn-row">
+            <input value="Account Login" type="submit">
+        </div>
+    </div>
+</div>

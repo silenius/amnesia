@@ -1,0 +1,53 @@
+<!-- TAGS BEGIN -->
+
+<div class="form-group" id="tags">
+	<label>Tags</label>
+    <span class="help-block">Select appropriate tags (if any). Hint: use <b>ctrl + left click</b> to select.</span>
+    <select id="tag_list" multiple="multiple" size="15" name="tags_id" class="form-control">
+        <option tal:repeat="tag all_tags" value="${tag.id}">${tag.name}</option>
+    </select>
+</div>
+<div class="form-group">
+	<label>Add another tag</label>
+	<div class="row">
+		<div class="col-xs-2">
+			<input type="text" id="tag" name="name" class="form-control" />
+		</div>
+		<div class="col-xs-1">
+			<a class="btn btn-default" href="#" id="tag_save" role="button">Add</a>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+    /* <![CDATA[ */
+    document.addEventListener('DOMContentLoaded', function(e) {
+        var tag_list = new Bbpf.TagList({
+            container : 'tag_list',
+            parameters : {
+                sort : 'name',
+                limit : 0
+            },
+            url : "${'{}/tag'.format(request.script_name)}"
+        });
+//            tag_list.load();
+
+        Yeti.Element('tag_save').addEventListener('click', function(e) {
+            e.preventDefault();
+            var input = Yeti.Element('tag');
+            var tag = new Bbpf.Tag({
+                'data' : {
+                    'name' : input.value
+                }
+            });
+            
+            tag.save();
+            
+            tag.dispatcher.add('after_save_success', function(params) {
+                tag_list.add_tag(params.tag, true);
+            });
+        });
+    /* ]]> */
+    });
+</script>
+
+<!-- TAGS END -->

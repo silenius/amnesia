@@ -1,0 +1,83 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: Contact us</metal:block>
+<metal:block fill-slot="head-bottom">
+<style>
+    .address-box ul li {
+        margin-right: 0px;
+        width:210px;
+    }
+</style>
+</metal:block>
+<metal:block fill-slot="navbar-bottom">
+    <metal:block use-macro="load: amnesia:templates/folder/_navbar_add_to_folder.pt" tal:condition="request.has_permission('create')" />
+</metal:block>
+
+<metal:block fill-slot="content">
+  <div id="main"> 
+    <!--CONTACT SECTION START-->
+    <section class="contact-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 col-sm-6">
+            <div class="contact-form">
+              <h3>Please Feel Free to Contact us</h3>
+              <form action="${'{}/contact'.format(request.script_name)}" method="POST">
+                <div class="row">
+                  <div class="col-md-6">
+                    <input placeholder="Name" required type="text" name="user">
+                  </div>
+                  <div class="col-md-6">
+                    <input placeholder="Email" required type="text" name="email">
+                  </div>
+                  <div class="col-md-6">
+                    <input placeholder="Website (Optional )" required type="text" name="website">
+                  </div>
+                  <div class="col-md-6">
+                    <input placeholder="Subject" required type="text" name="subject">
+                  </div>
+                  <div class="col-md-12">
+                    <textarea placeholder="Message" cols="10" rows="10" name="message"></textarea>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="g-recaptcha" data-sitekey="6Lff_h8UAAAAABH9V5fkOr2SsVGpaXNffU8vwarO"></div>
+                    <input value="Contact" type="submit">
+                  </div>
+                </div>
+              <input type="hidden" name="oid" value="${content.id}" />
+              </form>
+              <div class="address-box">
+                <h3>Contact Info</h3>
+                <address>
+                <p><i class="fa fa-home" aria-hidden="true"></i>
+                Belgian Science Policy<br />
+                Belgian Biodiversity Platform<br />
+                Avenue Louise, 231<br />
+                1050 Brussels, BELGIUM
+                </p>
+                <ul>
+                  <li><i class="fa fa-phone-square" aria-hidden="true"></i>02.238.36.12</li>
+                  <li><i class="fa fa-envelope-o" aria-hidden="true"></i><a href="mailto:contact@biodiversity.be">contact@biodiversity.be</a></li>
+                  <li><i class="fa fa-twitter" aria-hidden="true"></i><a href="https://twitter.com/biodiversity_be">@Biodiversity_be</a></li>
+                  <li><i class="fa fa-globe" aria-hidden="true"></i><a href="http://www.biodiversity.be">www.biodiversity.be</a></li>
+                </ul>
+                </address>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-sm-6">
+            <div class="contact-map-box">
+              <div id="map_contact_1" class="map_canvas active"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!--CONTACT SECTION START--> 
+  </div>
+  
+</metal:block>
+<metal:block fill-slot="javascript_srcs">
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</metal:block>
+</metal:block>

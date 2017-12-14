@@ -1,0 +1,41 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: search</metal:block>
+<metal:block fill-slot="head-bottom">
+<style>
+    span.search_hl {
+        color:red;
+    }
+
+    .theme-style-1 h4 {
+        margin: 0;
+    }
+</style>
+</metal:block>
+<metal:block fill-slot="content">
+    <div id="main">
+        <section class="search-section">
+            <div class="container">
+                <div class="row">
+					<h3><i class="fa fa-search" aria-hidden="true"></i> Search result</h3>
+					<p><span class="badge">${count}</span> documents matched your query for <span class="label label-danger">${query}</span></p>
+                </div>
+                <div class="row">
+                    <div class="media" tal:repeat="(content, hl_title, hl_descr) results">
+                        <div class="media-left">
+                            <i class="fa ${content.fa_icon}"></i>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="media-heading"><a href="${request.resource_path(content)}">${structure: hl_title}</a></h4>
+                            <div><i>published on ${h.fmt_datetime(request, content.added)}</i></div>
+                            <metal:block tal:switch="bool(hl_descr)"> 
+                                <metal:block tal:case="True">${structure: hl_descr}</metal:block>
+                                <metal:block tal:case="False"><i>no description provided</i></metal:block>
+                            </metal:block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>

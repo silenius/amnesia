@@ -1,0 +1,5 @@
+<ol class="breadcrumb">
+    <li tal:repeat="(level, parent) enumerate(widget.parents)">
+        <a href="${request.resource_path(parent) if parent.id != 1 else request.application_url}" data-obj="${widget.obj_dump(parent, 'json', include_columns=['id'], include_relations=False)}">${h.shorten(request, parent.title)}</a>
+    </li>
+</ol>

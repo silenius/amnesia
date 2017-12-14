@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import configure_mappers
+from sqlalchemy.pool import NullPool
 
 import zope.sqlalchemy
 
@@ -19,6 +20,8 @@ import zope.sqlalchemy
 
 
 def get_engine(settings, prefix='sqlalchemy.'):
+    if settings.get('sqlalchemy.poolclass') == 'NullPool':
+        settings['sqlalchemy.poolclass'] = NullPool
     return engine_from_config(settings, prefix)
 
 

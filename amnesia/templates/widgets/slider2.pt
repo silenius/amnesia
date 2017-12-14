@@ -1,0 +1,40 @@
+<section class="project-section" tal:condition="widget.documents">
+  <div class="holder" tal:define="banner widget.folder.find_prop('img_home')" style="${'background-image:url({}/{}/download)'.format(request.script_name, banner) if banner else None}">
+    <div class="heading-center">
+        <h2>${widget.folder.title}</h2>
+    </div>
+    <div class="container">
+      <div class="project-row">
+        <div class="project-slider owl-carousel owl-theme">
+
+          <div class="item" tal:repeat="project widget.documents">
+            <div class="project-box">
+              <div class="frame-outer">
+                <div class="frame">
+                    <metal:block tal:switch="project.props is not None and 'img_home' in project.props">
+                        <img tal:case="True" src="${'{}/{}/download'.format(request.script_name, project.props['img_home'])}" alt="img" />
+                        <img tal:case="default" src="${request.static_url('amnesia:static/images/project-img-1.jpg')}" alt="img" />
+                    </metal:block>
+                </div>
+              </div>
+              <div class="text-box">
+                  <h3 tal:switch="project.props is not None and 'link_id_home' in project.props">
+                      <a tal:case="True" href="${'{}/{}'.format(request.script_name, project.props['link_id_home'])}">${project.title}</a>
+                      <a tal:case="False" href="${request.resource_path(project)}">${project.title}</a>
+                  </h3>
+                  <!--<div class="tags-row"> <a href="#" class="link">Eco,</a> <a href="#" class="link">Energy,</a> <a href="#" class="link">Green,</a> <a href="#" class="link">Solar</a> </div>-->
+                <p>${project.description}</p>
+                <metal:block tal:switch="project.props is not None and 'link_id_home' in project.props">
+                    <a tal:case="True" class="btn-readmore" href="${'{}/{}'.format(request.script_name, project.props['link_id_home'])}">More Details</a>
+                    <a tal:case="False" class="btn-readmore" href="${request.resource_path(project)}">More Details</a>
+                </metal:block>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

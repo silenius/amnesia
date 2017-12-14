@@ -1,0 +1,17 @@
+<ul class="dropdown-values">
+    <li tal:condition="True">
+        <a class="filter" data-filter="mine" href="#">only mine</a>
+    </li>
+
+    <li>
+        <a class="filter" data-filter="today" href="#">added or modified today</a>
+    </li>
+
+    <li>
+        <a class="filter" data-filter="week" href="#">added or modified this week</a>
+    </li>
+
+    <li>
+        <a class="filter" data-filter="month" href="#">added or modified this month</a>
+    </li>
+</ul>

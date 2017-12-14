@@ -7,17 +7,7 @@ from operator import attrgetter
 from sqlalchemy import inspect
 from sqlalchemy import orm
 
-from zope.interface import Interface
-from zope.interface import implementer
-
 from .modules.content import Content
-
-
-class IOrder(Interface):
-    """ Represents an order by clause """
-
-    def to_sql(self):
-        """ Returns the order as an SQL clause """
 
 
 class Path:
@@ -45,12 +35,11 @@ class Path:
 
     def to_dict(self):
         return {
-            'identity' : self.mapper.polymorphic_identity,
-            'prop' : self.prop
+            'identity': self.mapper.polymorphic_identity,
+            'prop': self.prop
         }
 
 
-@implementer(IOrder)
 class EntityOrder:
 
     def __init__(self, src, prop, direction='asc', nulls=None, doc=None,
@@ -65,9 +54,9 @@ class EntityOrder:
         # If a path is required, the first one should be a polymorphic entity
         self.path = path if path is not None else []
 
-    #########################################################################
-    ### PROPERTIES ##########################################################
-    #########################################################################
+    #######################################################################
+    # PROPERTIES ##########################################################
+    #######################################################################
 
     @property
     def direction(self):
@@ -75,10 +64,7 @@ class EntityOrder:
 
     @direction.setter
     def direction(self, value):
-        if value.lower() == 'desc':
-            self.direction = 'desc'
-        else:
-            self.direction = 'asc'
+        self._direction = 'desc' if value.lower() == 'desc' else 'asc'
 
     @property
     def nulls(self):
@@ -92,7 +78,7 @@ class EntityOrder:
             if value in ('first', 'last'):
                 self._nulls = value
             else:
-                raise ValueError
+                self._nulls = None
         except:
             self._nulls = None
 
@@ -116,9 +102,7 @@ class EntityOrder:
         except:
             self._doc = None
 
-
     #########################################################################
-
 
     def __eq__(self, other):
         if self.class_ == other.class_ and self.prop == other.prop:
@@ -153,7 +137,7 @@ class EntityOrder:
             'identity': self.mapper.polymorphic_identity,
             'cls': self.mapper.entity.__name__,
             'prop': self.prop,
-            'order': self.direction,
+            'direction': self.direction,
             'nulls': self.nulls,
             'doc': self.doc,
             'path': [p.to_dict() for p in self.path]
@@ -164,17 +148,17 @@ class EntityOrder:
 
     JSON = to_json
 
-    def to_sql(self, order=None, nulls=None):
+    def to_sql(self, direction=None, nulls=None):
         """ Returns an SQL expression """
         col = self.col
 
-        if not order:
-            order = self.direction
+        if not direction:
+            direction = self.direction
 
         if not nulls:
             nulls = self.nulls
 
-        if order == 'desc':
+        if direction == 'desc':
             col = col.desc()
 
         return col.nullslast() if nulls == 'last' else col.nullsfirst()
@@ -196,12 +180,12 @@ class EntityOrder:
             mapper = mapper.class_
 
         return cls(
-            src = mapper,
-            prop = data['prop'],
-            direction = data['order'],
-            nulls = data['nulls'],
-            doc = 'FIXME',
-            path = path
+            src=mapper,
+            prop=data['prop'],
+            direction=data['direction'],
+            nulls=data['nulls'],
+            doc='FIXME',
+            path=path
         )
 
     def has_path(self, cls):
@@ -215,7 +199,7 @@ class EntityOrder:
         # inheritance scenario and which share a common ancestor with
         # pl_cfg.base class (Content).
         # ex: Event.starts, File.file_size, ...
-        if (self.mapper.polymorphic_identity and self.mapper.isa(base)):
+        if self.mapper.polymorphic_identity and self.mapper.isa(base):
             return self.mapper.entity
 
         # The sort is on a mapped class which is reachable # through a
@@ -237,16 +221,16 @@ def for_entity(entity, orders):
     # insp.mapper -> <Mapper at 0x805aeb310; Content>
     if insp.is_aliased_class:
         if insp.with_polymorphic_mappers:
-            cls = list(map(attrgetter('class_'),
-                      insp.with_polymorphic_mappers))
+            cls = map(attrgetter('class_'), insp.with_polymorphic_mappers)
+            cls = tuple(cls)
         else:
             cls = (insp.mapper.class_, )
 
         return {
             k: v for (k, v) in orders.items()
-            if v.class_ in cls or
-            any((v.has_path(c) for c in cls)) or
-            v.class_ is None
+            if v.class_ in cls
+            or any((v.has_path(c) for c in cls))
+            or v.class_ is None
         }
 
     # Entity is an object instance
@@ -269,5 +253,3 @@ def for_entity(entity, orders):
             k: v for (k, v) in orders.items()
             if v.class_ in cls or v.has_path(base)
         }
-
-

@@ -1,0 +1,5 @@
+<div class="form-group">
+    <label for="register_email">Email</label>
+    <span class="help-block">Please enter the email address linked to your login</span>
+    <input type="text" id="register_email" name="email" class="form-control" placeholder="email address" required />
+</div>

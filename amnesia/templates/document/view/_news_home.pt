@@ -1,0 +1,26 @@
+<div class="news-box" tal:repeat="doc documents">
+    <div class="post-box">
+        <div class="row">
+            <div class="col-md-2 col-sm-2">
+                <div class="frame">
+                    <metal:block tal:switch="doc.props and 'picture_list' in doc.props">
+                        <img tal:case="True" src="${'{}/{}/download'.format(request.script_name, doc.props['picture_list'])}" alt="img"/>
+                        <img tal:case="default" src="${request.static_url('amnesia:static/images/news-img-1.jpg')}" alt="img" />
+                    </metal:block>
+                </div>
+            </div>
+            <div class="col-md-10 col-sm-10">
+                <div class="text-box">
+                    <h3><a href="${request.resource_path(doc)}">${doc.title}</a></h3>
+                    <div class="tags-row">
+                        <!--!<a href="#" class="link"><i class="fa fa-user" aria-hidden="true"></i>${doc.owner.full_name}</a>-->
+                        <a href="#" class="link"><i class="fa fa-calendar" aria-hidden="true"></i>${h.fmt_datetime(request, doc.added)}</a>
+                    </div>
+                    <p>${doc.description}</p>
+                    <a href="${request.resource_path(doc)}" class="btn-readmore">Read News Detail</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

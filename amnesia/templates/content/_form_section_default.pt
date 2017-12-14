@@ -1,0 +1,20 @@
+<!-- TITLE -->
+
+<div class="form-group" metal:define-slot="content_title">
+    <label for="content_title">Title</label>
+    <span class="help-block">Title for the item, it will be shown throughout the site.</span>
+    <input type="text" id="content_title" name="title" class="form-control" placeholder="title" />
+</div>
+
+<!-- DESCRIPTION -->
+
+<div class="form-group">
+    <label for="content_description">Description</label>
+    <span class="help-block">A short summary of the content.</span>
+    <textarea id="content_description" class="form-control" rows="3" name="description"></textarea>
+</div>
+
+<input type="hidden" name="container_id" />
+<input type="hidden" id="object_id" name="id" />
+
+<!-- END: content/_form -->

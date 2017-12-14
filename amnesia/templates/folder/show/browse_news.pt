@@ -1,0 +1,94 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: ${content.title}</metal:block>
+<metal:block fill-slot="head-bottom">
+<script tal:define="default_browse dict(); default_limit default_browse.get('limit', 10) ;">
+
+    /* <![CDATA[ */
+
+    document.addEventListener("DOMContentLoaded",function(e) {
+        var folder = new Bbpf.Folder(${dump_obj(content, 'json', exclude_columns=['fts', 'position_in_container'], include_relations=['state'])}),
+            pagination = new Bbpf.Pagination({}),
+            folder_browser = new Bbpf.FolderController({
+                url : "${request.resource_path(content, 'browse_news')}",
+                folder : folder,
+                components : {
+                    main : new Bbpf.Component({
+                        container : 'content'
+                    }),
+                    pagination : new Bbpf.PaginationComponent({
+                        container : 'pagination',
+                        pagination : pagination
+                    })
+                },
+                parameters : {
+                    display : 'news_summary',
+                    limit : pagination.get('limit'),
+                    filter_types: ['document']
+                }
+            }); // var
+
+        pagination.dispatcher.add('pagination_change', function() {
+            folder_browser.refresh({
+                limit: this.get('limit'),
+                offset: this.get('offset')
+            });
+        });
+
+        folder_browser.dispatcher.add('before_load', function() {
+            var content_icon = Yeti.Element('content_icon');
+            if (content_icon) {
+                if (this.parameters.display == 'list') {
+                    content_icon.style.display = 'inline';
+                } else {
+                    content_icon.style.display = 'none';
+                }
+            }
+        });
+
+        folder_browser.load();
+    });
+
+    /* ]]> */
+
+</script>
+</metal:block>
+
+<metal:block fill-slot="navbar-bottom">
+    <metal:block use-macro="load: amnesia:templates/folder/_navbar_add_to_folder.pt" tal:condition="request.has_permission('create')" />
+</metal:block>
+
+<metal:block fill-slot="content" tal:define="aside bool(content.props and 'twitter' in content.props or content.tags)">
+    <div id="main">
+        <section class="news-timeline">
+            <div class="container">
+                <div class="row">
+                    <div tal:attributes="class 'col-md-9 col-sm-8' if aside else 'col-md-12'" id="content"></div>
+                    <div class="col-md-3 col-sm-4" tal:condition="aside"> 
+                        <aside>
+                            <div class="sidebar">
+                                <div class="sidebar-box" tal:condition="content.props and content.props.get('twitter')">
+                                    ${structure: widgets.Twitter(request, content.props['twitter'])}
+                                </div>
+                                <!--!
+                                <div class="sidebar-box">
+                                    ${structure: widgets.RecentPosts(request, 10)}
+                                </div>
+                                -->
+
+                                <div class="sidebar-box" tal:condition="content.tags">
+                                    <h3>Tags</h3>
+                                    <div class="tags">
+                                        <a href="${'{}/search/tag?id={}'.format(request.script_name, tag.id)}" tal:repeat="tag content.tags">${tag.name}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+
+                    <div id="pagination"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>

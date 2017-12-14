@@ -1,0 +1,25 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: login</metal:block>
+<metal:block define-macro="body">
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="lost_password">
+        <div class="container">
+            <p>
+                Please enter your login email below and we’ll send you a link to reset your password.
+            </p>
+            <form action="${request.resource_path(request.context, 'lost')}" method="post">
+                ${structure: form}
+                <div class="g-recaptcha" data-sitekey="6Lff_h8UAAAAABH9V5fkOr2SsVGpaXNffU8vwarO"></div>
+                <input type="hidden" name="csrf_token" value="${request.session.get_csrf_token()}">
+                <input type="submit" value="submit" />
+            </form>
+        </div>
+    </section>
+</div>
+</metal:block>
+</metal:block>
+<metal:block fill-slot="javascript_srcs">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</metal:block>
+</metal:block>

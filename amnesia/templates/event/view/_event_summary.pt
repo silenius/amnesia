@@ -1,0 +1,23 @@
+<div class="col-md-4 col-sm-6">
+    <div class="outer">
+        <strong class="date">${content.starts.day} <span>${content.starts.strftime('%b. %y')}</span></strong>
+        <div class="frame">
+            <div class="caption">
+                <div class="event-counter-box">
+                    <div class="defaultCountdown" data-starts="${content.starts.isoformat()}"></div>
+                </div>
+            </div>
+            <metal:block tal:switch="content.props and 'picture_list' in content.props">
+                <img tal:case="True" src="${'{}/{}/download'.format(request.script_name, content.props['picture_list'])}" />
+                <img tal:case="default" src="${request.resource_path(random_picture(), 'download')}" alt="img" />
+            </metal:block>
+        </div>
+    </div>
+    <div class="text-box">
+        <h3><a href="${request.resource_path(content)}">${content.title}</a></h3>
+        <div class="tags-row">
+            <a href="#" class="link"><i class="fa fa-clock-o" aria-hidden="true"></i>${h.event_date(request, content)}</a> <a href="#" class="link"><i class="fa fa-map-marker" aria-hidden="true"></i>${content.location} ${content.address}</a>
+        </div>
+        <a href="${request.resource_path(content)}" class="btn-readmore">Event Details</a>
+    </div>
+</div>

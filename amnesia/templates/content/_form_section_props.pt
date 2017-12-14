@@ -1,0 +1,85 @@
+<div class="form-group">
+	<label>Properties</label>
+	<span class="help-block">Add random properties, mostly used as metadata.</span>
+	<div class="row">
+		<div class="col-xs-2">
+			<input id="prop_key" class="form-control" placeholder="key"/>
+		</div>
+		<div class="col-xs-2">
+			<input id="prop_value" class="form-control" placeholder="value" />
+		</div>
+        <a class="btn btn-success" role="button" href="#" id="prop_save">add</a>
+	</div>
+	<div class="row">
+  		<div class="col-xs-12"><ul id="prop_list"></ul></div>
+	</div>
+    <input type="hidden" name="props" id="props" />
+</div>
+<script>
+    /* <![CDATA[ */
+
+    var props = undefined;
+
+    function add_prop(container, key, value) {
+        var span = document.createElement('li');
+        span.appendChild(document.createTextNode(key));
+        span.appendChild(document.createTextNode(' : '));
+        span.appendChild(document.createTextNode(value));
+
+        var remove = document.createElement('a');
+		remove.appendChild(document.createTextNode('remove'));
+		remove.className = "btn btn-danger btn-xs";
+		remove.setAttribute('role', 'button');
+
+        remove.addEventListener('click', function(e) {
+            e.preventDefault();
+            remove_prop(key, span);  
+        });
+
+        span.appendChild(remove);
+        container.appendChild(span);
+    }
+
+    function remove_prop(key, container) {
+        var props_json = JSON.parse(props.value);
+        delete props_json[key];
+        props.value = JSON.stringify(props_json);
+        container.parentNode.removeChild(container);
+    }
+
+    document.addEventListener("DOMContentLoaded",function(e) {
+        props = Yeti.Element('props');
+
+        var props_json = JSON.parse(props.value),
+            props_ui = Yeti.Element('prop_list'),
+            save_prop = Yeti.Element('prop_save');
+
+		if (props_json !== null) {
+        	Object.keys(props_json).forEach(function(key,index) {
+				add_prop(props_ui, key, props_json[key]);
+			});
+		}
+
+        save_prop.addEventListener('click', function(ev) {
+            var prop_key = Yeti.Element('prop_key'),
+                prop_value = Yeti.Element('prop_value');
+
+            ev.preventDefault();
+
+            if (prop_key && prop_value) {
+                var props_json = JSON.parse(props.value);
+                if (props_json === null) {
+                    props_json = {};
+                }
+
+                props_json[prop_key.value] = prop_value.value;
+                props.value = JSON.stringify(props_json);
+                
+                add_prop(props_ui, prop_key.value, prop_value.value);
+            }
+        });
+
+    })
+    /* ]]> */
+</script>
+

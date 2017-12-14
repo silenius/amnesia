@@ -1,0 +1,23 @@
+<metal:block use-macro="load: ../../content/view/_list.pt">
+    <metal:block fill-slot="after-title">
+        <div class="posted" style="margin-left:23px">
+            This event
+
+            <span tal:condition="content.finished">
+                <span class="event_passed">has passed</span>, it took place
+            </span>
+
+            <span tal:condition="not content.finished and content.has_begin" class="event_now">
+                is taking place right now
+            </span>
+
+            <span tal:condition="not content.finished and not content.has_begin" class="event_futur">
+                will take place
+            </span>
+
+            in <span class="bold">${content.country.name} <img src="${request.static_url('amnesia:static/images/flags/{}.gif'.format(content.country.iso_code))}" class="opa" /></span> <span tal:condition="content.address">(${content.address})</span> -
+
+            <!--! <span>${h.format_event_date(content)}</span> -->
+        </div>
+    </metal:block>
+</metal:block>

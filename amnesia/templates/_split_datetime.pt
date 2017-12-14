@@ -1,0 +1,15 @@
+<metal:block use-macro="load: _split_date.pt" />
+
+<div class="col-xs-1">
+    <select name="${name}_hour" class="form-control">
+        <option value="">--</option>
+        <option value="${hour}" tal:repeat="hour range(0,24)">${hour}</option>
+    </select>
+</div>
+
+<div class="col-xs-1">
+    <select name="${name}_minute" class="form-control">
+        <option value="">--</option>
+        <option value="${minute}" tal:repeat="minute range(0,60,5)">${minute}</option>
+    </select>
+</div>

@@ -1,0 +1,19 @@
+<metal:block use-macro="load: ../layout.pt" tal:define="js_tinymce True">
+<metal:block fill-slot="title_more">: folder</metal:block>
+<metal:block fill-slot="content">
+    <div id ="main">
+        <section class="edit-folder">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="folder_form" method="post" action="${form_action}">
+                            ${structure: form}
+                            <input type="submit" value="send" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>

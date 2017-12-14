@@ -1,0 +1,20 @@
+<h3>Recent Posts</h3>
+<div class="recent-post">
+    <ul>
+        <li tal:repeat="post widget.posts">
+            <!--!
+            <div class="thumb">
+                 <metal:block tal:switch="post.props and 'picture_list' in post.props">
+                    <img tal:case="True" style="width:67px;height:67px" src="${'{}/{}/download'.format(request.script_name, post.props['picture_list'])}" />
+                    <img tal:case="default" src="${request.static_url('amnesia:static/images/blog-recent-post-img-1.jpg')}" alt="img" />
+                </metal:block>
+            </div>
+            -->
+            <div class="text-col">
+                <a href="${request.resource_path(post)}">${h.shorten(request, post.title, 100)}</a> 
+                <span><i class="fa fa-calendar" aria-hidden="true"></i>${h.fmt_datetime(request, post.added)}</span> 
+            </div>
+        </li>
+    </ul>
+</div>
+

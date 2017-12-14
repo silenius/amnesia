@@ -1,0 +1,20 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: login</metal:block>
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="lost_password">
+        <div class="container">
+            <h3>Email sent</h3>
+            <p>
+            We've sent an email to <strong>${principal.email}</strong>. Please check your email and click on the link to reset your password.
+            </p>
+            <h4>Haven't received the email?</h4>
+            <p>
+                If it's been less than 10 minutes, check again in a few minutes.
+                Please also make sure that it isn’t in your junk mail folder.
+            </p>
+        </div>
+    </section>
+</div>
+</metal:block>
+</metal:block>

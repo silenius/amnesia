@@ -1,0 +1,19 @@
+<metal:block use-macro="load: ../layout.pt">
+<metal:block fill-slot="title_more">: file</metal:block>
+<metal:block fill-slot="content">
+    <div id ="main">
+        <section class="edit-file">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="file_form" method="post" enctype="multipart/form-data" accept-charset="utf-8" action="${form_action}">
+                            ${structure: form}
+                            <input type="submit" value="send" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>

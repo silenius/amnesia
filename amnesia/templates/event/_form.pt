@@ -1,0 +1,111 @@
+<metal:block use-macro="load: ../content/_form.pt">
+    <metal:block fill-slot="section-default">
+
+        <!-- START DATE -->
+
+        <div class="form-group">
+            <label>Start</label>
+            <span class="help-block">Start date of event.</span>
+            <div class="row">
+                <metal:block use-macro="load: ../_split_datetime.pt" tal:define="name 'starts'" />
+            </div>
+        </div>
+
+        <!-- END DATE -->
+
+        <div class="form-group">
+            <label>End</label>
+            <span class="help-block">End date of event.</span>
+            <div class="row">
+                <metal:block use-macro="load: ../_split_datetime.pt" tal:define="name 'ends'" />
+            </div>
+        </div>
+
+        <!-- BODY -->
+
+        <div class="form-group">
+            <label for="content_body">Body</label>
+            <span class="help-block">Title for the item, it will be shown throughout the site.</span>
+            <textarea name="body" class="mceEditor"></textarea>
+        </div>
+
+        <!-- MAP -->
+
+        <div class="right">
+            <div id="event_map"></div>
+        </div>
+
+        <!-- COUNTRY -->
+
+        <div class="form-group">
+            <label for="country_iso">Country</label>
+            <span class="help-block">Country where the event takes place.</span>
+            <select class="form-control" name="country_iso" id="country_iso">
+                <option>-- select a country --</option>
+                <option tal:repeat="country countries" value="${country.iso_code}">${country.name} (${country.iso_code})</option>
+            </select>
+        </div>
+
+        <!-- ADDRESS -->
+
+        <div class="form-group">
+            <label for="address">Address</label>
+            <span class="help-block">Address where the event takes place.</span>
+            <input class="form-control" type="text" name="address" id="address" />
+        </div>
+
+        <!-- LOCATION -->
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <span class="help-block">Where the event takes place (university, institution, building or ...).</span>
+            <input class="form-control" type="text" id="location" name="location" />
+        </div>
+
+        <!-- CONTACT NAME -->
+
+        <div class="form-group">
+            <label for="contact_name">Contact name</label>
+            <span class="help-block">Name of the person to contact for more information</span>
+            <input class="form-control" type="text" id="contact_name" name="contact_name" />
+        </div>
+
+        <!-- CONTACT EMAIL -->
+
+        <div class="form-group">
+            <label for="contact_email">Contact email</label>
+            <span class="help-block">Email address for more information</span>
+            <input class="form-control" type="text" id="contact_email" name="contact_email" />
+        </div>
+
+        <!-- CONTACT PHONE -->
+
+        <div class="form-group">
+            <label for="contact_phone">Contact phone</label>
+            <span class="help-block">A phone number to call for more information</span>
+            <input class="form-control" type="text" id="contact_phone" name="contact_phone" />
+        </div>
+
+        <!-- ATTENDEES -->
+
+        <div class="form-group">
+            <label for="attendees">Attendees</label>
+            <span class="help-block">Awaited people</span>
+            <input type="text" name="attendees" id="attendees" class="form-control"  />
+        </div>
+
+        <!-- URL -->
+
+        <div class="form-group">
+            <label for="url">URL</label>
+            <span class="help-block">A Web address with more information about the event</span>
+            <input type="text" name="url" id="url" class="form-control" />
+        </div>
+
+        <!-- HIDDEN FIELDS -->
+
+        <input type="hidden" name="address_latitude" />
+        <input type="hidden" name="address_longitude" />
+
+    </metal:block>
+</metal:block>

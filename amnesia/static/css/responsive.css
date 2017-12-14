@@ -1,0 +1,2932 @@
+/*===========================================================================*/
+							/*1280px CSS*/
+/*===========================================================================*/
+@media (max-width: 1280px) {
+#banner .caption {
+	top: 90px;
+}
+/*
+.call-action-box {
+	width: 440px;
+}
+.donation-form-row .donation-form {
+	width: 450px;
+}
+*/
+.footer-section-1:before {
+	width: 440px;
+}
+#banner.banner-style-2 .caption {
+	top: 40px;
+}
+.call-action-section {
+	margin-bottom: 70px;
+}
+.timeline-row .box .frame .caption h3 {
+	font-size: 15px;
+	line-height: 20px;
+}
+.timeline-row .box strong.mnt:before {
+	left: -50px;
+}
+.timeline-row .box strong.mnt:after {
+	left: -47px;
+}
+.timeline-section {
+	margin-bottom: 60px;
+}
+.recent-project.post-news-row {
+	margin-bottom: 50px;
+}
+.donation-form-row.donation-form-2 .donation-form, .donation-form-row.donation-form-2 .call-action-box {
+	width: 640px;
+}
+.donation-form-row:hover .donation-form .holder {
+	margin: 0;
+}
+.donation-form-row:hover .call-action-box .holder {
+	margin: 0 0 0 30px;
+}
+.donation-form-row, .recent-post-style-2 {
+	margin-bottom: 70px;
+}
+.upcoming-event-section {
+	margin-bottom: 90px;
+}
+.exeutive-section .empty-section {
+	width: 300px;
+}
+.exeutive-facts-box {
+	width: 330px;
+}
+.executive-message-box-2 {
+	width: 650px;
+}
+.executive-message-box-2 .message-box {
+	margin: 50px 0 0 50px;
+}
+.exeutive-section, .testimonials-style-2, .supporters-section {
+	margin-bottom: 60px;
+}
+.urgent-donation.home-3 {
+	margin-bottom: 130px;
+}
+.post-news-row.news.home-3 {
+	margin-bottom: 70px;
+}
+.causes-style-2 {
+	margin: 0;
+}
+.post-news-row.home-3 {
+	margin-bottom: 40px;
+}
+}
+
+
+
+
+/*===========================================================================*/
+							/*767px CSS*/
+/*===========================================================================*/
+@media (max-width: 767px) {
+.topbar .right-box {
+	width: 100%;
+}
+.topbar .left-box ul li, .topbar .left-box ul li:first-child {
+	border-bottom: 1px solid #ccc;
+}
+.navigation-row .navbar {
+	padding: 0;
+	width: 100%;
+}
+strong.logo {
+	margin: 0;
+	width: 100%;
+	text-align: center;
+}
+#nav li {
+	float: none;
+	display: block;
+}
+#nav {
+	width: 100%;
+}
+#nav li ul {
+	position: static;
+	width: 100%;
+}
+#nav li ul li > ul {
+	position: static;
+	width: 100%;
+	padding: 0 10px;
+}
+.shop-box {
+	width: 100%;
+}
+.cp-search-holder {
+	float: right;
+}
+.cp-search-inner {
+	width: 100%;
+	padding: 200px 10px 0 10px;
+}
+.cart-box-outer .dropdown-menu {
+	right: inherit;
+	top: 100%;
+}
+#banner .caption {
+	top: 30px;
+}
+#banner .caption .holder h1 {
+	font-size: 40px;
+}
+#banner .caption .holder h2 {
+	margin-bottom: 25px;
+}
+#banner {
+	margin-bottom: 40px;
+}
+.chose-heading {
+	width: 100%;
+	margin: 0 0 0 0;
+}
+.why-choose-box-row .col-md-4 {
+	border: 0;
+}
+.why-choose-box {
+	min-height: auto;
+	padding: 20px 20px;
+}
+.priorities .owl-carousel {
+	width: 100%;
+}
+.priorities .box {
+	width: 100%;
+}
+.priorities {
+	margin-bottom: 50px;
+}
+.why-choose-box-row {
+	margin: 0;
+}
+.project-section .holder {
+	width: 100%;
+}
+.project-section {
+	margin-bottom: 50px;
+}
+.urgent-donation {
+	padding: 0 15px;
+	margin-bottom: 20px;
+}
+.donation-head {
+	width: 100%;
+}
+.donation-row {
+	margin: 0 auto;
+	width: 100%;
+	padding: 40px 0;
+	height: auto;
+}
+.donation-progress {
+	margin: 25px 0;
+}
+.progress-box {
+	width: 50%;
+	margin-bottom: 25px;
+}
+.donation-row .btn-row {
+	margin: 0;
+}
+.donation-form-row:hover .donation-form .holder, .donation-form-row:hover .call-action-box .holder {
+	margin: 0;
+}
+.donation-form-row .donation-form {
+	width: 100%;
+}
+.donation-form-row .donation-form .holder {
+	width: 100%;
+	margin: 0;
+	padding: 0 25px;
+}
+.donation-count {
+	width: 100%;
+	padding: 20px 0;
+}
+.count-box {
+	width: 159px;
+	padding: 35px 0 30px 14px;
+	border-bottom: 0;
+}
+.call-action-box {
+	width: 100%;
+}
+.call-action-box .holder {
+	width: 100%;
+	padding: 0 30px;
+	margin: 0;
+}
+.post-news-row .left-box, .news-box {
+	margin-bottom: 25px;
+}
+.post-news-row:before, .attend-event:before {
+	display: none;
+}
+.post-news-row {
+	margin-bottom: 0;
+}
+.attend-event {
+	padding: 0 20px;
+}
+.sc-noo-event-slider-wrap .swiper-button-prev, .sc-noo-event-slider-wrap .swiper-container-rtl .swiper-button-next {
+	left: 20px !important;
+	background: #fff !important;
+}
+.sc-noo-event-slider-wrap .swiper-button-next, .sc-noo-event-slider-wrap .swiper-container-rtl .swiper-button-prev {
+	right: 20px !important;
+	background: #fff !important;
+}
+.attend-event {
+	margin: 0 0 -50px 0;
+}
+.sc-noo-event-slider-wrap .swiper-container {
+	padding-bottom: 0 !important;
+}
+.testimonials-team-section {
+	position: relative;
+	z-index: 9;
+	margin-bottom: 40px;
+}
+.testimonials-outer {
+	margin-bottom: 25px;
+	overflow: hidden;
+	clear: both;
+}
+.testimonials-team-section .item {
+	margin: 0;
+}
+.exeutive-section .video-box .modal-dialog {
+	width: 100%;
+	margin: 50px 0 0 0;
+	padding: 0 30px;
+}
+.exeutive-section .video-box .modal-body iframe {
+	height: 335px !important;
+}
+.exeutive-section .video-box {
+	padding: 80px 0;
+}
+.message-box {
+	margin: 0;
+}
+.exeutive-section {
+	margin-bottom: 50px;
+}
+.supporters-section .holder ul li {
+	border: 0;
+}
+.newsletter {
+	margin: 0 0 30px 0;
+	padding: 0 20px;
+}
+.newsletter .holder {
+	width: 100%;
+}
+.newsletter .holder input[type="text"] {
+	margin-bottom: 10px;
+}
+.footer-section-1:before {
+	width: 100%;
+}
+.footer-section-1 {
+	padding: 40px 5px 0 5px;
+}
+.footer-section-1 .box {
+	margin-bottom: 25px;
+}
+.services-widget ul li a, .recent-post-widget .text-col a.title, .recent-post-widget .text-col span.date {
+	color: #fff;
+}
+.footer-section-2 address {
+	margin: 0 0 10px 0;
+}
+.footer-menu ul {
+	text-align: center;
+}
+.footer-menu ul li {
+	float: none;
+	display: inline-block;
+	padding: 0 20px;
+}
+.footer-section-3 strong.copyrights {
+	padding: 15px 0 0 0;
+	float: none;
+	display: block;
+	text-align: center;
+}
+.header-style-2 .topbar .container-fluid, .header-style-2 .navigation-row .container-fluid {
+	padding: 0 15px;
+}
+.topbar-social {
+	width: 100%;
+}
+.topbar-social ul {
+	text-align: center;
+}
+.topbar-social ul li {
+	float: none;
+	display: inline-block;
+}
+.header-style-2 .navigation-row a.btn-donate {
+	width: 100%;
+	text-align: center;
+	margin: 10px 0 5px 0;
+}
+.header-style-2 .navigation-row .navbar {
+	padding: 0;
+}
+.header-style-2 .navbar-toggle {
+	margin-right: 0;
+}
+.header-style-2 .navigation-row {
+	padding: 30px 0 10px 0;
+}
+.features-section {
+	margin: 0 0 40px 0;
+}
+#banner.banner-style-2 .caption span.logo-icon {
+	display: none;
+}
+#banner.banner-style-2 .caption .holder h1 {
+	font-size: 30px;
+	line-height: 30px;
+}
+#banner .caption .holder h2 {
+	font-size: 28px;
+}
+.features-section .box .text-col {
+	float: left;
+	padding: 20px 0 0 0;
+}
+.welcome-tab {
+	margin: 0;
+}
+.welcome-tab .tab-box {
+	padding: 30px 0 0 0;
+}
+.welcome-tab .tab-box .nav-tabs > li > a {
+	font-size: 13px;
+	line-height: 13px;
+	padding: 14px 23px;
+}
+.welcome-tab .tab-box .list {
+	margin-bottom: 30px;
+}
+.news-box .post-box .frame {
+	margin-bottom: 25px;
+}
+.post-news-row.news {
+	margin: 0;
+}
+.call-action-section .holder .text-col h2 {
+	font-size: 24px;
+}
+.call-action-section {
+	margin-bottom: 30px;
+}
+.timeline-section {
+	margin-bottom: 40px;
+}
+.recent-project .center-box {
+	margin-bottom: 30px;
+}
+.recent-project.post-news-row {
+	margin: 0;
+}
+.donation-style-2 .holder::before {
+	display: none;
+}
+.donation-progress-box {
+	width: 100%;
+	background-size: 100%;
+	position: static;
+	padding: 70px 10px 15px 29px;
+	margin-bottom: 20px;
+}
+.donation-style-2 .holder {
+	width: 100%;
+	padding: 0;
+	height: auto;
+	background-size: cover;
+}
+.donation-style-2 .holder .left-box {
+	width: 100%;
+	padding: 0 20px;
+	margin: 20px 0;
+}
+.donation-style-2 .holder .left-box .round-box .progress-box {
+	width: 100%;
+	padding: 40px 0 0 0;
+}
+.donation-style-2 .holder .left-box .round-box {
+	width: 122px;
+	height: 122px;
+	margin: 0 10px;
+}
+.progress-box strong.number {
+	font-size: 25px;
+	line-height: 25px;
+}
+.donation-style-2 {
+	margin-bottom: 40px;
+}
+.donation-form-row.donation-form-2 .donation-form {
+	width: 100%;
+}
+.donation-form-row.donation-form-2 .call-action-box {
+	width: 100%;
+}
+.donation-form-row {
+	margin-bottom: 50px;
+}
+.event-counter-box {
+	display: none;
+}
+.upcoming-event-section {
+	margin-bottom: 40px;
+}
+.recent-post-style-2 .box {
+	margin-bottom: 30px;
+}
+.recent-post-style-2 {
+	margin: 0;
+}
+.exeutive-section .empty-section {
+	display: none;
+}
+.exeutive-facts-box {
+	width: 100%;
+}
+.executive-message-box-2 {
+	width: 100%;
+	height: auto;
+	background-size: cover;
+}
+.executive-message-box-2 .message-box {
+	margin: 30px 0;
+}
+.testimonials-style-2 .holder {
+	height: auto;
+	width: 100%;
+	float: left;
+}
+.testimonials-style-2 .holder .bx-wrapper {
+	margin: 0;
+}
+.testimonials-style-2 {
+	padding: 0 20px;
+	margin-bottom: 40px;
+}
+.testimonials-style-2 #bx-pager {
+	position: static;
+	margin: 20px 0 0 0;
+}
+.supporters-section {
+	margin-bottom: 40px;
+}
+.upcoming-event-section::before {
+	display: none;
+}
+.header-style-2.nav-style-3 a.btn-volunteer {
+	width: 100%;
+}
+.header-style-2.nav-style-3 .navigation-row .navbar-collapse {
+	width: 100%;
+}
+.navigation-row.nav-style-3 {
+	margin: 0;
+	padding: 0;
+}
+#banner-style-3 {
+	height: auto;
+}
+#banner-style-3 img {
+	width: 100%;
+}
+#banner-style-3 .caption {
+	top: 60px;
+}
+#banner-style-3 .caption .holder h1 {
+	font-size: 50px;
+}
+.choose-eco-section .holder {
+	width: 100%;
+	height: auto;
+}
+.choose-eco-section .holder .frame {
+	margin: 20px 0 0 0;
+}
+.choose-eco-section .holder .text-box {
+	padding: 40px 0 0 0;
+}
+.post-news-row.news.home-3::before {
+	display: none;
+}
+.post-news-row.news.home-3 {
+	margin: 0;
+}
+.causes-style-2 {
+	margin: 0;
+}
+.post-news-row.home-3 {
+	margin: 0;
+}
+.welcome-row {
+	margin-bottom: 60px;
+}
+.welcome-tab .nav-tabs li {
+	padding: 0 0 0 5px;
+}
+.about-section .why-choose {
+	margin-bottom: 0;
+}
+.about-video-row .text-box {
+	width: 100%;
+	padding: 0 20px;
+	margin: 0;
+}
+.about-video-box .modal-dialog {
+	width: 100%;
+	margin: 40px 0 0 0;
+	padding: 0 25px;
+}
+.about-video-box .modal-body iframe {
+	height: 329px !important;
+}
+.about-video-box {
+	padding: 100px 0;
+}
+.about-video-row {
+	margin-bottom: 40px;
+}
+.think-row {
+	margin: 0;
+}
+.donation-form-row.donation-form-2 .call-action-box {
+	padding: 80px 0;
+}
+.blog-post .video-frame iframe {
+	height: 353px !important;
+}
+.pagination-box {
+	margin: 0 0 20px 0;
+}
+.recent-post ul li {
+	overflow: hidden;
+}
+.list-box::before {
+	display: none;
+}
+.list-box {
+	margin: 0 0 40px 0;
+}
+.blockquote-outer {
+	padding: 0 0 0 20px;
+}
+.comment-box {
+	margin: 0;
+}
+.blog-list .text-box {
+	margin: 0 0 30px 0;
+	padding: 0;
+}
+.blog-list.blog-post .frame {
+	margin-bottom: 20px;
+}
+.blog-list.blog-post .pagination-box {
+	margin: 20px 0 30px 0;
+}
+.causes-style-2.causes-2-col .causes-progress {
+	margin-bottom: 40px;
+}
+.causes-style-2 .donation-row {
+	height: auto;
+}
+.donors-list ul li strong.title {
+	width: 370px;
+}
+.causes-list .frame {
+	width: 100%;
+}
+.causes-list .outer {
+	margin: 0;
+	width: 100%;
+}
+.comingsoon-section .holder {
+	width: 100%;
+}
+.comingsoon-section {
+	padding: 100px 0;
+}
+.address-box {
+	margin-bottom: 40px;
+}
+.contact-map-box .map_canvas {
+	height: 350px;
+}
+.contact-section {
+	margin-bottom: 40px;
+}
+.error-page {
+	margin-bottom: 40px;
+}
+.cp-gallery-metro-2 .isotope .item.width2 {
+	width: 100%;
+}
+.cp-gallery-metro-2 .isotope .item.height2 {
+	height: auto;
+}
+.cp-gallery-metro-2 .isotope .item {
+	margin: 0;
+}
+.cp-gallery-metro-2 .isotope .item {
+	height: auto;
+	width: 100%;
+}
+.cp-gallery .container-fluid {
+	padding: 0 15px;
+}
+.cp-gallery-metro-1 .isotope .item {
+	width: 100%;
+	height: auto;
+}
+.cp-gallery-metro-1 .isotope .item.width2 {
+	width: 100%;
+}
+.cp-gallery-metro-1 .isotope .item.width2 img, .cp-gallery-metro-1 .isotope .item.height2 img, .cp-gallery-metro-1 .isotope .item.height2 {
+	height: auto;
+}
+.news-page .news-box .post-box .frame {
+	margin-bottom: 20px;
+}
+.news-page .post-box {
+	margin: 0 0 10px 0;
+}
+.news-timeline-box .text-box {
+	width: 100%;
+	height: auto;
+	padding: 0 15px 20px 15px;
+}
+.news-timeline-box strong.date:before, .news-timeline-box strong.date:after {
+	display: none;
+}
+.news-timeline-box .text-box .thumb {
+	margin: 20px 0 0 0;
+}
+.news-timeline-box .text-box .holder {
+	width: 310px;
+}
+.news-timeline-box strong.date {
+	width: 100%;
+	border-radius: 0;
+	margin: 0;
+}
+.news-timeline-box {
+	margin-bottom: 40px;
+}
+.news-timeline {
+	margin: 0;
+}
+.news-timeline-box .text-box:before, .news-timeline-box .text-box:after {
+	display: none;
+}
+.project-large .center-box .frame {
+	margin: 0;
+}
+.project-list .project-row .project-box .text-box {
+	width: 100%;
+	margin: 0;
+}
+.features-section-2:before {
+	display: none;
+}
+.team-style-2.margin-none .pagination-box {
+	margin: 20px 0 40px 0;
+}
+.team-style-2 .box {
+	margin-bottom: 25px;
+}
+.testo-page.testimonials-team-section .item {
+	margin: 0 10px;
+}
+.testimonials-style-1 .fa {
+	display: none;
+}
+.testimonials-team-section.testo-page {
+	margin: 0;
+}
+.volunteer-form .text-box {
+	margin: 0 0 30px 0;
+}
+.volunteer-form {
+	margin-bottom: 40px;
+}
+.call-action-section .holder {
+	background-size: cover;
+}
+.blog-post blockquote .fa {
+	left: -25px;
+}
+}
+
+/*===========================================================================*/
+							/*480px CSS*/
+/*===========================================================================*/
+@media (min-width: 320px) and (max-width: 480px) {
+.about-video-row .text-box {
+	width: 100%;
+	margin: 0;
+	padding: 0 15px;
+}
+.team-style-1 .box {
+	min-height: auto;
+}
+.inner-banner .breadcrumb > li + li:before {
+	padding: 0;
+}
+.volunteer-form .text-box {
+	margin: 0 0 30px 0;
+}
+.volunteer-form {
+	margin-bottom: 40px;
+}
+#banner.banner-style-2 .caption {
+	top: 7px;
+}
+.testo-page.testimonials-team-section .item {
+	margin: 0;
+}
+.testimonials-style-1 .fa {
+	display: none;
+}
+.testo-page.testimonials-team-section .testimonials-style-1 {
+	margin: 0;
+}
+.testimonials-team-section.testo-page {
+	margin: 0;
+}
+.testimonials-style-2.testo-page h2 {
+	font-size: 34px;
+}
+.team-style-2 .box {
+	margin-bottom: 25px;
+}
+.team-style-2.margin-none .pagination-box {
+	margin: 20px 0 40px 0;
+}
+.features-section-2:before {
+	display: none;
+}
+.project-small .project-row .project-box {
+	margin-bottom: 20px;
+}
+.project-list .project-row .project-box .text-box {
+	width: 100%;
+	margin: 0;
+}
+.project-row .project-box .text-box h3 {
+	font-size: 17px;
+}
+.project-list .project-row .project-box {
+	margin-bottom: 30px;
+}
+.recent-project .center-box .frame .caption {
+	padding: 15px 30px;
+}
+.project-large .center-box .frame {
+	margin: 0;
+}
+.recent-project .post-box .text-box h3 {
+	font-size: 16px;
+	margin: 0 0 10px 0;
+}
+.news-timeline-box .text-box:before, .news-timeline-box .text-box:after {
+	display: none;
+}
+.news-timeline-box .text-box {
+	width: 100%;
+	height: auto;
+	padding: 0 15px 20px 15px;
+}
+.news-timeline .btn-row {
+	margin-bottom: 30px;
+}
+.news-timeline {
+	margin: 0;
+}
+.news-timeline-box .text-box .holder h3 {
+	font-size: 20px;
+}
+.news-timeline-box .text-box a.link {
+	font-size: 13px;
+	padding: 0 14px 10px 0;
+}
+.news-timeline-box strong.date:before, .news-timeline-box strong.date:after {
+	display: none;
+}
+.news-timeline-box strong.date {
+	width: 100%;
+	border-radius: 0;
+	margin: 0;
+}
+.news-timeline-box {
+	margin-bottom: 40px;
+}
+.news-timeline-box .text-box .holder {
+	width: 100%;
+}
+.news-timeline-box .text-box .thumb {
+	margin: 20px 0 0 0;
+	float: left;
+	width: 100%;
+}
+.news-timeline-box .text-box .thumb img {
+	width: 100%;
+}
+.signup .holder {
+	width: 100%;
+}
+.signup {
+	margin-bottom: 40px;
+}
+.cp-gallery .container-fluid {
+	padding: 0 15px;
+}
+.cp-gallery-metro-1 .isotope .item {
+	width: 100%;
+	height: auto;
+}
+.cp-gallery-metro-1 .isotope .item.width2 {
+	width: 100%;
+}
+.cp-gallery-metro-1 .isotope .item.width2 img, .cp-gallery-metro-1 .isotope .item.height2 img, .cp-gallery-metro-1 .isotope .item.height2 {
+	height: auto;
+}
+.cp-gallery-metro-2 .isotope .item.width2 {
+	width: 100%;
+}
+.cp-gallery-metro-2 .isotope .item.height2 {
+	height: auto;
+}
+.cp-gallery-metro-2 .isotope .item {
+	margin: 0;
+}
+.cp-gallery-metro-2 .isotope .item {
+	height: auto;
+	width: 100%;
+}
+.gallery-section .frame .caption .holder h3 {
+	font-size: 16px;
+}
+.gallery-section .frame {
+	margin-bottom: 30px;
+}
+.event-section .outer {
+	padding: 0;
+}
+.event-section .text-box {
+	margin-bottom: 30px;
+}
+.event-section .pagination-box {
+	margin: 0px 0 30px 0;
+}
+.event-section a.btn-readmore {
+	margin: 0 14px 0 0;
+	font-size: 12px;
+	line-height: 12px;
+}
+.donation-section form ul li {
+	margin: 0 28px 10px 0;
+}
+.donation-section form ul {
+	margin: 0 0 20px 0;
+}
+.form-row input[type="submit"] {
+	margin: 0;
+}
+.donation-section h2 {
+	font-size: 29px;
+}
+.error-page .holder {
+	width: 100%;
+}
+.error-page .holder h1 {
+	font-size: 150px;
+}
+.error-page .holder span {
+	font-size: 70px;
+	margin-bottom: 10px;
+}
+.error-page .holder p {
+	margin-bottom: 20px;
+}
+.error-page {
+	margin-bottom: 40px;
+}
+.address-box {
+	margin-bottom: 30px;
+}
+.contact-map-box .map_canvas {
+	height: 300px;
+}
+.contact-section {
+	margin-bottom: 40px;
+}
+.comingsoon-section .holder {
+	width: 100%;
+}
+.comingsoon-section .holder h1 {
+	font-size: 36px;
+}
+.comingsoon-section {
+	padding: 100px 0;
+}
+.causes-list .frame {
+	width: 100%;
+}
+.causes-list .outer {
+	margin: 0;
+	width: 100%;
+}
+.causes-style-2 .donation-row {
+	height: auto;
+	padding: 50px 15px 50px;
+	margin: -75px 0 30px;
+}
+.donors-list ul li span.number {
+	width: 100%;
+	border-right: 0;
+	border-bottom: 1px solid #ccc;
+}
+.donors-list ul li strong.title {
+	width: 100%;
+	border-right: 0;
+	border-bottom: 1px solid #ccc;
+	text-align: center;
+}
+.donors-list ul li strong.amount {
+	width: 100%;
+	text-align: center;
+	padding: 14px 0;
+}
+.causes-style-2 .progress-box strong.number {
+	font-size: 16px;
+}
+.progress-box sup {
+	font: 12px;
+	top: 9px;
+}
+.progress-box span {
+	font-size: 11px;
+	line-height: 11px;
+}
+.progress-box {
+	padding: 0 0 0 12px;
+}
+.causes-style-2.causes-2-col .causes-progress {
+	margin-bottom: 50px;
+}
+.inner-banner .breadcrumb > li, .inner-banner .breadcrumb > li a {
+	font-size: 12px;
+}
+.space-col {
+	padding: 0 10px;
+}
+.blog-list .text-box {
+	margin: 0 0 30px 0;
+	padding: 0;
+}
+.blog-list.blog-post .frame {
+	margin-bottom: 20px;
+}
+.blog-list.blog-post .pagination-box {
+	margin: 20px 0 30px 0;
+}
+.list-box {
+	padding: 0;
+}
+.share-post strong.title {
+	display: block;
+	padding: 0 0 10px 0;
+	float: none;
+}
+.list-box {
+	margin: 0;
+}
+.share-post ul li {
+	padding: 0 4px 0 0;
+}
+.share-post {
+	margin: 0 0 20px 0;
+}
+.comment-box h2 {
+	font-size: 27px;
+}
+.comment-box {
+	margin: 0;
+}
+.list-box:before {
+	display: none;
+}
+.blockquote-outer {
+	padding: 0 0 0 15px;
+}
+.blog-post .video-frame iframe {
+	height: 300px !important;
+}
+.link-post a.link {
+	font-size: 18px;
+}
+.pagination-box {
+	margin: 0 0 40px 0;
+}
+.recent-post ul li {
+	overflow: hidden;
+}
+.about-video-box {
+	padding: 100px 0;
+}
+.about-video-box .modal-dialog {
+	width: 100%;
+	padding: 0 20px;
+	margin: 30px 0 0 0;
+}
+.about-video-box .modal-body iframe {
+	height: 300px !important;
+}
+.about-video-row {
+	margin-bottom: 30px;
+}
+.think-row {
+	margin: 0;
+}
+.inner-banner h1 {
+	font-size: 33px;
+	line-height: 36px;
+	margin: 0;
+}
+.inner-banner {
+	padding: 80px 0;
+	height: auto;
+	background-size: cover;
+	position: relative;
+	margin: 0 0 50px 0;
+}
+.inner-banner .breadcrumb {
+	position: absolute;
+	bottom: -23px;
+	left: 0;
+	right: 0;
+	margin: auto;
+	padding: 10px 13px;
+}
+.welcome-frame-1:before {
+	display: none;
+}
+.welcome-frame-1 {
+	width: 100%;
+	margin-bottom: 30px;
+}
+.welcome-frame-1 img, .welcome-frame-2 img {
+	width: 100%;
+}
+.welcome-frame-2 {
+	width: 100%;
+	margin: 0;
+}
+.list li {
+	position: relative;
+	padding: 0 0 0 20px;
+}
+.welcome-row {
+	margin: 0 0 40px 0;
+}
+.welcome-tab .tab-box h3 {
+	font-size: 20px;
+}
+.about-section .why-choose {
+	margin: 0;
+}
+.team-style-2 {
+	margin: 0;
+}
+.topbar .right-box a.btn-donate {
+	width: 100%;
+	text-align: center;
+}
+.header-style-2 .topbar .container-fluid, .header-style-2 .navigation-row .container-fluid {
+	padding: 0 15px;
+}
+.header-style-2.nav-style-3 .topbar .topbar-social ul li {
+	padding: 15px 7px;
+}
+.navigation-row.nav-style-3 {
+	margin: 0;
+}
+.header-style-2.nav-style-3 a.btn-volunteer {
+	width: 100%;
+}
+.header-style-2.nav-style-3 .navigation-row .navbar-collapse {
+	width: 100%;
+}
+.header-style-2.nav-style-3 .navigation-row .navbar {
+	margin: 0;
+}
+#banner-style-3 {
+	height: auto;
+	background-size: cover;
+}
+#banner-style-3 img {
+	width: 100%;
+}
+#banner-style-3 .caption {
+	top: 40px;
+}
+#banner-style-3 .caption .holder {
+	width: 100%;
+}
+#banner-style-3 .caption .holder h1 {
+	font-size: 30px;
+	line-height: 30px;
+}
+#banner-style-3 .caption .holder h2 {
+	font-size: 20px;
+	line-height: 20px;
+}
+#banner-style-3 .caption .holder a.btn-style-1 {
+	margin: 0 5px 5px 0;
+	font-size: 14px;
+	line-height: 14px;
+	padding: 14px 24px;
+}
+.urgent-donation.home-3 {
+	margin: 40px 0;
+}
+.home-3 .donation-head h2 {
+	font-size: 25px;
+}
+.choose-eco-section .holder {
+	width: 100%;
+	height: auto;
+}
+.choose-eco-section .holder .frame {
+	margin: 20px 0 0 0;
+}
+.choose-eco-section .holder .text-box {
+	padding: 40px 0 0 0;
+}
+.choose-eco-section .holder .text-box h2 {
+	font-size: 30px;
+}
+.post-news-row.news.home-3::before {
+	display: none;
+}
+.post-news-row.news.home-3 {
+	margin-bottom: 0;
+}
+.causes-progress {
+	margin: 0 0 50px 0;
+}
+.causes-style-2 .outer .box .text-box h3 {
+	font-size: 18px;
+}
+.causes-style-2 {
+	margin: 0;
+}
+.upcoming-event-box .frame .caption {
+	display: none;
+}
+.post-news-row.home-3 {
+	margin: 0;
+}
+.header-style-2 .topbar .topbar-social ul li {
+	padding: 15px 9px;
+}
+.header-style-2 .topbar .topbar-social ul li a {
+	font-size: 12px;
+}
+.header-style-2 .navigation-row a.btn-donate {
+	width: 100%;
+	text-align: center;
+	margin: 10px 0 0 0;
+}
+.header-style-2 .navigation-row .navbar {
+	padding: 0;
+}
+.header-style-2 .navigation-row .navbar-toggle {
+	margin-right: 0;
+}
+.features-section {
+	margin: 0 0 30px 0;
+}
+#banner.banner-style-2 .caption span.logo-icon {
+	display: none;
+}
+#banner.banner-style-2 .caption .holder h1 {
+	font-size: 20px;
+	line-height: 20px;
+	margin: 0;
+}
+#banner.banner-style-2 .caption .holder h2 {
+	margin-bottom: 6px;
+}
+#banner.banner-style-2 .btn-row {
+	margin: 0;
+}
+#banner.banner-style-2 .caption .holder a.btn-style-1 {
+	font-size: 13px;
+	line-height: 13px;
+	padding: 10px 18px;
+}
+#banner.banner-style-2 .caption .holder a.btn-style-2 {
+	padding: 8px 18px;
+}
+.header-style-2 .navigation-row {
+	padding: 30px 0 0 0;
+}
+.header-style-2 .topbar .left-box ul li, .topbar .left-box ul li:first-child {
+	border: 0;
+}
+.header-style-2 .topbar .right-box {
+	border-top: 1px solid #ccc;
+}
+.welcome-tab {
+	margin: 0;
+}
+.welcome-tab .tab-box {
+	padding: 30px 0 0 0;
+}
+.welcome-tab .tab-box .nav {
+	text-align: center;
+}
+.welcome-tab .nav-tabs li {
+	float: none;
+	display: inline-block;
+	padding: 0;
+	margin: 0 3px 5px 3px;
+}
+.welcome-tab .tab-box .nav-tabs > li > a {
+	font-size: 13px;
+	line-height: 13px;
+	padding: 12px 20px;
+}
+.list li::before {
+	position: absolute;
+	left: 0;
+}
+.welcome-tab .tab-box .list li {
+	position: relative;
+	padding: 0 0 7px 20px;
+}
+.welcome-tab .tab-box .list {
+	margin-bottom: 20px;
+}
+.news-box .post-box .frame {
+	margin-bottom: 20px;
+}
+.post-news-row.news {
+	margin: 0;
+}
+.call-action-section .holder .text-col h2 {
+	font-size: 30px;
+	margin: 0 0 10px 0;
+}
+.call-action-section .holder a.btn-style-2 {
+	padding: 18px 0;
+	text-align: center;
+	width: 100%;
+}
+.call-action-section, .timeline-section {
+	margin-bottom: 40px;
+}
+.recent-project .center-box {
+	margin-bottom: 30px;
+}
+.donation-progress-box {
+	position: static;
+	width: 100%;
+	height: auto;
+	background-size: cover;
+	margin-bottom: 25px;
+	padding: 70px 10px 20px 29px;
+}
+.donation-style-2 .holder::before {
+	display: none;
+}
+.donation-style-2 .holder {
+	width: 100%;
+	height: auto;
+	background-size: cover;
+	padding: 0 20px;
+}
+.donation-style-2 .holder .left-box {
+	width: 100%;
+}
+.donation-style-2 .holder .left-box .round-box {
+	float: none;
+	display: block;
+	margin: 0 auto 20px;
+}
+.donation-style-2 .holder .left-box .round-box .progress-box {
+	width: 100%;
+	text-align: center;
+}
+.donation-progress-box .donation-progress .progress-outer {
+	width: 100%;
+}
+.donation-progress-box .btn-row {
+	margin: 0;
+}
+.recent-project.post-news-row {
+	margin: 0;
+}
+.donation-style-2 {
+	margin-bottom: 40px;
+}
+.donation-form-row.donation-form-2 .donation-form, .donation-form-row.donation-form-2 .call-action-box {
+	width: 100%;
+}
+.donation-form-row.donation-form-2 .donation-form .holder {
+	width: 100%;
+	padding: 0 15px;
+}
+.donation-form-row.donation-form-2 .call-action-box .holder {
+	width: 100%;
+	margin: 0;
+	padding: 0 15px;
+}
+.donation-form-row.donation-form-2 .call-action-box {
+	padding: 40px 0;
+}
+.event-counter-box, .upcoming-event-section:before {
+	display: none;
+}
+.upcoming-event-section {
+	margin-bottom: 40px;
+}
+.recent-post-style-2 .box {
+	margin-bottom: 30px;
+}
+.recent-post-style-2 {
+	margin: 0;
+}
+.exeutive-section .empty-section {
+	display: none;
+}
+.executive-message-box-2 .message-box {
+	margin: 0;
+}
+.executive-message-box-2 {
+	width: 100%;
+	height: auto;
+}
+.testimonials-style-2 {
+	margin: 0 0 40px 0;
+	padding: 0 15px;
+}
+.testimonials-style-2 .holder {
+	width: 100%;
+	height: auto;
+	float: left;
+}
+.testimonials-style-2 .holder .bx-wrapper {
+	margin: 0;
+}
+.testimonials-style-2 p {
+	margin: 50px 0 20px 0;
+}
+.testimonials-style-2 .text-box {
+	margin: 30px 0 0 0;
+}
+.testimonials-style-2 #bx-pager {
+	position: static;
+	margin: 20px 0 0 0;
+	text-align: center;
+}
+.testimonials-style-2 #bx-pager a {
+	display: inline-block;
+	margin: 5px 3px;
+}
+.exeutive-facts-box {
+	width: 100%;
+}
+.features-section .box .text-col {
+	float: left;
+	padding: 20px 0 0 0;
+}
+.topbar .left-box ul {
+	text-align: center;
+}
+.topbar .left-box ul li {
+	float: none;
+	display: inline-block;
+	border: 0;
+	padding: 8px 0;
+}
+.topbar .left-box ul li:first-child {
+	padding: 8px 0;
+}
+.topbar .left-box .dropdown-menu {
+	top: 100%;
+}
+.topbar .left-box {
+	margin-bottom: 20px;
+}
+.topbar .right-box {
+	width: 100%;
+}
+strong.logo {
+	margin: 0;
+	text-align: center;
+	margin: 0 auto 15px;
+	width: 100%;
+}
+.navigation-row .navbar {
+	padding: 0;
+	width: 100%;
+	margin-bottom: 5px;
+}
+#nav li {
+	display: block;
+	float: none;
+}
+#nav {
+	width: 100%;
+}
+#nav li ul {
+	position: static;
+	width: 100%;
+}
+#nav li ul li > ul {
+	position: static;
+	width: 100%;
+	padding: 0 10px;
+}
+.shop-box {
+	width: 100%;
+}
+.cp-search-holder {
+	float: right;
+}
+.cp-search-inner {
+	width: 100%;
+	padding: 200px 10px 0 10px;
+}
+.cart-box-outer .dropdown-menu {
+	min-width: 300px;
+	right: inherit;
+	top: 100%;
+}
+#banner .caption {
+	top: 10px;
+}
+#banner .caption .holder {
+	width: 100%;
+}
+#banner .caption .holder h1 {
+	font-size: 20px;
+}
+#banner .caption .holder h2 {
+	font-size: 15px;
+	margin-bottom: 10px;
+}
+#banner .caption .holder a.btn-style-1 {
+	font-size: 14px;
+	line-height: 14px;
+	padding: 12px 20px;
+}
+#banner .caption .holder a.btn-style-2 {
+	font-size: 14px;
+	line-height: 14px;
+	padding: 10px 20px;
+}
+#banner {
+	margin-bottom: 40px;
+}
+.chose-heading {
+	width: 100%;
+	margin: 0 0 0 0;
+}
+.chose-heading h2 {
+	font-size: 26px;
+	text-align: center;
+}
+.why-choose-box-row .col-md-4 {
+	border: 0;
+}
+.why-choose-box {
+	min-height: auto;
+	padding: 20px;
+}
+.why-choose p {
+	text-align: center;
+}
+.why-choose-box-row {
+	margin: 0;
+}
+.priorities .box, .priorities .owl-carousel {
+	width: 100%;
+}
+.priorities {
+	margin-bottom: 20px;
+}
+.project-section {
+	margin: 0;
+}
+.project-section .holder {
+	width: 100%;
+	padding: 40px 0;
+}
+.project-row .project-box {
+	margin: 0;
+}
+.project-row, .urgent-donation {
+	margin-bottom: 20px;
+	padding: 0 15px;
+}
+.donation-head {
+	padding: 30px 20px;
+	width: 100%;
+	margin-bottom: 20px;
+}
+.donation-head h2 {
+	font-size: 28px;
+}
+.donation-row {
+	width: 100%;
+	margin: 0 auto 0;
+	padding: 30px 0;
+	height: auto;
+}
+.progress-box {
+	margin-bottom: 30px;
+}
+.donation-progress {
+	margin: 25px 0;
+}
+.donation-row .btn-row {
+	margin: 0;
+}
+.donation-form-row .donation-form, .donation-form-row .donation-form .holder {
+	width: 100%;
+}
+.donation-form-row .donation-form .holder {
+	padding: 0 20px;
+}
+.donation-form-row:hover .donation-form .holder, .donation-form-row:hover .call-action-box .holder {
+	margin: 0;
+}
+.donation-count {
+	width: 100%;
+	padding: 10px;
+}
+.count-box {
+	width: 100%;
+	border: 0;
+	padding: 15px 0;
+}
+.call-action-box {
+	width: 100%;
+	padding: 25px 15px;
+}
+.call-action-box .holder {
+	width: 100%;
+	margin: 0;
+}
+.call-action-box .holder h2 {
+	font-size: 30px;
+	line-height: 30px;
+}
+.call-action-box .holder a.btn-style-1 {
+	padding: 13px 20px;
+	margin: 0 10px 10px 0;
+}
+.call-action-box .holder a.btn-style-2 {
+	padding: 11px 20px;
+}
+.post-news-row .left-box a.btn-readmore.space {
+	margin: 15px 0;
+}
+.donation-form-row {
+	margin-bottom: 30px;
+}
+.post-news-row .left-box a.btn-readmore {
+	margin: 0 0 10px 0;
+}
+.post-news-row .left-box .owl-prev, .post-news-row .left-box .owl-next {
+	top: 52px;
+}
+.post-box .frame {
+	margin-bottom: 20px;
+}
+.post-box .text-box h3 {
+	font-size: 18px;
+	line-height: 25px;
+	margin-bottom: 15px;
+}
+.post-box .text-box a.link {
+	padding: 0 12px 10px 0;
+}
+.post-news-row .left-box, .news-box {
+	margin-bottom: 20px;
+}
+.post-news-row:before {
+	display: none;
+}
+.post-news-row {
+	margin: 0;
+}
+.heading-center h2 {
+	font-size: 32px;
+}
+.sc-noo-event-slider-wrap .swiper-slide-active .item-thumb {
+	height: 280px !important;
+}
+.attend-event .heading-center {
+	margin-bottom: 40px;
+}
+.sc-noo-event-slider-wrap .swiper-slide-active .wrap {
+	padding: 0 10px;
+}
+.sc-noo-event-slider-wrap .swiper-paging, .attend-event:before {
+	display: none;
+}
+.attend-event a.btn-readmore {
+	margin: 0 10px 10px 0;
+}
+.attend-event {
+	margin: 0;
+}
+.sc-noo-event-slider-wrap .swiper-container {
+	padding-bottom: 0 !important;
+}
+.testimonials-team-section {
+	position: relative;
+	z-index: 9;
+}
+.sc-noo-event-slider-wrap .swiper-slide-active .wrap h3 {
+	font-size: 20px !important;
+	margin-bottom: 15px !important;
+}
+.testimonials-team-section h2 {
+	font-size: 32px;
+}
+.testimonials-outer {
+	padding: 0;
+}
+.testimonials-style-1 .fa {
+	left: -28px;
+}
+.testimonials-style-1 {
+	margin-bottom: 30px;
+}
+.team-section .owl-prev, .team-section .owl-next {
+	top: -61px;
+}
+.testimonials-team-section a.btn-readmore {
+	margin: 0 0 10px 0;
+}
+.testimonials-team-section .item {
+	margin: 0;
+}
+.team-section {
+	margin-bottom: 30px;
+}
+.testimonials-style-1 .owl-pagination {
+	left: -62px;
+	bottom: -28px;
+}
+.exeutive-section .video-box {
+	padding: 100px 0;
+	height: auto;
+}
+.message-box {
+	width: 100%;
+	margin: 0;
+	padding: 20px 15px;
+}
+.message-box h2 {
+	font-size: 30px;
+	line-height: 30px;
+}
+.exeutive-section .video-box .modal-dialog {
+	width: 100%;
+	margin: 50px 0 0 0;
+	padding: 0 15px;
+}
+.exeutive-section .video-box .modal-body iframe {
+	height: 200px !important;
+}
+.supporters-section {
+	margin-bottom: 40px;
+}
+.exeutive-section {
+	margin-bottom: 180px;
+}
+.supporters-section .holder ul li {
+	width: 100%;
+	text-align: center;
+	padding: 20px 0;
+	border: 0;
+}
+.newsletter {
+	margin: 0 0 20px 0;
+	padding: 0 20px;
+}
+.newsletter .holder {
+	width: 100%;
+}
+.newsletter .holder strong.title {
+	font-size: 16px;
+	line-height: 20px;
+	padding-bottom: 20px;
+}
+.newsletter .holder input[type="text"], .footer-section-2 address {
+	margin-bottom: 10px;
+}
+.footer-section-1 {
+	padding: 40px 0 0 0;
+}
+.footer-section-1 .box {
+	margin-bottom: 30px;
+}
+.services-widget ul li a, .recent-post-widget .text-col a.title, .recent-post-widget .text-col span.date {
+	color: #fff;
+}
+.footer-section-3 {
+	padding: 10px 0 20px 0;
+}
+.footer-menu ul {
+	text-align: center;
+}
+.footer-menu ul li {
+	float: none;
+	display: inline-block;
+	padding: 0 3px;
+}
+.footer-menu ul li a {
+	font-size: 13px;
+}
+.footer-section-3 strong.copyrights {
+	display: block;
+	text-align: center;
+	padding: 15px 0 0 0;
+}
+.footer-section-1:before {
+	width: 100%;
+	display: none;
+}
+.instagram ul {
+	margin: 0;
+}
+.btn-row {
+	margin: 20px 0 0 0;
+}
+.news-page .news-box .post-box .frame {
+	margin-bottom: 20px;
+}
+.news-page .post-box {
+	margin: 0 0 10px 0;
+}
+}
+
+
+
+/*===========================================================================*/
+						/*768px And 992px CSS*/
+/*===========================================================================*/
+@media (min-width: 768px) and (max-width: 992px) {
+.topbar .right-box {
+	width: 100%;
+}
+.team-style-1 .box {
+	min-height: auto;
+}
+.call-action-section .holder {
+	background-size: cover;
+}
+.news-timeline-box .text-box {
+	width: 100%;
+	height: auto;
+	padding: 0 15px 20px 15px;
+}
+.volunteer-form .text-box {
+	margin: 0;
+}
+.volunteer-form {
+	margin-bottom: 40px;
+}
+.why-choose .priorities {
+	margin-bottom: 150px;
+}
+.testimonials-team-section.testo-page .testimonials-outer {
+	padding: 0;
+}
+.testimonials-team-section.testo-page .testimonials-style-1 {
+	padding: 20px 10px 22px 30px;
+}
+.testimonials-team-section.testo-page {
+	margin: 0;
+}
+.features-section-2:before {
+	display: none;
+}
+.project-section.project-small .project-box .text-box {
+	min-height: auto;
+}
+.project-section.project-small {
+	margin: 0;
+}
+.project-list .project-row .project-box .text-box {
+	margin: 0;
+	width: 100%;
+}
+.news-timeline-box .text-box .thumb {
+	margin: 20px 0 0 0;
+	float: left;
+}
+.news-timeline-box strong.date:before, .news-timeline-box strong.date:after {
+	display: none;
+}
+.news-timeline-box strong.date {
+	margin: 0;
+	width: 100%;
+	border-radius: 0;
+}
+.news-timeline-box {
+	margin-bottom: 40px;
+}
+.news-timeline {
+	margin: 0 0 40px 0;
+}
+.news-timeline-box .text-box .holder {
+	width: 100%;
+}
+.gallery-section .frame .caption .holder h3 {
+	font-size: 20px;
+}
+.news-page .news-box .post-box .frame {
+	margin-bottom: 20px;
+}
+.news-page .post-box {
+	margin: 0 0 10px 0;
+}
+.cp-gallery .container-fluid {
+	padding: 0 15px;
+}
+.news-medium .news-box .post-box .frame {
+	margin-bottom: 25px;
+}
+.news-medium .news-box .post-box h3 {
+	font-size: 19px;
+}
+.cp-gallery-metro-1 .isotope .item {
+	width: 100%;
+	height: auto;
+}
+.cp-gallery-metro-1 .isotope .item.width2 {
+	width: 100%;
+}
+.cp-gallery-metro-1 .isotope .item.width2 img, .cp-gallery-metro-1 .isotope .item.height2 img, .cp-gallery-metro-1 .isotope .item.height2 {
+	height: auto;
+}
+.cp-gallery-metro-2 .isotope .item {
+	height: auto;
+	margin: 0;
+}
+.gallery-section .cp-gallery-metro-2 .frame {
+	margin: 0 0 20px 0;
+}
+.cp-gallery-metro-2 .isotope .item.height2 {
+	height: auto;
+}
+.list-box:before {
+	display: none;
+}
+.event-small h3 {
+	font-size: 13px;
+}
+.comingsoon-section .holder {
+	width: 100%;
+}
+.comingsoon-section {
+	padding: 100px 0;
+}
+.causes-list .frame {
+	width: 100%;
+}
+.causes-list .outer {
+	margin: 0;
+	width: 100%;
+}
+.causes-style-2 .donation-row {
+	height: auto;
+}
+.causes-style-2 .progress-box strong.number {
+	font-size: 17px;
+}
+.progress-box sup {
+	font-size: 13px;
+	top: -9px;
+}
+.causes-style-2 .donation-row {
+	padding: 60px 15px 40px;
+}
+.donors-list ul li strong.title {
+	width: 220px;
+}
+.donors-list ul li strong.amount {
+	width: 147px;
+}
+.progress-box span {
+	font-size: 12px;
+}
+.progress-box {
+	padding: 0 0 0 8px;
+}
+.blog-list .text-box {
+	margin: 0;
+	padding: 0;
+}
+.blog-list.blog-post .post-box {
+	min-height: auto;
+	margin-bottom: 30px;
+}
+.blog-list.blog-post .frame {
+	margin-bottom: 25px;
+}
+.blog-list.blog-post .pagination-box {
+	margin: 20px 0 30px 0;
+}
+.blog-post .post-box {
+	min-height: 482px;
+	margin-bottom: 30px;
+}
+.list-box {
+	margin: 0 0 40px 0;
+}
+.welcome-frame-2 {
+	margin: -25px -40px 0;
+	float: left;
+}
+.blog-post .video-frame iframe {
+	height: 274px !important;
+}
+.pagination-box {
+	margin: 0 0 50px 0;
+}
+.about-section .why-choose {
+	margin: 0 0 40px 0;
+}
+.team-style-2 .box:hover .text-box {
+	margin: 0;
+}
+.team-style-2 .text-box a.email {
+	font-size: 12px;
+	line-height: 12px;
+}
+.about-video-row .text-box {
+	width: 100%;
+	margin: 0;
+	padding: 0 20px;
+}
+.about-video-box {
+	background-size: cover;
+}
+.about-video-box .modal-dialog {
+	width: 100%;
+	margin: 50px 0 0 0;
+	padding: 0 20px;
+}
+.about-video-box .modal-body iframe {
+	height: 403px !important;
+}
+.about-video-row {
+	margin-bottom: 40px;
+}
+.think-row {
+	margin: 0;
+}
+.donation-form-row.donation-form-2 {
+	margin-bottom: 40px;
+}
+.about-section .team-style-1 {
+	margin: 0;
+}
+.team-style-2 .text-box span {
+	font-size: 13px;
+}
+.header-style-2.nav-style-3 .navigation-row #nav li a {
+	font-size: 12px;
+	padding: 0 15px;
+}
+.header-style-2.nav-style-3 a.btn-volunteer {
+	width: 100%;
+}
+#banner-style-3 {
+	height: auto;
+	background-size: cover;
+}
+#banner-style-3 img {
+	width: 100%;
+}
+#banner-style-3 .caption {
+	top: 100px;
+}
+.urgent-donation.home-3 {
+	padding: 0 15px;
+}
+.urgent-donation.home-3 {
+	margin-bottom: 60px;
+}
+.choose-eco-section .holder {
+	width: 100%;
+	height: auto;
+}
+.choose-eco-section {
+	padding: 0 15px;
+}
+.choose-eco-section .holder .frame {
+	margin: 20px 0 0 0;
+}
+.choose-eco-section .holder .text-box h2 {
+	font-size: 28px;
+}
+.home-3 .news-box .post-box .frame {
+	margin-bottom: 25px;
+}
+.post-news-row.news.home-3::before {
+	display: none;
+}
+.post-news-row.news.home-3 {
+	margin: 0;
+}
+.causes-style-2 {
+	margin: 0;
+}
+.causes-progress {
+	margin: 0 0 50px 0;
+}
+.post-news-row.home-3 {
+	margin: 0;
+}
+.home-3 .news-box {
+	margin: 0;
+}
+.exeutive-facts-box {
+	width: 390px;
+}
+.testimonials-outer {
+	float: left;
+	width: 100%;
+	margin: 0 0 30px 0;
+}
+.event-counter-box {
+	display: none;
+}
+.upcoming-event-section::before {
+	display: none;
+}
+.upcoming-event-section {
+	margin-bottom: 40px;
+}
+.recent-post-style-2 .box {
+	margin-bottom: 30px;
+}
+.recent-post-style-2 {
+	margin-bottom: 40px;
+}
+.exeutive-section .empty-section {
+	width: 378px;
+}
+.executive-message-box-2 {
+	width: 100%;
+	height: auto;
+	background-size: cover;
+}
+.executive-message-box-2 .message-box {
+	margin: 30px 0 30px 50px
+}
+.message-box h2 {
+	font-size: 30px;
+	line-height: 30px;
+}
+.testimonials-style-2 .holder {
+	width: 100%;
+	height: auto;
+}
+.testimonials-style-2 #bx-pager {
+	position: static;
+	text-align: center;
+	display: block;
+	float: none;
+}
+.testimonials-style-2 .holder .bx-wrapper {
+	margin: -60px 0 20px 0;
+}
+.team-style-2 .text-box h4 {
+	font-size: 16px;
+}
+.team-style-2 .box {
+	min-height: auto;
+	margin-bottom: 30px;
+}
+.donation-form-row.donation-form-2 .donation-form {
+	width: 100%;
+}
+.testimonials-style-2 #bx-pager a {
+	display: inline-block;
+}
+.testimonials-style-2 {
+	padding: 0 15px;
+}
+.topbar-social {
+	width: 100%;
+}
+.topbar-social ul {
+	text-align: center;
+}
+.topbar-social ul li {
+	float: none;
+	display: inline-block;
+}
+.post-news-row.news .news-box {
+	margin: 0;
+}
+.call-action-section .holder .text-col h2 {
+	font-size: 29px;
+	margin: 0 0 10px 0;
+}
+.post-news-row.news {
+	margin-bottom: 20px;
+}
+.call-action-section {
+	margin-bottom: 40px;
+}
+.timeline-section {
+	margin-bottom: 40px;
+}
+.recent-project .center-box .frame .caption {
+	padding: 20px;
+}
+.donation-style-2 .holder {
+	height: auto;
+	width: 100%;
+	padding: 0;
+}
+.donation-style-2 .holder .left-box .round-box .progress-box {
+	width: 100%;
+}
+.donation-style-2 .holder::before {
+	display: none;
+}
+.donation-progress-box {
+	position: static;
+	height: auto;
+	width: 100%;
+	padding: 70px 10px 15px 29px;
+	background-size: cover;
+}
+.donation-style-2 .holder .left-box {
+	width: 100%;
+	margin: 20px 0;
+	padding: 0 15px;
+}
+.donation-style-2 {
+	margin-bottom: 40px;
+}
+.donation-form-row.donation-form-2 .donation-form .holder {
+	float: left;
+	padding: 0 50px;
+}
+.donation-form-row.donation-form-2 .call-action-box {
+	width: 100%;
+	padding: 40px 0;
+}
+.header-style-2 .navigation-row .navbar {
+	width: 100%;
+	padding: 0;
+}
+.header-style-2 .topbar .container-fluid, .header-style-2 .navigation-row .container-fluid {
+	padding: 0 20px;
+}
+.header-style-2 .navigation-row .shop-box {
+	width: 100%;
+}
+.header-style-2 .navigation-row #nav {
+	width: 100%;
+}
+.header-style-2 #nav li a {
+	font-size: 14px;
+	padding: 0 11px;
+}
+.header-style-2 #nav li ul li a {
+	padding: 14px 10px;
+}
+.header-style-2 .topbar .left-box {
+	width: 100%;
+}
+.header-style-2 .topbar .left-box ul {
+	text-align: center;
+}
+.header-style-2 .topbar .left-box ul li {
+	float: none;
+	display: inline-block;
+	padding: 15px 25px;
+}
+.header-style-2 .cart-box-outer .dropdown-menu {
+	right: inherit;
+	top: 100%;
+}
+#banner.banner-style-2 .caption span.logo-icon {
+	display: none;
+}
+#banner.banner-style-2 .caption .holder h1 {
+	font-size: 30px;
+	line-height: 30px;
+}
+.features-section {
+	margin: -120px 0 30px 0;
+}
+.welcome-tab {
+	margin: 0 0 40px 0;
+}
+.welcome-tab .tab-box {
+	padding: 0;
+}
+.welcome-tab .nav-tabs li {
+	padding: 0 0 0 5px;
+}
+.welcome-tab .tab-box .nav-tabs > li > a {
+	font-size: 12px;
+	line-height: 12px;
+	padding: 12px 5px;
+}
+.welcome-tab .tab-box h3 {
+	font-size: 19px;
+}
+.topbar .left-box {
+	border-bottom: 1px solid #e1e1e1;
+}
+#nav li a {
+	font-size: 13px;
+	padding: 0 7px;
+}
+#nav li ul li > ul {
+	right: 100%;
+	left: inherit;
+}
+.cart-box-outer .dropdown-menu {
+	top: 67px;
+}
+strong.logo {
+	margin: 0 0 10px 0;
+	width: 100%;
+	text-align: center;
+}
+#banner .caption {
+	top: 30px;
+}
+#banner .caption .holder h1 {
+	font-size: 50px;
+	line-height: 50px;
+}
+#banner .caption .holder h2 {
+	margin-bottom: 20px;
+}
+.chose-heading {
+	margin: 0;
+	width: 100%;
+}
+.why-choose-box h3 {
+	font-size: 17px;
+}
+.priorities .owl-carousel {
+	width: 437px;
+}
+.priorities .box img {
+	margin: 0 10px 3px 0;
+}
+.priorities .box {
+	padding: 12px 30px;
+}
+.priorities .box p {
+	margin-bottom: 7px;
+}
+.project-section .holder {
+	width: 100%;
+}
+.donation-head {
+	width: 100%;
+}
+.urgent-donation {
+	padding: 0;
+}
+.donation-row {
+	width: 100%;
+	margin: 0 auto;
+	height: auto;
+	padding: 40px 0;
+}
+.donation-progress {
+	width: 93%;
+	margin: 25px 0;
+}
+.progress-box {
+	width: 25%;
+}
+.project-section, .urgent-donation, .exeutive-section, .supporters-section {
+	margin-bottom: 60px;
+}
+.donation-form-row:hover .donation-form .holder, .donation-form-row:hover .call-action-box .holder {
+	margin: 0;
+}
+.donation-form-row .donation-form {
+	width: 374px;
+}
+.donation-form-row .donation-form .holder {
+	padding: 0 20px;
+}
+.call-action-box {
+	width: 100%;
+	padding: 40px 0;
+}
+.call-action-box .holder {
+	width: 100%;
+	margin: 0;
+	padding: 0 50px;
+}
+.news-box {
+	margin-bottom: 25px;
+}
+.post-news-row:before, .attend-event:before {
+	display: none;
+}
+.post-news-row {
+	margin: 0;
+}
+.news-box .post-box .frame {
+	margin: 0;
+}
+.post-news-row.news .news-box .post-box .frame {
+	margin-bottom: 20px;
+}
+.attend-event {
+	margin: 0 0 -50px 0;
+	padding: 0 15px;
+}
+.sc-noo-event-slider-wrap .swiper-button-next, .sc-noo-event-slider-wrap .swiper-container-rtl .swiper-button-prev {
+	background: #fff !important;
+	right: 20px !important;
+}
+.sc-noo-event-slider-wrap .swiper-button-prev, .sc-noo-event-slider-wrap .swiper-container-rtl .swiper-button-next {
+	left: 20px !important;
+	background: #fff !important;
+}
+.sc-noo-event-slider-wrap .swiper-container {
+	padding-bottom: 20px !important;
+}
+.testimonials-team-section {
+	position: relative;
+	z-index: 9;
+	margin-bottom: 50px;
+}
+.exeutive-section .video-box {
+	padding: 100px 0;
+}
+.exeutive-section .video-box .modal-dialog {
+	width: 100%;
+	margin: 50px 0 0 0;
+	padding: 0 30px;
+}
+.exeutive-section .video-box .modal-body iframe {
+	height: 406px !important;
+}
+.message-box {
+	margin: 0;
+	width: 620px;
+}
+.supporters-section .holder ul li {
+	padding: 30px 58px;
+	width: 239px;
+}
+.supporters-section .holder ul li, .supporters-section .holder ul li {
+	border-bottom: 1px solid #ccc !important;
+}
+.newsletter .holder {
+	width: 100%;
+}
+.footer-section-1::before {
+	display: none;
+}
+.footer-section-1 .box {
+	margin-bottom: 25px;
+}
+.footer-section-2 address {
+	margin-bottom: 15px;
+}
+.footer-menu ul li {
+	padding: 0 20px 0 0;
+}
+.footer-section-3 strong.copyrights {
+	padding: 15px 0 0 0;
+}
+.post-news-row .left-box {
+	margin-bottom: 25px;
+}
+.causes-style-2.causes-2-col .outer .box .text-box h3 {
+	font-size: 19px;
+}
+.project-row .project-box .text-box {
+	min-height: 272px;
+}
+.project-section.project-medium {
+	margin: 0;
+}
+.donation-form-row .donation-form, .donation-count, .donation-form-row .donation-form {
+	width: 100%;
+}
+.count-box {
+	border: 0px;
+}
+}
+
+
+
+/*===========================================================================*/
+							/*1199px CSS*/
+/*===========================================================================*/
+@media (min-width: 993px) and (max-width: 1199px) {
+.donation-form-row .donation-form, .donation-count, .donation-form-row .donation-form, .donation-form-row .donation-form {
+	width: 100%;
+}
+.count-box {
+	border: 0px;
+}
+.cart-box-outer .dropdown-menu {
+	top: 67px;
+}
+.project-section.project-small .project-box .text-box {
+	min-height: auto;
+}
+.why-choose .priorities {
+	margin-bottom: 150px;
+}
+.project-section.project-small {
+	margin: 0;
+}
+.project-section.project-small .project-box .text-box h4 {
+	font-size: 15px;
+}
+.project-row .project-box .text-box h3 {
+	font-size: 20px;
+}
+.project-row .project-box .text-box {
+	min-height: 296px;
+}
+.project-section.project-medium {
+	margin: 0;
+}
+.project-list .project-row .project-box .text-box {
+	width: 393px;
+}
+.news-timeline-box .text-box {
+	width: 100%;
+}
+.news-timeline-box .text-box:before, .news-timeline-box .text-box:after {
+	display: none;
+}
+.news-timeline-box {
+	margin: 0;
+}
+.news-timeline-box strong.date {
+	margin: 35px 30px 20px 0;
+}
+.news-timeline-box strong.date:before {
+	display: none;
+}
+.news-timeline-box strong.date:after {
+	height: 17px;
+}
+.news-timeline .btn-row {
+	margin: 60px 0 0 0;
+	float: left;
+}
+.news-timeline {
+	margin: 0 0 40px 0;
+}
+.news-medium .news-box {
+	margin: 0;
+}
+.post-news-row.news-medium {
+	margin: 0;
+}
+.gallery-section .cp-gallery-metro-2 .frame {
+	margin: 0 0 0 0;
+}
+.cp-gallery-metro-2 .isotope .item {
+	height: auto;
+}
+.cp-gallery-metro-2 .isotope .item.height2 {
+	height: auto;
+}
+.header-style-2 .topbar .container-fluid, .header-style-2 .navigation-row .container-fluid {
+	padding: 0 30px;
+}
+.event-section .text-box {
+	min-height: 182px;
+}
+.blog-list.blog-post .post-box {
+	min-height: auto;
+}
+.causes-style-2 .donation-row {
+	height: 350px;
+}
+.donors-list ul li strong.title {
+	width: 400px;
+}
+.causes-list .frame {
+	width: 350px;
+}
+.causes-list .outer {
+	width: 378px;
+}
+.blog-list .text-box {
+	margin: 0;
+	padding: 0;
+}
+.blog-list .text-box h3 {
+	font-size: 20px;
+}
+.blog-post .post-box {
+	margin-bottom: 30px;
+	min-height: 527px;
+}
+.about-video-row .text-box {
+	width: 100%;
+	margin: 75px 0 0 0;
+	padding: 0 15px;
+}
+.blog-post .video-frame iframe {
+	height: 402px !important;
+}
+.about-video-row {
+	margin-bottom: 50px;
+}
+.think-row {
+	margin: 0;
+}
+.header-style-2.nav-style-3 .navigation-row #nav li a {
+	font-size: 13px;
+	padding: 0 14px;
+}
+.about-section .why-choose {
+	margin-bottom: 30px;
+}
+#banner-style-3 {
+	height: auto;
+	background-size: cover;
+}
+#banner-style-3 img {
+	width: 100%;
+}
+.urgent-donation.home-3 {
+	padding: 0 15px;
+}
+.urgent-donation.home-3 {
+	margin-bottom: 50px;
+}
+.choose-eco-section .holder {
+	width: 100%;
+	height: auto;
+}
+.choose-eco-section {
+	padding: 0 15px;
+}
+.choose-eco-section .holder .frame {
+	margin: 20px 0 0 0;
+}
+.causes-style-2 .outer .box .text-box h3 {
+	font-size: 20px;
+}
+.causes-style-2 {
+	margin: 0;
+}
+.causes-progress {
+	margin: 0 0 50px 0;
+}
+.header-style-2 .navigation-row #nav li ul li > ul {
+	left: inherit;
+	right: 100%;
+}
+.header-style-2 .cart-box-outer .dropdown-menu {
+	top: 100%;
+}
+#banner.banner-style-2 .caption .holder h1 {
+	font-size: 60px;
+	line-height: 60px;
+}
+#banner.banner-style-2 .caption {
+	top: 20px;
+}
+#banner.banner-style-2 .caption .holder h2 {
+	margin-bottom: 25px;
+}
+.features-section {
+	margin: -120px 0 60px 0;
+}
+.welcome-tab .nav-tabs li {
+	padding: 0 0 0 7px;
+}
+.welcome-tab .tab-box .nav-tabs > li > a {
+	font-size: 13px;
+	line-height: 13px;
+	padding: 14px 26px;
+}
+.news-box .post-box {
+	margin-bottom: 15px;
+}
+.post-news-row.news {
+	margin: 0;
+}
+.call-action-section {
+	margin-bottom: 50px;
+}
+.donation-progress-box {
+	position: static;
+	width: 100%;
+	background-size: cover;
+	height: auto;
+}
+.donation-progress-box .donation-progress .progress-outer {
+	width: 80%;
+}
+.donation-progress strong.title {
+	clear: both;
+}
+.donation-progress-box .btn-row {
+	margin: 0;
+}
+.donation-style-2 .holder {
+	width: 100%;
+	padding: 0;
+}
+.donation-style-2 .holder .left-box {
+	width: 100%;
+}
+.donation-style-2 .holder .left-box .round-box {
+	float: none;
+	display: block;
+	margin: 0 auto;
+}
+.donation-style-2 {
+	margin-bottom: 40px;
+}
+.donation-form-row.donation-form-2 .donation-form {
+	width: 500px;
+}
+.donation-form-row.donation-form-2 .call-action-box {
+	width: 524px;
+	padding: 117px 0 116px 0;
+}
+.donation-form-row {
+	margin-bottom: 40px;
+}
+.upcoming-event-section {
+	margin-bottom: 90px;
+}
+.recent-post-style-2 .box h4 {
+	font-size: 15px;
+}
+.recent-post-style-2 .box a.link .fa {
+	padding: 0 5px 0 0;
+}
+.recent-post-style-2 .box a.link {
+	padding: 0 6px 10px 0;
+	font-size: 12px;
+	line-height: 12px;
+}
+.recent-post-style-2 {
+	margin-bottom: 40px;
+}
+.exeutive-section .empty-section {
+	width: 524px;
+	background-size: cover;
+}
+.testimonials-style-2 {
+	padding: 0 15px;
+	margin-bottom: 50px;
+}
+.team-style-2 .box {
+	min-height: auto;
+	margin-bottom: 30px;
+}
+.executive-message-box-2 {
+	width: 100%;
+}
+.testimonials-style-2 .holder {
+	width: 100%;
+}
+.testimonials-style-2 #bx-pager {
+	left: 349px;
+	bottom: 8px;
+}
+.exeutive-facts-box {
+	width: 500px;
+}
+.donation-form-row.donation-form-2 .donation-form .holder {
+	width: 450px;
+}
+.donation-form-row.donation-form-2 .call-action-box .holder {
+	width: 480px;
+}
+.call-action-box .holder h2 {
+	font-size: 28px;
+}
+.donation-style-2 .holder::before {
+	display: none;
+}
+#banner .caption {
+	top: 30px;
+}
+.priorities .owl-carousel {
+	width: 657px;
+}
+.priorities .box {
+	padding: 40px 30px;
+}
+.project-section .holder {
+	width: 100%;
+}
+.project-section {
+	margin-bottom: 60px;
+}
+.donation-row {
+	width: 100%;
+	height: auto;
+	padding: 119px 0 30px 0;
+}
+.donation-form-row:hover .donation-form .holder, .donation-form-row:hover .call-action-box .holder {
+	margin: 0;
+}
+.donation-form-row .donation-form {
+	width: 632px;
+}
+.call-action-box {
+	width: 100%;
+}
+.call-action-box .holder {
+	width: 500px;
+	margin: 0;
+	padding: 0 0 0 50px;
+}
+.news-box .post-box h3 {
+	font-size: 19px;
+}
+.post-box .text-box a.link {
+	padding: 0 10px 10px 0;
+}
+.news-box .text-box {
+	margin: 0 0 25px 0;
+}
+.post-news-row:before {
+	bottom: -20px;
+}
+.post-news-row {
+	margin-bottom: 50px;
+}
+.sc-noo-event-slider-wrap .swiper-button-next, .sc-noo-event-slider-wrap .swiper-container-rtl .swiper-button-prev {
+	right: 20px !important;
+}
+.sc-noo-event-slider-wrap .swiper-button-prev, .sc-noo-event-slider-wrap .swiper-container-rtl .swiper-button-next {
+	left: 20px !important;
+}
+.attend-event::before {
+	bottom: 44px;
+}
+.attend-event {
+	margin: 0;
+}
+.message-box {
+	width: 515px;
+}
+.message-box h2 {
+	font-size: 30px;
+	line-height: 32px;
+}
+.exeutive-section .video-box {
+	padding: 162px 0;
+}
+.exeutive-section .video-box .modal-dialog {
+	padding: 0 30px;
+}
+.exeutive-section .video-box .modal-body iframe {
+	height: 538px !important;
+}
+.supporters-section .holder ul li {
+	height: 100px;
+	padding: 20px 27px;
+}
+.supporters-section .holder ul li img {
+	width: 100px;
+	height: auto;
+}
+.exeutive-section, .supporters-section {
+	margin-bottom: 60px;
+}
+.newsletter .holder {
+	width: 100%;
+}
+.newsletter .holder strong.title {
+	font-size: 14px;
+	line-height: 44px;
+}
+.footer-section-1:before {
+	width: 350px;
+}
+.instagram ul li {
+	width: 100px;
+}
+.instagram ul li img {
+	width: 100%;
+}
+.footer-social ul li a {
+	width: 28px;
+	height: 28px;
+	line-height: 28px;
+}
+.footer-section-3 strong.copyrights {
+	font-size: 13px;
+	padding: 15px 0 0 0;
+}
+.gallery-section .frame .caption .holder h3 {
+	font-size: 14px;
+}
+.call-action-section .holder {
+	background-size: cover;
+}
+.team-style-1 .box {
+	min-height: auto;
+}
+}
+ @media (min-width: 1200px) and (max-width: 1699px) {
+.call-action-box {
+	width: 32%;
+}
+.donation-count {
+	width: 33%;
+}
+.donation-form-row .donation-form {
+	width: 35%;
+}
+.donation-form-row.donation-form-2 .donation-form, .donation-form-row.donation-form-2 .call-action-box {
+	width: 50%;
+}
+.donation-form-row:hover .donation-form .holder {
+	margin: 0;
+}
+.donation-form-row:hover .call-action-box .holder {
+	margin: 0 0 0 30px;
+}
+.footer-section-1::before {
+	width: 480px;
+	background:none;
+}
+.executive-message-box-2 {
+	width: 586px;
+}
+.executive-message-box-2 .message-box {
+	margin: 50px 0 0 0;
+}
+.exeutive-facts-box {
+	width: 30%;
+}
+.exeutive-section .empty-section {
+	width: 30%;
+	background-size: cover;
+}
+.executive-message-box-2 {
+	width: 40%;
+}
+}
+
+ @media (min-width: 1700px) and (max-width: 1800px) {
+	
+	.footer-section-1::before {
+	width: 480px;
+	background:none;
+} 
+	 
+ }
+
+

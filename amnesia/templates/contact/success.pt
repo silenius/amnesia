@@ -1,0 +1,36 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: Contact us</metal:block>
+<metal:block fill-slot="head-bottom">
+<style>
+    .address-box ul li {
+        margin-right: 0px;
+        width:210px;
+    }
+</style>
+</metal:block>
+<metal:block fill-slot="content">
+  <div id="main"> 
+    <!--CONTACT SECTION START-->
+    <section class="contact-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 col-sm-6">
+            <h3><i class="fa fa-envelope-o" aria-hidden="true"> Thank you for your message !</i></h3>
+            <p>Your message has been successfully sent and we'll contact you as soon as possible</p>
+          </div>
+          <div class="col-md-6 col-sm-6">
+            <div class="contact-map-box">
+              <div id="map_contact_1" class="map_canvas active"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!--CONTACT SECTION START--> 
+  </div>
+  
+</metal:block>
+<metal:block fill-slot="javascript_srcs">
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+</metal:block>
+</metal:block>

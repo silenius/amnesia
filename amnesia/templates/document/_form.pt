@@ -1,0 +1,9 @@
+<metal:block use-macro="load: ../content/_form.pt">
+    <metal:block fill-slot="section-default">
+    <div class="form-group">
+        <label for="content_body">Body</label>
+        <span class="help-block">Title for the item, it will be shown throughout the site.</span>
+        <textarea name="body" class="mceEditor"></textarea>
+    </div>
+    </metal:block>
+</metal:block>

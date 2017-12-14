@@ -1,0 +1,20 @@
+/*************************************************************************
+    TinyMCE custom classes
+*************************************************************************/
+
+table.with_borders {
+    border:             1px solid #f89a22;
+}
+
+table.with_borders tr td {
+    border:             1px solid #f89a22;
+    padding:            5px;
+}
+
+table.align_top {
+
+}
+
+table.align_top tr {
+    vertical-align:     top;
+}

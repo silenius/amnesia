@@ -1,0 +1,54 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: ${content.title}</metal:block>
+<metal:block define-macro="body">
+<metal:block fill-slot="content" tal:define="aside bool(content.props and 'twitter' in content.props or content.tags)">
+    <div id="main">
+        <section class="document-page">
+            <div class="container">
+                <metal:block define-slot="top" />
+                <div class="row" metal:define-slot="body">
+                    <div tal:attributes="class 'col-md-9 col-sm-8' if aside else 'col-md-12'" metal:define-slot="text">
+                        <blockquote tal:condition="content.description">
+                            <p><strong>${content.description}</strong></p>
+                        </blockquote>
+                        ${structure: content.body}
+                    </div>
+                    <div class="col-md-3 col-sm-4" tal:condition="aside" metal:define-slot="aside"> 
+                    <!--SIDEBAR START-->
+                        <aside>
+                            <div class="sidebar">
+                                <metal:block define-slot="aside-top" />
+
+                                <div class="sidebar-box" tal:condition="content.props and content.props.get('twitter')">
+                                    ${structure: widgets.Twitter(request, content.props['twitter'])}
+                                </div>
+
+                                <!--!
+                                <div class="sidebar-box">
+                                    ${structure: widgets.RecentPosts(request, 5)}
+                                </div>
+
+                                <div class="sidebar-box">
+                                    ${structure: widgets.Archives(request)}
+                                </div>
+                                -->
+
+                                <div class="sidebar-box" tal:condition="content.tags">
+                                    <h3><i class="fa fa-tags" aria-hidden="true"></i> Tags</h3>
+                                    <div class="tags">
+                                        <a href="#" tal:repeat="tag content.tags">${tag.name}</a>
+                                    </div>
+                                </div>
+                                <metal:block define-slot="aside-bottom" />
+                            </div>
+                        </aside>
+                    <!-- SIDEBAR END -->
+                    </div>
+                </div>
+                <metal:block define-slot="bottom" />
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>
+</metal:block>

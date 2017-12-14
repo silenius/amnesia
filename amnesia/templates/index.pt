@@ -1,0 +1,204 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="head-bottom">
+    <style>
+        div.why-choose-box {
+            height:400px;
+        }
+    </style>
+</metal:block>
+<metal:block fill-slot="content">
+  
+  <!--BANNER START-->
+  <div id="banner">
+    <div id="home-banner" class="owl-carousel owl-theme">
+        
+      <div class="item" tal:repeat="banner banners">
+          <img src="${request.resource_path(banner, 'download')}" alt="img">
+        <div class="caption">
+          <div class="container">
+            <div class="holder">
+                <!--<h1>Belgian Biodiversity Platform</h1>
+                <h2>For science, policy and practice...</h2>
+              <a href="${'{}/1349'.format(request.script_name)}" class="btn-style-1">Learn More</a> 
+                -->
+            </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <!--BANNER END-->
+  
+  <div id="main"> 
+    <!--WHY CHOOSE US SECTION START-->
+    <section class="why-choose">
+      <div class="container">
+        <div class="chose-heading"> 
+            <!--!<span class="icon"><img src="${request.static_url('amnesia:static/images/heading-icon-1.png')}" alt="img"></span>-->
+            <h2 style="color:#415060">What we Can <br />do <span style="color:#faa627">For You</span></h2>
+        </div>
+        <p>We offer services to scientists, policy-makers, practitioners and stakeholders.<br/> Have a look:</p>
+
+        ${structure: widgets.BoxRow(request, why_choose)}
+        ${structure: widgets.Slider1(request, high_prio)}
+
+      </div>
+    </section>
+    <!--WHY CHOOSE US SECTION START--> 
+    
+    <!--PROJECTS SECTION START-->
+    ${structure: widgets.Slider2(request, current_projects)}
+    <!--PROJECTS SECTION END--> 
+    
+    <!--POST AND NEWS ROW START-->
+
+    <section class="post-news-row">
+        <div class="container">
+            <div class="heading-center">
+                <h2>Latest News</h2>
+            </div>
+            <!--NEWS LIST BEGIN-->
+            <div id="news" style="margin-top:70px"></div>
+            <!--NEWS LIST END-->
+        </div>
+    </section>
+
+    <!--
+    <section class="post-news-row">
+      <div class="container">
+        <div class="col-md-6">
+          <div class="left-box">
+            <div class="heading-left">
+              <h2>Latest News</h2>
+            </div>
+            <a href="${'{}/90'.format(request.script_name)}" class="btn-readmore space">More News</a>
+            <div id="news"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    -->
+    <!--POST AND NEWS ROW END--> 
+
+    <!--ATTEND EVENTS SECTION START-->
+    <section class="attend-event">
+      <div class="container">
+        <div class="heading-center">
+          <h2>Attend Events</h2>
+        </div>
+      </div>
+      <div class="sc-noo-event-slider-wrap">
+        <div class="swiper-container">
+          <!--EVENT LIST BEGIN-->
+          <div class="swiper-wrapper" id="events"></div>
+          <!--EVENT LIST END-->
+          <div class="swiper-paging">
+            <span class="swiper-button-prev"></span>
+            <span class="swiper-button-next"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!--ATTEND EVENTS SECTION END--> 
+    
+    <!--SUPPORTERS SECTION START-->
+    <section class="supporters-section" tal:condition="logos_folder and logos">
+      <div class="container">
+        <div class="heading-left">
+            <h2><a href="${request.resource_path(request.root, 3222)}">${logos_folder.title}</a></h2>
+        </div>
+        <div class="priorities">
+          <div class="priorities-slider owl-carousel owl-theme" style="width:100%">
+            <div class="item" tal:repeat="img logos">
+              <div class="slid-box">
+                <div class="frame frame2" style="width:auto;height:auto;padding:0;margin:0">
+                    <metal:block tal:switch="img.props is not None and 'link_website_home' in img.props">
+                        <a tal:case="True" href="${img.props['link_website_home']}">
+                            <img src="${request.resource_path(img, 'download')}" alt="img" style="z-index:1000" />
+                        </a>
+                        <img tal:case="False" src="${request.resource_path(img, 'download')}" alt="img" style="width:auto;height:auto;"/>
+                    </metal:block>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!--SUPPORTERS SECTION END--> 
+  </div>
+</metal:block>
+
+
+<metal:block fill-slot="javascript_srcs">
+<script>
+/* <![CDATA[ */
+
+    document.addEventListener("DOMContentLoaded",function(e) {
+
+        Yeti.AjaxRequest("${request.resource_path(request.context, 'document', 'newshome')}", {
+            accept : 'html',
+            onreadystatechange : function(req) {
+                if (req.success()) {
+                    Yeti.Element('news').innerHTML = req.o.responseText;
+                }
+            }
+        });
+
+        Yeti.AjaxRequest("${request.resource_path(request.context, 'event', 'sliderhome')}", {
+            accept : 'html',
+            onreadystatechange : function(req) {
+                if (req.success()) {
+                    Yeti.Element('events').innerHTML = req.o.responseText;
+
+                    var swiper = new Swiper('.swiper-container', {
+                        effect: 'coverflow',
+                        grabCursor: true,
+                        centeredSlides: true,
+                        paginationClickable: false,
+                        nextButton: '.swiper-button-next',
+                        prevButton: '.swiper-button-prev',
+                        slidesPerView: 5,
+                        spaceBetween: 30,
+                        speed: 800,
+                        loop: true,
+                        autoplay: true,
+                        autoplayDisableOnInteraction: true,
+                        coverflow: {
+                            rotate: 50,
+                            stretch: 0,
+                            depth: 100,
+                            modifier: 1,
+                            slideShadows : true
+                        },
+                        // Responsive breakpoints
+                        breakpoints: {
+                            // when window width is <= 1024px
+                            1024: {
+                              slidesPerView: 1,
+                              spaceBetweenSlides: 10
+                            }
+                        }
+                    });
+
+                    swiper.slideTo(2, 800, true);
+                    jQuery('.swiper-button-prev').one('click', function(event) {
+                        event.preventDefault();
+                        swiper.slideTo(1, 800, true);
+                    });
+
+                    jQuery('.swiper-button-next').one('click', function(event) {
+                        event.preventDefault();
+                        swiper.slideTo(3, 800, true);
+                    });
+                }
+            }
+        });
+    });
+
+/* ]]> */
+</script>
+
+</metal:block>
+
+</metal:block>

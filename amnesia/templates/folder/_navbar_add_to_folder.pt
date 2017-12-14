@@ -1,0 +1,9 @@
+<ul class="nav navbar-nav navbar-right">
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-plus-circle" aria-hidden="true"></i> New <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li tal:repeat="ct content_types">
+                <a href="${'{}/{}/new?container_id={}'.format(request.script_name, ct.name, content.id)}"><i class="fa ${ct.icons['fa']}"> ${ct.name}</i></a></li>
+        </ul>
+    </li>
+</ul>

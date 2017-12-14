@@ -1,0 +1,18 @@
+<div class="swiper-slide noo-event-slider-item" tal:repeat="event events">
+    <div class="wrap">
+        <div class="outer-thumb">
+            <strong class="date">${event.starts.day} <span>${event.starts.strftime('%b. %y')}</span></strong>
+            <metal:block tal:switch="event.props and 'picture_home' in event.props">
+               <div tal:case="True" class="item-thumb" style="background-image:url(${'{}/{}/download'.format(request.script_name, event.props['picture_home'])})"></div>
+                <div tal:case="default" class="item-thumb" style="background-image:url(${request.static_url('amnesia:static/images/img-2.jpg')});"></div>
+            </metal:block>
+        </div>
+        <div class="item-body">
+            <h3><a href="${request.resource_path(event)}">${event.title}</a></h3>
+            <div class="tags-row"> <a href="#" class="link"><i class="fa fa-clock-o" aria-hidden="true"></i>09:00 am - 03:00 pm</a> <a href="#" class="link"><i class="fa fa-map-marker" aria-hidden="true"></i>${event.location} ${event.address}</a> </div>
+            <p>${event.description}</p>
+            <a href="${request.resource_path(event)}" class="btn-readmore">Read Event Detail</a>
+        </div>
+    </div>
+    <div style="clear:both">&nbsp;</div>
+</div>

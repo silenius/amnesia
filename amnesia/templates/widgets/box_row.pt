@@ -1,0 +1,16 @@
+<div class="why-choose-box-row">
+  <div class="row">
+    <div class="col-md-4 col-sm-4" tal:repeat="doc widget.documents">
+      <div class="why-choose-box"> 
+        <metal:block tal:condition="doc.props and 'img_home' in doc.props">
+            <img src="${'{}/{}/download'.format(request.script_name, doc.props['img_home'])}" alt="img" />
+        </metal:block>
+        <h3 tal:switch="doc.props is not None and 'link_id_home' in doc.props">
+            <a tal:case="False" href="${request.resource_path(doc)}">${doc.title}</a>
+            <a tal:case="True" href="${'{}/{}'.format(request.script_name, doc.props['link_id_home'])}">${doc.title}</a>
+        </h3>
+          <p>${doc.description}</p>
+      </div>
+    </div>
+  </div>
+</div>

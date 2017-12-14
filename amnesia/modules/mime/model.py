@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+
 from sqlalchemy import sql
 from sqlalchemy import orm
 
@@ -28,16 +30,21 @@ class Mime(Base):
 
     @property
     def full(self):
-        return '%s/%s' % (self.major.name, self.name)
+        return '{0}/{1}'.format(self.major.name, self.name)
 
     @staticmethod
-    def q_major_minor(major, minor):
-        cond = sql.and_(MimeMajor.name == major,
-                        Mime.name == minor)
+    def q_major_minor(dbsession, major, minor):
+        cond = sql.and_(
+            MimeMajor.name == major,
+            Mime.name == minor
+        )
+
+        query = dbsession.query(Mime).join(Mime.major).options(
+            orm.contains_eager(Mime.major)
+        ).filter(cond)
+
         try:
-            return Mime.query.join(Mime.major).\
-                   options(orm.contains_eager(Mime.major)).\
-                   filter(cond).one()
+            return query.one()
         except NoResultFound:
             return None
 

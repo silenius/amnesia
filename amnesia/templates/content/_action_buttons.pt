@@ -1,0 +1,5 @@
+<span>
+    <metal:block define-slot="top" />
+    <a title="Edit object" href="${request.resource_url(content, 'edit')}"><img src="${request.static_url('amnesia:static/images/application_form_edit.png')}" class="link"/></a> 
+    <metal:block define-slot="bottom" />
+</span>

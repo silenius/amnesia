@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?python
+    import json
+?>
+<response tal:define="page_total (count / limit if count % limit == 0 else count / limit + 1) ; page_current (offset / limit + 1);">
+
+    <meta>
+        <requested tal:condition="req">${json.dumps(request.GET.mixed())}</requested>
+        <errors>
+            <error tal:repeat="error errors | ()" level="${error.level}">${error.message}</error>
+        </errors>
+    </meta>
+
+    <components tal:define="components components | ('main', 'pagination')">
+
+        <navigation tal:condition="'navigation' in components" xmlns="http://www.w3.org/1999/xhtml">
+            ${structure: widgets.Navigation(request, content.id, obj_dump=dump_obj)}
+        </navigation>
+
+        <main tal:condition="'main' in components" xmlns="http://www.w3.org/1999/xhtml">
+            <metal:block use-macro="load: amnesia:templates/folder/_browse.pt" tal:define="display display; sort sort; options options; results query" />
+        </main>
+
+        <pagination tal:condition="'pagination' in components" xmlns="http://www.w3.org/1999/xhtml" count="${count}" limit="${limit}" offset="${offset}" page_total="${page_total}" page_current="${page_current}">
+            <metal:block use-macro="load: amnesia:templates/_pagination.pt" tal:define="offset offset; limit limit" />
+        </pagination>
+
+    </components>
+
+</response>

@@ -1,0 +1,26 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: register</metal:block>
+<metal:block define-macro="body">
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="register">
+        <div class="container">
+            <div class="holder">
+                <form id="form_login" method="post" action="${request.resource_url(request.context, 'register')}">
+                    ${structure: form}
+                    <input type="hidden" name="csrf_token" value="${request.session.get_csrf_token()}">
+                    <div class="form-group">
+                        <div class="g-recaptcha" data-sitekey="6Lff_h8UAAAAABH9V5fkOr2SsVGpaXNffU8vwarO"></div>
+                    </div>
+                    <input type="submit" value="register" />
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+</metal:block>
+</metal:block>
+<metal:block fill-slot="javascript_srcs">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</metal:block>
+</metal:block>

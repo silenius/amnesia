@@ -1,0 +1,365 @@
+<!-- BEGIN: DEFAULT VIEW -->
+
+<div class="checkbox" tal:condition="content_id | None">
+    <label>
+        <input type="checkbox" id="select_page" />
+        Select a default page for this folder
+        <input type="hidden" id="index_content_id" name="index_content_id" />
+        <div class="row">
+            <div id="replace_content"></div>
+            <div id="replace_pagination"></div>
+        </div>
+    </label>
+
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        function _load() {
+            var pagination = new Bbpf.Pagination({}),
+                folder_browser = new Bbpf.FolderController({
+                    url : "${request.resource_url(request.context, 'browse')}",
+                    components : {
+                        main : new Bbpf.Component({
+                            container : 'replace_content'
+                        }),
+                        pagination : new Bbpf.PaginationComponent({
+                            container : 'replace_pagination',
+                            pagination : pagination
+                        })
+                    },
+                    parameters : {
+                        display : "select_default_view",
+                        limit : pagination.get('limit'),
+                        filter_types : ['document']
+                    }
+                })
+            ;
+
+            pagination.dispatcher.add('pagination_change', function() {
+                folder_browser.refresh({
+                    limit: this.get('limit'),
+                    offset: this.get('offset')
+                });
+            });
+
+            folder_browser.dispatcher.add('after_load_success', function() {
+                var inputs = Yeti.Element('replace_content').getElementsByTagName('input'); 
+                for (var i=0, _len = inputs.length; i<_len; i++) {
+                    var input = inputs[i];
+
+                    if (input.getAttribute('data-purpose') == 'select_obj' && 
+                        input.value == Yeti.Element('index_content_id').value) {
+                        input.checked = 'checked';
+                    }
+
+                    (function(elem) {
+                        Yeti.Evt.bind(elem, 'click', function() {
+                            Yeti.Element('index_content_id').value = elem.value;
+                        })
+                    })(input);
+                }
+            });
+
+            folder_browser.load({});
+ 
+        }
+
+        document.addEventListener("DOMContentLoaded",function(e) {
+            if (Yeti.Element('index_content_id').value) {
+                _load();
+                Yeti.Element('select_page').checked = 'checked';
+            }
+
+            Yeti.Element('select_page').addEventListener('click', function() {
+                if (this.checked) {
+                    _load();
+                } else {
+                    Yeti.Element('index_content_id').value = '';
+                    Yeti.DOM.removeNodes(Yeti.Element('replace_content'));
+                    Yeti.DOM.removeNodes(Yeti.Element('replace_pagination'));
+                };
+            });
+
+        });
+
+        /* ]]> */
+    </script>
+</div>
+<!-- END: DEFAULT VIEW -->
+
+<div class="form-group">
+
+    <!-- BEGIN: POLYMORPHIC LOADING -->
+
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" id="polymorphic_loading" name="polymorphic_loading" />Polymorphic loading
+        </label>
+        <span class="help-block">If selected, control which descendant mapper’s tables are included in the FROM clause, and will allow filter() criterion to be used against those tables. The resulting instances will also have those columns already loaded so that no “post fetch” of those columns will be required.</span>
+        <div class="row">
+            <div id="polymorphic_loading_selection" style="display:none">
+                <div class="col-xs-2">
+                    <select data-select="polymorphic_children" id="polymorphic_children" name="polymorphic_children_ids" multiple="multiple" class="form-control">
+                        <tal:block repeat="m h['polymorphic_hierarchy']()">
+                            <option tal:condition="m.polymorphic_identity" value="${m.polymorphic_identity}">${m.class_.__name__}</option>
+                        </tal:block>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- END: POLYMORPHIC LOADING -->
+
+    </div>
+</div>
+
+<div class="form-group">
+
+    <!-- BEGIN: DEFAULT SORT / ORDERING -->
+
+    <label>Ordering</label>
+    <span class="help-block">Default ordering.</span>
+    <div id="order_selection">
+        <div id="available_orders"></div>
+    </div>
+
+    <input type="hidden" id="default_order" name="default_order" />
+
+    <!-- END: DEFAULT SORT / ORDERING -->
+    <script>
+        /* <![CDATA[ */
+
+        document.addEventListener("DOMContentLoaded", function(e) {
+
+        /***********************
+         * POLYMORPHIC LOADING *
+         ***********************/
+
+        var MapperSelection = function(params) {
+            this.container = Yeti.Element(params.container);
+            this.dispatcher = new Yeti.Tools.Dispatcher(this);
+
+            this.select = Yeti.Element(params.polymorphic_children);
+
+            this.add_select_loading_handlers();
+            this.add_select_mappers_handlers();
+
+            this.dispatcher.add('select-polymorphic-loading',
+                this.set_polymorphic_loading
+            );
+        }
+
+        MapperSelection.prototype.get_options = function() {
+            var opts = this.select.options,
+                selected = [];
+
+            for (var i=0, _len = opts.length; i<_len; i++) {
+                if (opts[i].selected) {
+                    selected.push(opts[i].value);
+                }
+            }
+
+            return selected;
+        }
+
+
+        MapperSelection.prototype.set_polymorphic_loading = function(params) {
+            var _self = this;
+            this.polymorphic_loading = params.checked;
+
+            if (this.polymorphic_loading) {
+                this.container.style.display = 'block';
+            } else {
+                this.unselect_mappers();
+                this.container.style.display = 'none';
+            }
+
+            this.dispatcher.fire('polymorphic-loading-changed', {
+                polymorphic_loading: _self.polymorphic_loading,
+                selected: params.selected ? params.selected : undefined
+            });
+        }
+
+        MapperSelection.prototype.unselect_mappers = function() {
+            var opts = this.select.options;
+
+            for (var i=0, _len = opts.length; i<_len; i++) {
+                opts[i].selected = false;
+            }
+        }
+
+        /* Add click events on the <input> */
+        MapperSelection.prototype.add_select_loading_handlers = function() {
+            var pl_selection = Yeti.Element('polymorphic_loading'),
+                _self = this;
+
+            pl_selection.addEventListener('click', function(e) {
+                var input = e.target;
+                _self.dispatcher.fire('select-polymorphic-loading', {
+                    checked: input.checked
+                });
+            });
+        }
+
+        MapperSelection.prototype.add_select_mappers_handlers = function() {
+            var _self = this;
+
+            this.select.addEventListener('change', function(e) {
+                _self.dispatcher.fire('select-mappers', {
+                    selection: _self
+                });
+            });
+        }
+
+        /*****************
+         * DEFAULT ORDER *
+         *****************/
+
+        var OrderSelection = function(params) {
+            var _self = this;
+            this.container = Yeti.Element(params.container);
+            this.orders = Yeti.Element(params.orders);
+            this.dispatcher = new Yeti.Tools.Dispatcher(this);
+
+            this.dispatcher.add('after-refresh-order', function() {
+                _self.add_weight_handlers();
+            });
+        }
+
+        OrderSelection.prototype.get_orders = function() {
+            var params = [],
+                trs = this.container.getElementsByTagName('tr'),
+                cpt = 0 ;
+
+            for (var i=0, _len = trs.length; i<_len; i++) {
+                var tr = trs[i],
+                    identity = tr.getAttribute('data-identity'),
+                    key = tr.getAttribute('data-key') ;
+
+                if (key) {
+                    if (Yeti.DOM.firstElementChild(tr.cells[0]).checked) {
+                        params.push({
+                            key : key,
+                            direction : Yeti.DOM.firstElementChild(tr.cells[2]).value,
+                            nulls : Yeti.DOM.firstElementChild(tr.cells[3]).value
+                        });
+                    }
+                }
+            }
+
+            return params;
+        }
+
+        /* Fetch available order for given polymorphic loading/polymorphic
+         * identities */
+        OrderSelection.prototype.refresh_order = function(params) {
+            var _self = this;
+
+            Yeti.AjaxRequest("${request.resource_url(request.context, 'polymorphic_orders')}", {
+                method: 'GET',
+                accept: 'xml',
+                data: params,
+                onreadystatechange: function(req) {
+                    if (req.success()) {
+                        var data = req.o.responseXML;
+                        Yeti.DOM.removeNodes(_self.orders);
+                        Yeti.DOM.appendClone(_self.orders,
+                            Yeti.DOM.importNode(
+                                Yeti.DOM.firstElementChild(data),
+                                true
+                            )
+                        );
+                        _self.dispatcher.fire('after-refresh-order');
+                    }
+                }
+            });
+        }
+
+        OrderSelection.prototype.change_weight = function(params) {
+            var row = params.src;
+            do {
+               row = row.parentNode;
+            } while (row.tagName.toUpperCase() != 'TR');
+
+            var t = row.offsetParent,
+                src, dst;
+
+            if (params.direction == 'up') {
+                src = row;
+                dst = t.rows[row.rowIndex - 1];
+            } else if (params.direction == 'down') {
+                src = t.rows[row.rowIndex + 1];
+                dst = row;
+            }
+
+            if (src && dst) {
+                row.parentNode.insertBefore(src, dst);
+            }
+        }
+
+        OrderSelection.prototype.add_weight_handlers = function() {
+            var a = this.container.getElementsByTagName('a'),
+                _self = this;
+
+            for (var i=0, _len = a.length; i<_len; i++) {
+                (function(el) {
+                    if (el.hasAttribute('data-move')) {
+                        Yeti.Evt.bind(el, 'click', function(e) {
+                            e.preventDefault();
+                            _self.change_weight({
+                                src: el,
+                                direction: this.getAttribute('data-move')
+                            });
+                        });
+                    }
+                })(a[i]);
+            }
+
+        }
+
+        /*****************************************************************/
+
+        var mapper_selection = new MapperSelection({
+                container: 'polymorphic_loading_selection',
+                polymorphic_children: 'polymorphic_children'
+            }),
+            order_selection = new OrderSelection({
+                container: 'order_selection',
+                orders: 'available_orders'
+            });
+
+        mapper_selection.dispatcher.add('select-mappers', function(params) {
+            order_selection.refresh_order({
+                pc: params.selection.get_options(),
+                pl: this.polymorphic_loading,
+                selected: JSON.stringify(order_selection.get_orders())
+            });
+        });
+
+        mapper_selection.dispatcher.add('polymorphic-loading-changed', function(params) {
+            var polymorphic_loading = params.polymorphic_loading;
+
+            order_selection.refresh_order({
+                pc: this.get_options(),
+                pl: polymorphic_loading,
+                selected: params.selected ? params.selected : JSON.stringify(order_selection.get_orders())
+            });
+        });
+
+        mapper_selection.set_polymorphic_loading({
+            checked: Yeti.Element('polymorphic_loading').checked,
+            selected: JSON.stringify(${default_order})
+        });
+
+        Yeti.Evt.bind(document.forms.folder_form, 'submit', function() {
+            Yeti.Element('default_order').value = JSON.stringify(order_selection.get_orders());
+            this.submit();
+        });
+
+        }); // DOMContentLoaded
+
+        /* ]]> */
+    </script>
+
+</div>

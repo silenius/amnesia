@@ -1,0 +1,6 @@
+<metal:block use-macro="load: ../content/_form.pt">
+    <metal:block fill-slot="section-settings">
+        <metal:block use-macro="load: _form_section_settings.pt" />
+        <br class="clear" />
+    </metal:block>
+</metal:block>

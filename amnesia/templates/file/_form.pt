@@ -1,0 +1,43 @@
+<metal:block use-macro="load: ../content/_form.pt">
+    <metal:block fill-slot="section-default" tal:define="has_file has_file | None">
+
+        <!-- FILE -->
+
+        <div class="form-group">
+            <label for="file_content">File</label>
+            <span class="help-block">The input file</span>
+
+            <div style="margin-bottom:10px" tal:condition="has_file">
+                <script type="text/javascript">
+                    /* <![CDATA[ */
+                    document.addEventListener("DOMContentLoaded",function(e) {
+                        var has_file = Yeti.Element('has_file'),
+                            inputs = has_file.getElementsByTagName('input'),
+                            file_section = Yeti.Element('file_section');
+
+                        for (var i=0, _len=inputs.length; i<_len; i++) {
+                            (function(el) {
+                                Yeti.Evt.bind(el, 'click', function() {
+                                    file_section.style.display = el.value == 'replace' ? 'block' : 'none';
+                                });
+                            })(inputs[i]);
+                        }
+                    });
+                    /* ]]> */
+                </script>
+
+                <!-- KEEP/REPLACE FILE -->
+
+                <div id="has_file">
+                    <div><input type="radio" name="has_file" value="keep" /> Keep existing file</div>
+                    <div><input type="radio" name="has_file" value="replace" /> Replace existing file</div>
+                </div>
+                <div class="hidden" id="file_section"><input type="file" name="content" id="file_content" /></div>
+            </div>
+
+            <div tal:condition="not has_file">
+                <div id="file_section"><input type="file" name="content" /></div>
+            </div>
+        </div>
+    </metal:block>
+</metal:block>

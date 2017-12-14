@@ -1,0 +1,6 @@
+<metal:block use-macro="load: amnesia:templates/content/view/_thumbnail.pt">
+    <metal:block tal:switch="content.mime.major.name" fill-slot="icon">
+        <img tal:case="'image'" src="${request.resource_path(content, 'download')}" style="width:64px;height:64px" />
+        <i tal:case="default" class="fa ${content.fa_icon} fa-5x"></i>
+    </metal:block>
+</metal:block>

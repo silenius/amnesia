@@ -1,0 +1,29 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: ${content.title}</metal:block>
+<metal:block fill-slot="content">
+    <div id="main">
+        <section class="file-page">
+            <div class="container">
+                <h1>${content.title}</h1>
+                <h2>${content.description}</h2>
+                <p>
+                    <a href="${request.resource_path(content, 'download')}" class="btn btn-default">
+                        <i class="fa fa-download fa-4x" aria-hidden="true"></i>
+                    </a>
+                </p>
+
+                <table class="table">
+                    <tr>
+                        <td>File size</td>
+                        <td>${content.file_size} MB</td>
+                    </tr>
+                    <tr>
+                        <td>File name</td>
+                        <td>${content.original_name}</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>

@@ -1,0 +1,17 @@
+<div class="media">
+    <div class="media-left">
+        <metal:block define-slot="before-icon" />
+        <i class="fa ${content.fa_icon} fa-2x"></i>
+    </div>
+    <div class="media-body">
+        <a metal:define-slot="title" href="${request.resource_url(content)}"><strong>${content.title}</strong></a>
+        <em> - <small>updated on <mark>${h.fmt_datetime(request, content.added)}</mark></small></em>
+        <metal:block define-slot="after-title" />
+        <div tal:switch="content.description is not None">
+            <metal:block tal:case="True">${content.description}</metal:block>
+            <metal:block tal:case="False"><i>no description provided</i></metal:block>
+        </div>
+        <metal:block define-slot="after-description" />
+    </div>
+    <hr class="separator" />
+</div>

@@ -1,0 +1,19 @@
+<!-- EFFECTIVE DATE -->
+
+<div class="form-group">
+    <label>Publishing date</label>
+    <span class="help-block">If this date is in the future, the content will not show up in listings and searches until this date.</span>
+    <div class="row">
+        <metal:block use-macro="load: ../_split_datetime.pt" tal:define="name 'effective'" />
+    </div>
+</div>
+
+<!-- EXPIRATION DATE -->
+
+<div class="form-group">
+    <label>Expiration date</label>
+    <span class="help-block">When this date is reached, the content will nolonger be visible in listings and searches.</span>
+    <div class="row">
+        <metal:block use-macro="load: ../_split_datetime.pt" tal:define="name 'expiration'" />
+    </div>
+</div>

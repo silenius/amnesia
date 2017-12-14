@@ -1,0 +1,4 @@
+<h3><i class="fa fa-twitter-square" aria-hidden="true"></i> Twitter</h3>
+<div class="twitter">
+    <a class="twitter-timeline" data-height="600" data-theme="light" data-chrome="noscrollbar nofooter noheader noborders" href="${widget.embed}"></a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>

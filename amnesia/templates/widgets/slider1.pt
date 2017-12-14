@@ -1,0 +1,21 @@
+<div class="priorities" tal:condition="widget.files">
+  <div class="box">
+      <strong class="title">${widget.folder.title}</strong>
+      <p></p>
+      <p>${widget.folder.description}</p>
+  </div>
+  <div class="priorities-slider owl-carousel owl-theme">
+
+    <div class="item" tal:repeat="prio widget.files">
+      <div class="slid-box">
+        <div class="frame"><img src="${request.resource_path(prio, 'download')}" alt="img"></div>
+        <div class="text-box"> 
+            <strong class="title" tal:switch="prio.props is not None and 'link_id_home' in prio.props">
+                <a tal:case="True" href="${'{}/{}'.format(request.script_name, prio.props['link_id_home'])}">${prio.title}</a>
+                <span tal:case="False">${prio.title}</span>
+            </strong>
+            <a href="#" class="arrow"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></a> </div>
+      </div>
+    </div>
+  </div>
+</div>

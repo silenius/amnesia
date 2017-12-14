@@ -1,0 +1,31 @@
+<metal:block use-macro="load: ../layout.pt" tal:define="js_tinymce True">
+<metal:block fill-slot="title_more">: document</metal:block>
+<metal:block fill-slot="head-bottom">
+    <script>
+        /* <![CDATA[ */
+        document.addEventListener('DOMContentLoaded', function() {
+            Bbpf.utils.init_tinyMCE();
+        })
+        /* ]]> */
+    </script>
+</metal:block>
+<metal:block fill-slot="content">
+
+    <metal:block use-macro="load: amnesia:templates/content/browser_modal.pt" />
+
+    <div id ="main">
+        <section class="edit-document">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form id="document_form" method="post" action="${form_action}">
+                            ${structure: form}
+                            <input type="submit" value="send" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</metal:block>
+</metal:block>

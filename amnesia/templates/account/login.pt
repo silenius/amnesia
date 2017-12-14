@@ -1,0 +1,19 @@
+<metal:block use-macro="load: amnesia:templates/layout.pt">
+<metal:block fill-slot="title_more">: login</metal:block>
+<metal:block define-macro="body">
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="signup">
+        <div class="container">
+            <div class="holder">
+                <form id="form_login" method="post" action="${request.resource_url(request.context, 'login')}">
+                    ${structure: form}
+                    <input type="hidden" name="csrf_token" value="${request.session.get_csrf_token()}">
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+</metal:block>
+</metal:block>
+</metal:block>

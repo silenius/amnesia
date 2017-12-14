@@ -1,0 +1,8 @@
+<h3>Archives</h3>
+<div class="archives-widget">
+    <ul>
+        <li tal:repeat="archive widget.archives">
+            <a href="${request.resource_path(request.root, 'search', 'archives', archive.ts.year, archive.ts.month, query={'ids': widget.types_ids})}">${archive.ts.strftime('%B')} ${archive.ts.strftime('%Y')}<span>(${archive.cpt})</span></a>
+        </li>
+    </ul>
+</div>

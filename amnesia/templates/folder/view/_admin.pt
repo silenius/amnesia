@@ -1,0 +1,5 @@
+<metal:block use-macro="load: amnesia:templates/content/view/_tabular.pt">
+    <metal:block fill-slot="title">
+        <a href="${request.resource_path(content, 'admin')}">${h.shorten(request, content.title, 60)}</a>
+    </metal:block>
+</metal:block>

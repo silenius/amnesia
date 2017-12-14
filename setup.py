@@ -1,50 +1,75 @@
+# -*- coding: utf-8 -*-
+
+
 import os
 
-from setuptools import setup, find_packages
+from setuptools import find_packages
+from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
+
 with open(os.path.join(here, 'README.txt')) as f:
     README = f.read()
 with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
-requires = [
-    'pyramid<1.8',
+install_requires = [
+    'pyramid>=1.9.0,<1.10',
+    'Chameleon>3.0',
     'pyramid_chameleon',
-    'pyramid_debugtoolbar',
+    'pyramid_beaker',
     'pyramid_tm',
-    'SQLAlchemy<1.2',
+    'pyramid_mailer',
+    'SQLAlchemy>=1.0.0,<1.2.0',
     'transaction',
     'zope.sqlalchemy',
-    'waitress',
     'psycopg2',
     'pytz',
-    ]
+    'rutter',
+    'marshmallow>=3.0.0b2',
+    'bcrypt',
+    'file-magic',
+    'saexts'
+]
 
-setup(name='amnesia',
-      version='0.1',
-      description='amnesia',
-      long_description=README + '\n\n' + CHANGES,
-      classifiers=[
+extra_requires = {
+    'production': [
+        'gunicorn'
+    ],
+    'development': [
+        'pyramid_debugtoolbar',
+        'waitress',
+    ]
+}
+
+setup(
+    name='amnesia',
+    version='0.1.1',
+    description='amnesia',
+    long_description=README + '\n\n' + CHANGES,
+    classifiers=[
         "Programming Language :: Python",
         "Framework :: Pyramid",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    ],
+    author='Julien Cigar',
+    author_email='julien@perdition.city',
+    url='https://github.com/silenius/amnesia',
+    keywords='web wsgi pyramid cms sqlalchemy',
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    test_suite='amnesia',
+    install_requires=install_requires,
+    extras_require=extra_requires,
+    entry_points={
+        'paste.app_factory': [
+            'main = amnesia:main'
         ],
-      author='Julien Cigar',
-      author_email='jcigar@ulb.ac.be',
-      url='',
-      keywords='web wsgi bfg pylons pyramid',
-      packages=find_packages(),
-      include_package_data=True,
-      zip_safe=False,
-      test_suite='amnesia',
-      install_requires=requires,
-      entry_points="""\
-      [paste.app_factory]
-      main = amnesia:main
-      [console_scripts]
-      initialize_amnesia_db = amnesia.scripts.initializedb:main
-      initialize_amnesia_mime = amnesia.scripts.initializemime:main
-      """,
-      )
+        'console_scripts': [
+            'initialize_amnesia_db = amnesia.scripts.initializedb:main',
+            'initialize_amnesia_mime = amnesia.scripts.initializemime:main',
+        ]
+    }
+)

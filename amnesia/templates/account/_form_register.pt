@@ -1,0 +1,30 @@
+<div class="form-group">
+    <label for="register_name">Name</label>
+    <input type="text" id="register_name" name="account_name" class="form-control" placeholder="name" required />
+</div>
+
+<div class="form-group">
+    <label for="register_first_name">First name</label>
+    <input type="text" id="register_firt_name" name="account_first_name" class="form-control" placeholder="first name" required />
+</div>
+
+<div class="form-group">
+    <label for="register_email">Email</label>
+    <input type="text" id="register_email" name="email" class="form-control" placeholder="email address" required />
+</div>
+
+<div class="form-group">
+    <label for="register_login">Login</label>
+    <input type="text" id="register_login" name="login" class="form-control" placeholder="login" required />
+</div>
+
+<div class="form-group">
+    <label for="register_password">Password</label>
+    <input type="password" id="register_password" name="password" class="form-control" placeholder="password" required />
+</div>
+
+<div class="form-group">
+    <label for="register_password_repeat">Password (repeat)</label>
+    <input type="password" id="register_password_repeat" name="password_repeat" class="form-control" placeholder="password (repeat)" required />
+</div>
+
