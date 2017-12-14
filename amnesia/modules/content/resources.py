@@ -8,6 +8,7 @@ from pyramid.security import ALL_PERMISSIONS
 
 from sqlalchemy.exc import DatabaseError
 
+from amnesia.modules.content import Content
 from amnesia.resources import Resource
 
 
@@ -31,6 +32,9 @@ class Entity(Resource):
     @property
     def __parent__(self):
         return self.parent if self.parent else self.request.root
+
+    def query(self):
+        return self.dbsession.query(Content)
 
     def update(self, data):
         self.entity.feed(**data)
