@@ -46,6 +46,14 @@ class Entity(Resource):
         except DatabaseError:
             return False
 
+    def delete(self):
+        try:
+            self.dbsession.delete(self.entity)
+            self.dbsession.flush()
+            return True
+        except DatabaseError:
+            return False
+
 
 class EntityManager(Resource):
 

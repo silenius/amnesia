@@ -75,7 +75,7 @@ class ContentCRUD(BaseView):
 
     @view_config(request_method='DELETE', permission='delete')
     def delete(self):
-        self.dbsession.delete(self.entity)
+        return self.context.delete()
 
 
 @view_config(request_method='POST', context=EntityManager, name='delete',
