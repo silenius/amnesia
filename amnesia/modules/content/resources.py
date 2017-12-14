@@ -33,9 +33,6 @@ class Entity(Resource):
     def __parent__(self):
         return self.parent if self.parent else self.request.root
 
-    def query(self):
-        return self.dbsession.query(Content)
-
     def update(self, data):
         self.entity.feed(**data)
 
@@ -62,6 +59,9 @@ class EntityManager(Resource):
     def __init__(self, request, parent):
         super().__init__(request)
         self.__parent__ = parent
+
+    def query(self):
+        return self.dbsession.query(Content)
 
 
 class SessionResource(Resource):
