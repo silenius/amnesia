@@ -43,7 +43,7 @@ class Login(BaseView):
             if not user.enabled:
                 errors = {'login': 'Error: login must be enabled by an administrator'}
             elif self.context.check_user_password(user, password):
-                headers = remember(self.request, user.id)
+                headers = remember(self.request, str(user.id))
                 location = self.request.application_url
                 return HTTPFound(location=location, headers=headers)
             else:
