@@ -7,7 +7,7 @@ from amnesia.modules.content import EntityManager
 from amnesia.modules.state import State
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder.validation import FolderSchema
-from amnesia.modules.document import FolderCreatedEvent
+from amnesia.modules.folder import FolderCreatedEvent
 
 
 class FolderEntity(Entity):
