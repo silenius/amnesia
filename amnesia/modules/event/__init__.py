@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
+from .event import EventCreatedEvent
 from .model import Event
 from .resources import EventEntity
 from .resources import EventResource
 
 
 def includeme(config):
-    config.include('amnesia.modules.event.mapper')
-    config.include('amnesia.modules.event.views')
+    config.include('.mapper')
+    config.include('.views')
