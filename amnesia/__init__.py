@@ -31,10 +31,9 @@ def include_session(config):
 
 def include_authentication(config):
     settings = config.registry.settings
-    authn_policy = AuthTktAuthenticationPolicy(
-        settings['auth.secret'],
-        debug=asbool(settings.get('auth.debug', 'false'))
-    )
+    debug = asbool(settings.get('auth.debug', 'false'))
+    authn_policy = AuthTktAuthenticationPolicy(settings['auth.secret'],
+                                               debug=debug)
     config.set_authentication_policy(authn_policy)
 
 
