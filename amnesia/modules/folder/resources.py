@@ -7,6 +7,7 @@ from amnesia.modules.content import EntityManager
 from amnesia.modules.state import State
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder.validation import FolderSchema
+from amnesia.modules.document import FolderCreatedEvent
 
 
 class FolderEntity(Entity):
@@ -49,6 +50,8 @@ class FolderResource(EntityManager):
         try:
             self.dbsession.add(new_entity)
             self.dbsession.flush()
+            event = FolderCreatedEvent(self.request, new_entity)
+            self.request.registry.notify(event)
             return new_entity
         except DatabaseError:
             return False
