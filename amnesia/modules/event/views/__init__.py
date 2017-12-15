@@ -5,3 +5,4 @@ from .crud import EventCRUD
 
 def includeme(config):
     config.include('.query')
+    config.include('.crud')
