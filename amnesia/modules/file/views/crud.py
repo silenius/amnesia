@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import os.path
 import shutil
@@ -18,9 +19,13 @@ from amnesia.modules.file import FileEntity
 from amnesia.modules.file import FileResource
 from amnesia.modules.content.views import ContentCRUD
 
+log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+
 def includeme(config):
     ''' Pyramid includeme func'''
     config.scan(__name__)
+
 
 @view_config(context=FileEntity, name='download', request_method='GET')
 def download(context, request):
@@ -38,6 +43,7 @@ def download(context, request):
     file_response.headers.add('Content-Disposition', disposition)
 
     return file_response
+
 
 def save_file(request, entity, data):
     input_file = data['content'].file
