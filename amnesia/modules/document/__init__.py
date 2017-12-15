@@ -7,5 +7,5 @@ from .resources import DocumentResource
 
 
 def includeme(config):
-    config.include('amnesia.modules.document.mapper')
-    config.include('amnesia.modules.document.views')
+    config.include('.mapper')
+    config.include('.views')
