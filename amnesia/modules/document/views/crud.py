@@ -48,7 +48,7 @@ class DocumentCRUD(ContentCRUD):
         return self.edit_form(form_data)
 
     #########################################################################
-    # READ
+    # READ                                                                  #
     #########################################################################
 
     @view_config(request_method='GET', renderer='json',
@@ -58,7 +58,7 @@ class DocumentCRUD(ContentCRUD):
         schema = self.context.get_validation_schema()
         return schema.dump(self.context.entity, many=False).data
 
-    @view_config(request_method='GET', renderer='json',
+    @view_config(request_method='GET',
                  accept='text/html', permission='read',
                  context=DocumentEntity)
     def read_html(self):
