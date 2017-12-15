@@ -54,7 +54,7 @@ def main(global_config, **settings):
     config.include(include_authentication)
     config.include(include_authorization)
 
-    condig.include('amnesia.subscribers')
+    config.include('amnesia.subscribers')
     config.include('amnesia.renderers')
     config.include('amnesia.db')
 
