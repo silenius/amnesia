@@ -30,8 +30,11 @@ class FileEntity(Entity):
         file_path = os.path.join(files_dir, self.entity.subpath,
                                  self.entity.filename)
 
-        return FileResponse(file_path, self.request,
-                            content_type=self.entity.mime.full)
+        try:
+            return FileResponse(file_path, self.request,
+                                content_type=self.entity.mime.full)
+        except FileNotFoundError:
+            return None
 
 
 class FileResource(EntityManager):

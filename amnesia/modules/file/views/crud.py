@@ -7,12 +7,9 @@ import unicodedata
 
 import magic
 
-from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.httpexceptions import HTTPInternalServerError
-
-from sqlalchemy.exc import DatabaseError
+from pyramid.httpexceptions import HTTPNotFound
 
 from webob.compat import cgi_FieldStorage
 
@@ -25,9 +22,13 @@ def includeme(config):
     ''' Pyramid includeme func'''
     config.scan(__name__)
 
-@view_config(context=FileEntity, name="download", request_method='GET')
+@view_config(context=FileEntity, name='download', request_method='GET')
 def download(context, request):
     file_response = context.serve()
+
+    if not file_response:
+        return HTTPNotFound()
+
     file_name, file_ext = os.path.splitext(context.entity.original_name)
     file_name = ''.join(s for s in file_name if s.isalnum()) + file_ext
     # Important: HTTP headers should (must) be ASCII!
@@ -35,6 +36,7 @@ def download(context, request):
         encode('ascii', 'ignore').decode('ascii')
     disposition = '{0}; filename="{1}"'.format('attachment', file_name)
     file_response.headers.add('Content-Disposition', disposition)
+
     return file_response
 
 def save_file(request, entity, data):
