@@ -2,6 +2,8 @@
 
 # pylint: disable=E1101
 
+import logging
+
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from pyramid.httpexceptions import HTTPFound
@@ -14,6 +16,8 @@ from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderResource
 from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.content_type import ContentType
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def includeme(config):
@@ -93,10 +97,8 @@ class FolderCRUD(ContentCRUD):
     # READ                                                                  #
     #########################################################################
 
-    @view_config(context=FolderEntity,
-                 name='',
-                 request_method='GET',
-                 permission='read')
+    @view_config(context=FolderEntity, request_method='GET', permission='read',
+                 accept='text/html')
     def read(self):
         pl_cfg = self.entity.polymorphic_config
         entity = orm.with_polymorphic(pl_cfg.base_mapper.entity, pl_cfg.cls)

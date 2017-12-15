@@ -11,6 +11,10 @@ from amnesia.order import Path
 
 def includeme(config):
 
+    config.include('amnesia.modules.content.mapper')
+    config.include('amnesia.modules.account.mapper')
+    config.include('amnesia.modules.event.mapper')
+
     config.registry.settings['amnesia:orders'] = {
         'title': EntityOrder(Content, 'title', 'asc', doc='title'),
         'weight': EntityOrder(Content, 'weight', 'desc', doc='default'),

@@ -2,6 +2,7 @@
 
 # pylint: disable=E1101
 
+import logging
 
 from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.view import view_defaults
@@ -17,6 +18,8 @@ from amnesia.modules.content.validation import IdListSchema
 from amnesia.modules.tag import Tag
 from amnesia.utils.forms import render_form
 from amnesia.views import BaseView
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def includeme(config):
@@ -57,7 +60,7 @@ class ContentCRUD(BaseView):
     @view_config(request_method='GET', permission='read', accept='text/html')
     def read(self):
         context = {
-            'content': self.context.entity
+            'content': self.entity
         }
 
         try:

@@ -6,7 +6,6 @@ import json
 
 from pyramid.view import view_config
 
-from amnesia.modules.folder import FolderEntity
 from amnesia.modules.content_type import ContentType
 
 
@@ -23,7 +22,7 @@ def admin(context, request):
             content = content.parent
     except AttributeError:
         content = request.registry['root_folder']
-        request.dbsession.add(content)
+        #request.dbsession.add(content)
 
     session = request.session
     copy_oids = json.dumps(session.get('copy_oids', []))
