@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
@@ -7,6 +9,8 @@ from amnesia.modules.country import Country
 from amnesia.modules.event import EventEntity
 from amnesia.modules.event import EventResource
 from amnesia.modules.content.views import ContentCRUD
+
+log = logging.getLogger(__name__)
 
 
 def includeme(config):
