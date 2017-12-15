@@ -7,3 +7,4 @@ def includeme(config):
     config.include('.order')
     config.include('.admin')
     config.include('.browser')
+    config.include('.crud')
