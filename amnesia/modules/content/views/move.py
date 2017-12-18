@@ -4,8 +4,6 @@
 
 import operator
 
-import transaction
-
 from marshmallow import Schema
 from marshmallow.fields import Integer
 from marshmallow.validate import Range
@@ -13,12 +11,14 @@ from marshmallow.validate import Range
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPInternalServerError
 from sqlalchemy import sql
+from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
 from amnesia.modules.content import Entity
 
 
 def includeme(config):
+    ''' Pyramid includeme '''
     config.scan(__name__)
 
 
@@ -70,7 +70,7 @@ def weight(context, request):
         updated = request.dbsession.query(Content).enable_eagerloads(False).\
             filter(filters).update({'weight': new_weight},
                                    synchronize_session=False)
-        transaction.commit()
+        request.dbsession.flush()
         return {'updated': updated}
-    except:
+    except DatabaseError:
         raise HTTPInternalServerError()
