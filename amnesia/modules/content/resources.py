@@ -2,6 +2,7 @@
 
 # pylint: disable=E1101
 
+import logging
 import operator
 
 from pyramid.security import Allow
@@ -13,6 +14,8 @@ from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
 from amnesia.resources import Resource
+
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class Entity(Resource):
@@ -37,6 +40,8 @@ class Entity(Resource):
         return self.parent if self.parent else self.request.root
 
     def update(self, data):
+        """ Update an entity """
+
         self.entity.feed(**data)
 
         try:
@@ -47,6 +52,8 @@ class Entity(Resource):
             return False
 
     def delete(self):
+        """ Delete an entity from the database """
+
         try:
             self.dbsession.delete(self.entity)
             self.dbsession.flush()
@@ -54,7 +61,9 @@ class Entity(Resource):
         except DatabaseError:
             return False
 
-    def change_weight(self, new_weight):
+    def change_weight(self, new_weight: int):
+        """ Change the weight of the entity within it's container. """
+
         obj = self.dbsession.query(Content).enable_eagerloads(False).\
             with_lockmode('update').get(self.entity.id)
 
