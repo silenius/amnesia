@@ -8,3 +8,4 @@ def includeme(config):
 
     config.include('.crud')
     config.include('.move')
+    config.include('.copy')
