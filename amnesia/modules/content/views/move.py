@@ -2,18 +2,13 @@
 
 # pylint: disable=E1101
 
-import operator
-
 from marshmallow import Schema
 from marshmallow.fields import Integer
 from marshmallow.validate import Range
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPInternalServerError
-from sqlalchemy import sql
-from sqlalchemy.exc import DatabaseError
 
-from amnesia.modules.content import Content
 from amnesia.modules.content import Entity
 
 
