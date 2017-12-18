@@ -19,14 +19,6 @@ def include_pyramid_addons(config):
     config.include('pyramid_beaker')
     config.include('pyramid_tm')
     config.include('pyramid_mailer')
-    config.commit()
-
-
-def include_session(config):
-    settings = config.registry.settings
-    session_factory = session_factory_from_settings(settings)
-    config.set_session_factory(session_factory)
-    config.commit()
 
 
 def include_authentication(config):
@@ -50,7 +42,6 @@ def main(global_config, **settings):
     config = Configurator(settings=settings, root_factory=get_root)
 
     config.include(include_pyramid_addons)
-    config.include(include_session)
     config.include(include_authentication)
     config.include(include_authorization)
 
