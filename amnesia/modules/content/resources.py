@@ -2,10 +2,13 @@
 
 # pylint: disable=E1101
 
+import operator
+
 from pyramid.security import Allow
 from pyramid.security import Everyone
 from pyramid.security import ALL_PERMISSIONS
 
+from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
@@ -50,6 +53,43 @@ class Entity(Resource):
             return True
         except DatabaseError:
             return False
+
+    def change_weight(self, new_weight):
+        obj = self.dbsession.query(Content).enable_eagerloads(False).\
+            with_lockmode('update').get(self.entity.id)
+
+        (min_weight, max_weight) = sorted((new_weight, obj.weight))
+
+        # Do we move downwards or upwards ?
+        if new_weight - obj.weight > 0:
+            operation = operator.sub
+            whens = {min_weight: max_weight}
+        else:
+            operation = operator.add
+            whens = {max_weight: min_weight}
+
+        # Select all the rows between the current weight and the new weight
+        filters = sql.and_(
+            Content.container_id == obj.container_id,
+            Content.weight.between(min_weight, max_weight)
+        )
+
+        # Swap min_weight/max_weight, or increment/decrement by one depending
+        # on whether one moves up or down
+        new_weight = sql.case(
+            value=Content.weight, whens=whens,
+            else_=operation(Content.weight, 1)
+        )
+
+        try:
+            # The UPDATE statement
+            updated = self.dbsession.query(Content).enable_eagerloads(False).\
+                filter(filters).\
+                update({'weight': new_weight}, synchronize_session=False)
+            self.dbsession.flush()
+            return updated
+        except DatabaseError:
+            return None
 
 
 class EntityManager(Resource):

@@ -37,40 +37,4 @@ def weight(context, request):
     if errors:
         raise HTTPInternalServerError()
 
-    _weight = result['weight']
-
-    obj = request.dbsession.query(Content).enable_eagerloads(False).\
-        with_lockmode('update').get(context.entity.id)
-
-    (min_weight, max_weight) = sorted((_weight, obj.weight))
-
-    # Do we move downwards or upwards ?
-    if _weight - obj.weight > 0:
-        operation = operator.sub
-        whens = {min_weight: max_weight}
-    else:
-        operation = operator.add
-        whens = {max_weight: min_weight}
-
-    # Select all the rows between the current weight and the new weight
-    filters = sql.and_(
-        Content.container_id == obj.container_id,
-        Content.weight.between(min_weight, max_weight)
-    )
-
-    # Swap min_weight/max_weight, or increment/decrement by one depending on
-    # whether one moves up or down
-    new_weight = sql.case(
-        value=Content.weight, whens=whens,
-        else_=operation(Content.weight, 1)
-    )
-
-    try:
-        # The UPDATE statement
-        updated = request.dbsession.query(Content).enable_eagerloads(False).\
-            filter(filters).update({'weight': new_weight},
-                                   synchronize_session=False)
-        request.dbsession.flush()
-        return {'updated': updated}
-    except DatabaseError:
-        raise HTTPInternalServerError()
+    return {'updated': context.change_weight(result['weight'])}
