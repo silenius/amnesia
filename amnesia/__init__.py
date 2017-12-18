@@ -10,7 +10,7 @@ from pyramid.settings import asbool
 
 from amnesia.resources import get_root
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def include_pyramid_addons(config):
@@ -33,13 +33,7 @@ def include_authorization(config):
     config.set_authorization_policy(authz_policy)
 
 
-def main(global_config, **settings):
-    """
-    This function returns a Pyramid WSGI application.
-    """
-
-    config = Configurator(settings=settings, root_factory=get_root)
-
+def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
@@ -67,6 +61,19 @@ def main(global_config, **settings):
     #config.scan()
     #config.add_renderer('.html', 'pyramid_chameleon.zpt.renderer_factory')
     config.add_renderer('.xml', 'pyramid_chameleon.zpt.renderer_factory')
+
+
+def includeme(config):
+    config.include(include_amnesia)
+
+
+def main(global_config, **settings):
+    """
+    This function returns a Pyramid WSGI application.
+    """
+
+    config = Configurator(settings=settings, root_factory=get_root)
+    config.include(include_amnesia)
 
     return config.make_wsgi_app()
 
