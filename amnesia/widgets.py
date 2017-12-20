@@ -20,8 +20,6 @@ from amnesia.modules.folder import Folder
 from amnesia.modules.file import File
 from amnesia.modules.content_type import ContentType
 
-__all__ = ['Navigation', 'Tabs']
-
 
 class Widget(object):
 
@@ -55,12 +53,13 @@ class Navigation(Widget):
 
     @property
     def parents(self):
-        hierarchy = """ WITH RECURSIVE parents AS (
+        hierarchy = sql.text('''WITH RECURSIVE parents AS (
             SELECT c.*, 1 as level FROM content c WHERE c.id=:content_id
                 UNION ALL
             SELECT c.*, level+1 FROM content c
                                 JOIN parents p ON p.container_id=c.id
-        ) SELECT * FROM parents ORDER BY level DESC """
+        )
+        SELECT * FROM parents ORDER BY level DESC''')
 
         return self.dbsession.query(Content).from_statement(hierarchy).\
             params(content_id=self.content.id)
@@ -74,7 +73,7 @@ class Tabs(Widget):
     def __init__(self, request, root_id=None, **kwargs):
         super().__init__(request)
 
-        q = """ WITH RECURSIVE parents AS (
+        q = sql.text('''WITH RECURSIVE parents AS (
             SELECT
                 c.*, 1 AS level
             FROM
@@ -96,7 +95,8 @@ class Tabs(Widget):
             WHERE
                 c.container_id IS NOT NULL
                 AND c.exclude_nav=FALSE
-        ) SELECT * FROM parents ORDER BY container_id, level DESC, weight DESC """
+        )
+        SELECT * FROM parents ORDER BY container_id, level DESC, weight DESC''')
 
         self.kwargs = kwargs
         if 'template' in kwargs:
@@ -128,9 +128,9 @@ class RecentPosts(Widget):
             ContentType.name.in_(['document', 'event'])
         )
 
-        posts = self.dbsession.query(entity).join(entity.type).options(
-            orm.contains_eager(entity.type)
-        ).filter(filters).order_by(entity.added.desc()).limit(limit)
+        posts = self.dbsession.query(entity).join(entity.type).\
+            options(orm.contains_eager(entity.type)).filter(filters).\
+            order_by(entity.added.desc()).limit(limit)
 
         self.posts = posts.all()
 
