@@ -23,7 +23,6 @@ from amnesia.modules.content_type import ContentType
 
 class Widget(object):
 
-    name = None
     template = None
 
     def __init__(self, request):
@@ -36,7 +35,6 @@ class Widget(object):
 
 class Navigation(Widget):
 
-    name = 'navigation'
     template = 'amnesia:templates/widgets/navigation.pt'
 
     def __init__(self, request, content_or_id, action=None, after_text=[],
@@ -67,7 +65,6 @@ class Navigation(Widget):
 
 class Tabs(Widget):
 
-    name = 'tabs'
     template = 'amnesia:templates/widgets/tabs.pt'
 
     def __init__(self, request, root_id=None, **kwargs):
@@ -114,7 +111,6 @@ class Tabs(Widget):
 
 class RecentPosts(Widget):
 
-    name = 'recent posts'
     template = 'amnesia:templates/widgets/{}.pt'
 
     def __init__(self, request, limit=5, tmpl='recent_posts'):
@@ -137,7 +133,6 @@ class RecentPosts(Widget):
 
 class Archives(Widget):
 
-    name = 'archives'
     template = 'amnesia:templates/widgets/archives.pt'
 
     def __init__(self, request, starts=None, count=-6, types='*'):
