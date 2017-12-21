@@ -6,7 +6,7 @@
     /* <![CDATA[ */
 
     document.addEventListener("DOMContentLoaded",function(e) {
-        var folder = new Bbpf.Folder(${dump_obj(content, 'json',
+        var folder = new Bbpf.Folder(${h.dump_obj(content, 'json',
                 exclude_columns=['fts', 'position_in_container'], include_relations=False)}),
             counter = new Bbpf.Counter({
                 target : 'select_counter'

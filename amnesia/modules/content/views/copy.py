@@ -26,6 +26,7 @@ def copy_oids_to_session(context, request):
 
     return {'oids': oids}
 
+
 @view_config(name='sremove', request_method='POST',
              renderer='json', context=SessionResource,
              permission='delete')

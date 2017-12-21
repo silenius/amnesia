@@ -13,6 +13,7 @@ from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
+from amnesia.modules.content import ContentDeletedEvent
 from amnesia.resources import Resource
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -57,6 +58,8 @@ class Entity(Resource):
         try:
             self.dbsession.delete(self.entity)
             self.dbsession.flush()
+            event = ContentDeletedEvent(self.request, self.entity)
+            self.request.registry.notify(event)
             return True
         except DatabaseError:
             return False
@@ -126,10 +129,13 @@ class SessionResource(Resource):
         return self.request.session
 
     def copy_oids(self, oids):
+        """ Copy content ids in session """
         self.session['copy_oids'] = oids
+
         return self.session['copy_oids']
 
     def clear_oids(self):
+        """ Clear content ids from session """
         try:
             del self.session['copy_oids']
         except KeyError:

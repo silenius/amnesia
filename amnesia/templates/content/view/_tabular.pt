@@ -1,4 +1,4 @@
-<tr data-obj="${dump_obj(content, 'json', include_columns=['id', 'weight'], include_relations=False)}">
+<tr data-obj="${h.dump_obj(content, 'json', include_columns=['id', 'weight'], include_relations=False)}">
     <td>
         <input type="checkbox" data-purpose="select_object" />
     </td>

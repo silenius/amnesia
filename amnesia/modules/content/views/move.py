@@ -32,4 +32,6 @@ def weight(context, request):
     if errors:
         raise HTTPInternalServerError()
 
-    return {'updated': context.change_weight(result['weight'])}
+    updated = context.change_weight(result['weight'])
+
+    return {'updated': updated}

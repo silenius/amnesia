@@ -43,9 +43,9 @@ extra_requires = {
 }
 
 setup(
-    name='amnesia',
+    name='amnesiacms',
     version='0.1.1',
-    description='amnesia',
+    description='amnesia CMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
         "Programming Language :: Python",
