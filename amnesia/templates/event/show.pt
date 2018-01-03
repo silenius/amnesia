@@ -6,7 +6,7 @@
     /* <![CDATA[ */
 
     document.addEventListener("DOMContentLoaded",function(e) {
-        var evt = new Bbpf.Event(${dump_obj(content, 'json', include_columns=['address_latitude', 'address_longitude'], include_relations=False)}) ; // var
+        var evt = new Bbpf.Event(${h.dump_obj(content, 'json', include_columns=['address_latitude', 'address_longitude'], include_relations=False)}) ; // var
 
         if (evt.is_georeferenced()) {
             var point = new google.maps.LatLng(evt.address_latitude,

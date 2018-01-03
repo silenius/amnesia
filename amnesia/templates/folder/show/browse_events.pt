@@ -14,7 +14,7 @@
         /* <![CDATA[ */
 
         document.addEventListener("DOMContentLoaded",function(e) {
-            var folder = new Bbpf.Folder(${dump_obj(content, 'json', exclude_columns=['fts', 'position_in_container'], include_relations=['state'])}),
+            var folder = new Bbpf.Folder(${h.dump_obj(content, 'json', exclude_columns=['fts', 'position_in_container'], include_relations=['state'])}),
                 pagination = new Bbpf.Pagination({
                     values: {
                         limit: 9 
