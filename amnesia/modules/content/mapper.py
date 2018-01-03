@@ -28,9 +28,10 @@ def updated_listener(mapper, connection, target):
 PGSQL_FTS_WEIGHTS = frozenset(('a', 'b', 'c', 'd'))
 PGSQL_FTS_DEFAULT_WEIGHT = 'd'
 
+
 @event.listens_for(Content, 'before_update', propagate=True)
 @event.listens_for(Content, 'before_insert', propagate=True)
-def update_FTS_listener(mapper, connection, target):
+def update_fts_listener(mapper, connection, target):
     """ Set the 'fts' column (full text search) """
 
     fts = None
