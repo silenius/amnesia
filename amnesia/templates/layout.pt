@@ -126,7 +126,7 @@
     <!--TOPBAR SECTION END--> 
     
     <!--NAVIGATION ROW START-->
-    ${structure: widgets.Tabs(request, 1)}
+    ${structure: widgets.tabs(request, 1)}
     <!--NAVIGATION ROW END--> 
     
     <!--
@@ -149,7 +149,7 @@
         <div class="inner-banner" tal:define="banner content.find_prop('picture_banner') if content else None" style="${'background-image:url({}/{}/download)'.format(request.script_name, banner) if banner else None}">
                 <div class="container">
                     <h1>${h.shorten(request, banner_text if banner_text else content.title, 35)}</h1>
-                    ${structure: widgets.Navigation(request, nav_content, obj_dump=h.dump_obj)}
+                    ${structure: widgets.navigation(request, nav_content, obj_dump=h.dump_obj)}
                 </div>
             </div> 
         </metal:block>

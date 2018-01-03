@@ -53,6 +53,7 @@ def include_amnesia(config):
 
     config.include('amnesia.modules.content.views')
     config.include('amnesia.views.index')
+    config.include('amnesia.widgets')
 
     config.add_static_view(name='static', path='amnesia:static/')
 

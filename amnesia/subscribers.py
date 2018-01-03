@@ -6,7 +6,6 @@ from pyramid.events import BeforeRender
 from pyramid.events import subscriber
 
 from amnesia import helpers
-from amnesia import widgets
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +15,7 @@ def includeme(config):
 
 
 @subscriber(BeforeRender)
-def add_renderes_global(event):
+def add_renderers_global(event):
     event['h'] = helpers
+    widgets = event['request'].registry['widgets']
     event['widgets'] = widgets

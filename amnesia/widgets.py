@@ -18,6 +18,12 @@ from amnesia.modules.document import Document
 from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
 
+from amnesia.utils.widgets import widget_config
+
+
+def includeme(config):
+    config.scan(__name__)
+
 
 class Widget(object):
 
@@ -31,6 +37,7 @@ class Widget(object):
         return render(self.template, {'widget': self}, request=self.request)
 
 
+@widget_config('navigation')
 class Navigation(Widget):
 
     template = 'amnesia:templates/widgets/navigation.pt'
@@ -61,6 +68,7 @@ class Navigation(Widget):
             params(content_id=self.content.id)
 
 
+@widget_config('tabs')
 class Tabs(Widget):
 
     template = 'amnesia:templates/widgets/tabs.pt'
@@ -107,6 +115,7 @@ class Tabs(Widget):
         self.grouped_tabs = {i[0]: tuple(i[1]) for i in grp_by_container}
 
 
+@widget_config('recent_posts')
 class RecentPosts(Widget):
 
     template = 'amnesia:templates/widgets/{}.pt'
@@ -129,6 +138,7 @@ class RecentPosts(Widget):
         self.posts = posts.all()
 
 
+@widget_config('archives')
 class Archives(Widget):
 
     template = 'amnesia:templates/widgets/archives.pt'
