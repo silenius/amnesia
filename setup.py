@@ -20,7 +20,7 @@ install_requires = [
     'pyramid_beaker',
     'pyramid_tm',
     'pyramid_mailer',
-    'SQLAlchemy>=1.0.0,<1.2.0',
+    'SQLAlchemy>=1.2.0,<1.3.0',
     'transaction',
     'zope.sqlalchemy',
     'psycopg2',

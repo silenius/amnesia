@@ -10,6 +10,7 @@ def datetime_adapter(obj, request):
 
 
 def includeme(config):
+    ''' Pyramid includeme '''
     json_renderer = JSON(indent=4)
 
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)

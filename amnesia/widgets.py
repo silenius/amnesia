@@ -16,8 +16,6 @@ from amnesia.utils import polymorphic_ids
 from amnesia.modules.content import Content
 from amnesia.modules.document import Document
 from amnesia.modules.event import Event
-from amnesia.modules.folder import Folder
-from amnesia.modules.file import File
 from amnesia.modules.content_type import ContentType
 
 
