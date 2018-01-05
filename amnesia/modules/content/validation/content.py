@@ -11,7 +11,6 @@ from marshmallow import Schema
 from marshmallow import post_dump
 from marshmallow import post_load
 from marshmallow import pre_load
-from marshmallow import pre_dump
 
 from marshmallow.fields import Boolean
 from marshmallow.fields import DateTime
@@ -19,7 +18,6 @@ from marshmallow.fields import Integer
 from marshmallow.fields import String
 from marshmallow.fields import Nested
 from marshmallow.fields import List
-from marshmallow.fields import Dict
 from marshmallow.fields import Function
 
 from marshmallow.validate import Range
