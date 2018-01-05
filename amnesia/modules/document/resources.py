@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Entity
@@ -9,6 +11,8 @@ from amnesia.modules.document.validation import DocumentSchema
 from amnesia.modules.document import DocumentCreatedEvent
 from amnesia.modules.state import State
 from amnesia.modules.folder import Folder
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class DocumentEntity(Entity):
