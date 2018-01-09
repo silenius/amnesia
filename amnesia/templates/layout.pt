@@ -1,388 +1,157 @@
-<metal:block define-macro="page" tal:define="json import: json; content content|None; nav_content nav_content|content">
+<metal:block define-macro="page" tal:define="json import: json; content content|None">
 <!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="google-site-verification" content="TC27FvIKB4zPW3fH95b2GMuIIWhue7OOHorzAbSzX6w" >
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<metal:block define-slot="base">
-    <base tal:condition="not content" href="${request.application_url}" />
-    <base tal:condition="content" href="${request.url.rstrip('/')}" />
-<metal:block>
-<title metal:define-slot="title">
-    Belgian Biodiversity Platform
-    <metal:block define-slot="title_more" />
-</title>
-<!--CUSTOM CSS-->
-<link href="${request.static_url('amnesia:static/css/custom.css')}" rel="stylesheet" type="text/css" />
-<!--BOOTSTRAP CSS-->
-<link href="${request.static_url('amnesia:static/css/bootstrap.css')}" rel="stylesheet" type="text/css" />
-<!--COLOR CSS-->
-<link href="${request.static_url('amnesia:static/css/color.css')}" rel="stylesheet" type="text/css" />
-<!--RESPONSIVE CSS-->
-<link href="${request.static_url('amnesia:static/css/responsive.css')}" rel="stylesheet" type="text/css" />
-<!--OWL CAROSEL CSS-->
-<link href="${request.static_url('amnesia:static/css/owl.carousel.css')}" rel="stylesheet" type="text/css" />
-<!--ATTEND EVENTS-->
-<link href="${request.static_url('amnesia:static/css/no-css.css')}" rel="stylesheet" type="text/css">
-<link href="${request.static_url('amnesia:static/css/swiper.css')}" rel="stylesheet" type="text/css">
-<!--FONT AWESOME CSS-->
-<link href="${request.static_url('amnesia:static/css/font-awesome.min.css')}" rel="stylesheet" type="text/css" />
-<!--FAVICON ICON-->
-<link rel="shortcut icon" type="image/x-icon" href="${request.static_url('amnesia:static/images/favicon.ico')}">
-<metal:block define-slot="head-bottom" />
-<!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js')}"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js')}"></script>
-<![endif]-->
-</head>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    <metal:block define-slot="base">
+        <base tal:condition="not content" href="${request.application_url}" />
+        <base tal:condition="content" href="${request.url.rstrip('/')}" />
+    <metal:block>
+    <title metal:define-slot="title">
+        Belgian Biodiversity Platform
+        <metal:block define-slot="title_more" />
+    </title>
+    <link href="${request.static_url('amnesia:static/css/modern-business.css')}" rel="stylesheet">
+    <metal:block define-slot="head-bottom" />
+  </head>
+  <body>
 
-<body class="theme-style-1">
+  <!-- Navigation -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">Amnesia CMS</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-<!-- NEWSLETTER MODALS START -->
+        <ul class="nav navbar-nav">
+            ${structure: widgets.tabs(request, 1)}
+        </ul>
 
-<div class="modal fade" id="newsletter_modal" tabindex="-1" role="dialog" aria-labelledby="newsletter_modal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Newsletter Subscription</h4>
-      </div>
-      <div class="modal-body">
-          <p>Please solve the following captcha:</p>
-          <div id="recaptcha"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="modal fade" id="newsletter_ok" tabindex="-1" role="dialog" aria-labelledby="newsletter_ok">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-          <div id="recaptcha"></div>
-          <div class="alert alert-success" role="alert">You have been subscribed !</div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="newsletter_fail" tabindex="-1" role="dialog" aria-labelledby="newsletter_fail">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-          <div id="recaptcha"></div>
-          <div class="alert alert-danger" role="alert">Sorry, an error occurred. Please check that email is correct.</div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- NEWSLETTER MODALS END -->
-
-<!--WRAPPER START-->
-<div id="wrapper"> 
-  <!--HEADER START-->
-  <header id="header"> 
-    <!--TOPBAR SECTION START-->
-
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <!-- Collect the nav links, forms, and other content for toggling -->
-            <metal:block tal:condition="request.user">
-                <img class="navbar-gravatar img-circle" src="${h.gravatar(request,request.user.email, 48)}" />
-                <a class="btn btn-danger navbar-btn" href="${'{}/auth/logout'.format(request.script_name)}" role="button">Sign out <i class="fa fa-sign-out" aria-hidden="true"></i></a>
-            </metal:block>
-
-            <metal:block tal:condition="not request.user">
-                <a class="btn btn-success navbar-btn" href="${'{}/auth/login'.format(request.script_name)}" role="button"><i class="fa fa-sign-in" aria-hidden="true"></i> Sign in</a>
-                <a tal:condition="h.asbool(request.registry.settings.get('registration_enabled'))" class="btn btn-primary navbar-btn" href="${'{}/auth/register'.format(request.script_name)}" role="button"><i class="fa fa-user" aria-hidden="true"></i> Register</a>
-            </metal:block>
-
-            <a class="btn btn-default navbar-btn" href="${'{}/'.format(request.script_name)}"><i class="fa fa-home" aria-hidden="true"></i></a>
-            <form class="navbar-form navbar-right" action="${'{}/search'.format(request.script_name)}" method="get" role="search">
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Search" name="query">
-                </div>
-                <button type="submit" class="btn btn-default">Submit</button>
-            </form>
-
-            <metal:block use-macro="load: amnesia:templates/content/_navbar_content_crud.pt" tal:condition="content and request.user" />
-
-            <metal:block define-slot="navbar-bottom" />
+        <!--ç!
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="about.html">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="services.html">Services</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contact.html">Contact</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPortfolio" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Portfolio
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPortfolio">
+                <a class="dropdown-item" href="portfolio-1-col.html">1 Column Portfolio</a>
+                <a class="dropdown-item" href="portfolio-2-col.html">2 Column Portfolio</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Blog
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
+                <a class="dropdown-item" href="blog-home-1.html">Blog Home 1</a>
+                <a class="dropdown-item" href="blog-home-2.html">Blog Home 2</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Other Pages
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
+                <a class="dropdown-item" href="full-width.html">Full Width Page</a>
+                <a class="dropdown-item" href="sidebar.html">Sidebar Page</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+        -->
       </div>
     </nav>
-    <!--TOPBAR SECTION END--> 
-    
-    <!--NAVIGATION ROW START-->
-    ${structure: widgets.tabs(request, 1)}
-    <!--NAVIGATION ROW END--> 
-    
-    <!--
-    <div class="overlay overlay-contentscale">
-      <button type="button" class="overlay-close">Close</button>
-      <div class="cp-search-inner">
-        <form method="get">
-          <input type="text" placeholder="Enter your search" required>
-          <button class="submit"><i class="fa fa-search"></i></button>
-        </form>
+    <header>
+      <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+          <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner" role="listbox">
+          <!-- Slide One - Set the background image for this slide in the line below -->
+          <div class="carousel-item active" style="background-image: url('http://placehold.it/1900x1080')">
+            <div class="carousel-caption d-none d-md-block">
+              <h3>First Slide</h3>
+              <p>This is a description for the first slide.</p>
+            </div>
+          </div>
+          <!-- Slide Two - Set the background image for this slide in the line below -->
+          <div class="carousel-item" style="background-image: url('http://placehold.it/1900x1080')">
+            <div class="carousel-caption d-none d-md-block">
+              <h3>Second Slide</h3>
+              <p>This is a description for the second slide.</p>
+            </div>
+          </div>
+          <!-- Slide Three - Set the background image for this slide in the line below -->
+          <div class="carousel-item" style="background-image: url('http://placehold.it/1900x1080')">
+            <div class="carousel-caption d-none d-md-block">
+              <h3>Third Slide</h3>
+              <p>This is a description for the third slide.</p>
+            </div>
+          </div>
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
       </div>
+    </header>
+
+    <div class="container">
+      <h1 class="my-4">Welcome to Modern Business</h1>
     </div>
-    -->
-  </header>
-  <!--HEADER END--> 
 
-  <!--INNER-BANNER START-->
-    <metal:block tal:define="banner_text banner_text|nothing;">
-        <metal:block tal:condition="content or banner_text">
-        <div class="inner-banner" tal:define="banner content.find_prop('picture_banner') if content else None" style="${'background-image:url({}/{}/download)'.format(request.script_name, banner) if banner else None}">
-                <div class="container">
-                    <h1>${h.shorten(request, banner_text if banner_text else content.title, 35)}</h1>
-                    ${structure: widgets.navigation(request, nav_content, obj_dump=h.dump_obj)}
-                </div>
-            </div> 
-        </metal:block>
-    </metal:block>
-  <!--INNER-BANNER END-->
-
-  <metal:block define-slot="content" />
-  
-  <!--FOOTER START-->
-  <footer id="footer"> 
-    <!--NEWSLETTER START-->
-    <section class="newsletter">
-
-      <div class="holder">
-        <div class="container">
-          <div class="row">
-            <div class="col-md-3 col-sm-12"><strong class="title">Newsflash Subscription</strong></div>
-            <div class="col-md-4 col-sm-5">
-              <input placeholder="Name" required type="text" id="newsletter_name">
-            </div>
-            <div class="col-md-4 col-sm-5">
-              <input placeholder="Email" required type="text" id="newsletter_email">
-            </div>
-            <div class="col-md-1 col-sm-2">
-              <button type="submit" value="" id="newsletter_button"><i class="fa fa-envelope" aria-hidden="true"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!--NEWSLETTER END--> 
-    
-    <!--FOOTER SECTION 1 START-->
-    <section class="footer-section-1">
+    <footer class="py-5 bg-dark">
       <div class="container">
-        <div class="row">
-          <div class="col-md-4 col-sm-6">
-            <div class="box"> 
-              <h3>Funded by</h3>
-                <strong class="footer-logo"><a href="http://www.belspo.be"><img src="${request.resource_path(request.root, 3657, 'download')}" alt="belspo logo" /></a></strong>
-                <!--! <strong class="footer-logo"><a href="index.html"><img src="${request.static_url('amnesia:static/images/footer-logo.png')}" alt="logo"></a></strong>-->
-                <p>The Belgian Biodiversity Platform is initiated and funded by the Belgian Science Policy Office (<strong><a href="http://www.belspo.be">BELSPO</a></strong>)</p>
-                <a href="${request.resource_path(request.root, 3222)}" class="btn-style-2">More About Us</a> </div>
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <div class="box">
-                <h3>Twitter</h3>
-                <a class="twitter-timeline" data-height="230" data-theme="dark" data-chrome="nofooter noheader noborders" href="https://twitter.com/Biodiversity_be">Tweets by Biodiversity_be</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-            </div>
-          </div>
-          <!--!
-          <div class="col-md-3 col-sm-6">
-            <div class="box">
-                ${structure: widgets.RecentPosts(request, 3, 'recent_posts_home')}
-            </div>
-          </div>
-          -->
-          <div class="col-md-3 col-sm-6">
-            <div class="box">
-              <h3>Flickr</h3>
-              <div class="instagram">
-                <ul>
-                  <li><a href="https://www.flickr.com/photos/133832076@N07/albums"><img src="${request.static_url('amnesia:static/images/instagram-img-1.jpg')}" alt="img"></a></li>
-                  <li><a href="https://www.flickr.com/photos/133832076@N07/albums"><img src="${request.static_url('amnesia:static/images/instagram-img-2.jpg')}" alt="img"></a></li>
-                  <li><a href="https://www.flickr.com/photos/133832076@N07/albums"><img src="${request.static_url('amnesia:static/images/instagram-img-3.jpg')}" alt="img"></a></li>
-                  <li><a href="https://www.flickr.com/photos/133832076@N07/albums"><img src="${request.static_url('amnesia:static/images/instagram-img-4.jpg')}" alt="img"></a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+        <p class="m-0 text-center text-white">Copyright &copy; Your Website 2017</p>
       </div>
-    </section>
-    <!--FOOTER SECTION 1 END--> 
-    
-    <!--FOOTER SECTION 2 START-->
-    <section class="footer-section-2">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-3 col-sm-6">
-            <address>
-                <p><i class="fa fa-home" aria-hidden="true"></i>Belgian Biodiversity Platform<br /> Avenue Louise, 231<br />1050 Brussels, BELGIUM</p>
-            </address>
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <address>
-            <p><i class="fa fa-phone-square" aria-hidden="true"></i>Phone: +32 (0)2 238 36 71</p>
-            <p><a href="mailto:contact@biodiversity.be"><i class="fa fa-envelope-o" aria-hidden="true"></i>Email: contact@biodiversity.be</a></p>
-            </address>
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <address>
-            <p><a href="http://www.biodiversity.be"><i class="fa fa-globe" aria-hidden="true"></i>www.biodiversity.be</a></p>
-            </address>
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <div class="footer-social">
-              <ul>
-                <li><a href="https://www.flickr.com/photos/133832076@N07"><i class="fa fa-flickr" aria-hidden="true"></i></a></li>
-                <li><a href="https://twitter.com/biodiversity_be"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
-                <li><a href="https://www.linkedin.com/search/results/content/?keywords=belgian%20biodiversity%20platform"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12 col-sm-6">
-            <p class="text-center">&copy; 2017, Developed by the <a href="http://www.biodiversity.be/" target="_blank">Belgian Biodiversity Platform</a> - <a href="${'{}/1867'.format(request.script_name)}"> Photos and icons copyrights</a></p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!--FOOTER SECTION 2 END--> 
-    
-    <!--FOOTER SECTION 3 START-->
-    <!--
-    <section class="footer-section-3">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-6 col-sm-6">
-            <menu class="footer-menu">
-              <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="project-large.html">Projects</a></li>
-                <li><a href="news-post.html">News</a></li>
-                <li><a href="contact-1.html">Contact</a></li>
-              </ul>
-            </menu>
-          </div>
-          <div class="col-md-6 col-sm-6"><strong class="copyrights">&copy; 2017, Developed by the <a href="http://www.biodiversity.be/" target="_blank">Belgian Biodiversity Platform</a><br /><a href="${'{}/1867'.format(request.script_name)}"> Photos and icons copyrights</a></strong></div>
-        </div>
-      </div>
-    </section>
-    -->
-    <!--FOOTER SECTION 3 END--> 
-  </footer>
-  <!--FOOTER END--> 
-</div>
-<!--WRAPPER END--> 
+      <!-- /.container -->
+    </footer>
 
-<!--JQUERY--> 
-<script src="${request.static_url('amnesia:static/js/jquery.js')}"></script> 
-<!--BOOTSTRAP JS--> 
-<script src="${request.static_url('amnesia:static/js/bootstrap.min.js')}"></script> 
-<!--OWL CAROUSEL JS--> 
-<script src="${request.static_url('amnesia:static/js/owl.carousel.min.js')}"></script> 
-<!---Modernizr Script.js--> 
-<script src="${request.static_url('amnesia:static/js/modernizr.custom.js')}"></script> 
-<!---Search Script.js--> 
-<!--<script src="${request.static_url('amnesia:static/js/search-script.js')}"></script> -->
-<!--PROGRESS BAR JS--> 
-<script src="${request.static_url('amnesia:static/js/progress.js')}"></script> 
-<!--Running Counter--> 
-<script src="${request.static_url('amnesia:static/js/waypoint.js')}"></script> 
-<script src="${request.static_url('amnesia:static/js/jquery.counterup.min.js')}"></script> 
-<!--SELECT JS--> 
-<script src="${request.static_url('amnesia:static/js/jquery.noconflict.js')}"></script> 
-<script src="${request.static_url('amnesia:static/js/theme-scripts.js')}"></script> 
-<!--SWIPER SLIDER JS--> 
-<script src="${request.static_url('amnesia:static/js/swiper-jquery.js')}"></script> 
-<!--<script src="${request.static_url('amnesia:static/js/swiper-script.js')}"></script> -->
-<metal:block define-slot="javascript_srcs" />
-<!--CUSTOM JS--> 
-<script src="${request.static_url('amnesia:static/js/custom.js')}"></script>
-<!-- BBPF -->
-<script src="${request.static_url('amnesia:static/js/bbpf.js')}"></script>
-<script src="${request.static_url('amnesia:static/js/yeti/core.js')}"></script>
-<script src="${request.static_url('amnesia:static/js/yeti/ui.js')}"></script>
-<script tal:condition="js_tinymce | nothing" src="${request.static_url('amnesia:static/js/tinymce/tinymce.min.js')}"></script>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.2/js/all.js"></script>
 
-<script>
-    Bbpf.config.urls = {
-        host : "${request.host_url}",
-        prefix : "${request.script_name}"
-    }
+    <script src="${request.static_url('amnesia:static/js/custom.js')}"></script>
+    <!-- BBPF -->
+    <script src="${request.static_url('amnesia:static/js/bbpf.js')}"></script>
+    <script src="${request.static_url('amnesia:static/js/yeti/core.js')}"></script>
+    <script src="${request.static_url('amnesia:static/js/yeti/ui.js')}"></script>
+    <script tal:condition="js_tinymce | nothing" src="${request.static_url('amnesia:static/js/tinymce/tinymce.min.js')}"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        Bbpf.config.urls = {
+            host : "${request.host_url}",
+            prefix : "${request.script_name}"
+        }
+    </script>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var captcha,
-            modal = jQuery('#newsletter_modal'),
-            modal_ok = jQuery('#newsletter_ok'),
-            modal_fail = jQuery('#newsletter_fail'),
-            contact_name = Yeti.Element('newsletter_name'),
-            contact_email = Yeti.Element('newsletter_email'),
-            _verify_callback = function(resp) {
-                Yeti.AjaxRequest("${'{}/newsletter'.format(request.script_name)}", {
-                    method: 'POST',
-                    accept: 'json',
-                    data: {
-                        'g-recaptcha-response': resp,
-                        'name': contact_name.value,
-                        'email': contact_email.value
-                    },
-                    onreadystatechange: function(req) {
-                        if (req.success()) {
-                            modal.modal('hide');
-                            modal_ok.modal('show');
-                        } else if (req.error()) {
-                            modal.modal('hide');
-                            modal_fail.modal('show');
-                        }
-                    }
-                })
-            }
-
-        Yeti.Element('newsletter_button').addEventListener('click', function(e) {
-
-            if (contact_name.value.length && contact_email.value.length) {
-                modal.modal();
-                if (captcha === undefined) {
-                    captcha = grecaptcha.render('recaptcha', {
-                        'sitekey' : '6Lff_h8UAAAAABH9V5fkOr2SsVGpaXNffU8vwarO',
-                        'theme' : 'light',
-                        'callback':  _verify_callback
-                    });
-                } else {
-                    grecaptcha.reset(captcha);
-                }
-            }
-        });
-    });
-</script>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-55619176-2', 'auto');
-  ga('send', 'pageview');
-
-</script>
-</body>
+    <metal:block define-slot="body-bottom" />
+  </body>
 </html>
 </metal:block>
