@@ -73,6 +73,7 @@ class DocumentCRUD(ContentCRUD):
                  context=DocumentResource,
                  permission='create')
     def create(self):
+        ''' Create a new Document '''
         form_data = self.request.POST.mixed()
         data, errors = self.schema.load(form_data)
 

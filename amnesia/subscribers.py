@@ -7,7 +7,7 @@ from pyramid.events import subscriber
 
 from amnesia import helpers
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def includeme(config):
@@ -16,6 +16,7 @@ def includeme(config):
 
 @subscriber(BeforeRender)
 def add_renderers_global(event):
+    registry = event['request'].registry
+
     event['h'] = helpers
-    widgets = event['request'].registry['widgets']
-    event['widgets'] = widgets
+    event['widgets'] = registry['widgets']

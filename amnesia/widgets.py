@@ -2,6 +2,8 @@
 
 # pylint: disable=E1101
 
+import logging
+
 from calendar import monthrange
 from datetime import date
 from itertools import groupby
@@ -19,6 +21,8 @@ from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
 
 from amnesia.utils.widgets import widget_config
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def includeme(config):
@@ -110,9 +114,10 @@ class Tabs(Widget):
 
         self.root_id = root_id
 
-        # Group tabs per container_id
+        # Group tabs per container_id:
         grp_by_container = groupby(self.tabs, lambda x: x.container_id)
         self.grouped_tabs = {i[0]: tuple(i[1]) for i in grp_by_container}
+
 
 
 @widget_config('recent_posts')
