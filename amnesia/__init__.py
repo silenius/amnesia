@@ -23,8 +23,9 @@ def include_pyramid_addons(config):
 def include_authentication(config):
     settings = config.registry.settings
     debug = asbool(settings.get('auth.debug', 'false'))
-    authn_policy = AuthTktAuthenticationPolicy(settings['auth.secret'],
-                                               debug=debug)
+    authn_policy = AuthTktAuthenticationPolicy(
+        settings['auth.secret'], debug=debug, http_only=True
+    )
     config.set_authentication_policy(authn_policy)
 
 
