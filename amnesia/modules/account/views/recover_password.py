@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from marshmallow import ValidationError
+
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 
@@ -28,9 +31,13 @@ class RecoverPassword(BaseView):
     @view_config(request_method='GET')
     def get(self):
         params = self.request.GET.mixed()
-        result, errors = RecoverPasswordSchema(only=['token']).load(params)
 
-        if errors or not self.context.find_token(result['token']):
+        try:
+            result = RecoverPasswordSchema(only=['token']).load(params)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
+
+        if not self.context.find_token(result['token']):
             raise HTTPNotFound()
 
         form = self.form({'token': result['token']})
@@ -40,12 +47,12 @@ class RecoverPassword(BaseView):
     @view_config(request_method='POST')
     def post(self):
         form_data = self.request.POST.mixed()
-        result, errors = RecoverPasswordSchema(
-            only=['captcha_token', 'token', 'password', 'password_repeat']
-        ).load(form_data)
+        only = ['captcha_token', 'token', 'password', 'password_repeat']
 
-        if errors:
-            return {'form': self.form(form_data, errors)}
+        try:
+            result = RecoverPasswordSchema(only=only).load(form_data)
+        except ValidationError as error:
+            return {'form': self.form(form_data, error.messages)}
 
         principal = self.context.find_token(result['token'])
 

@@ -2,8 +2,11 @@
 
 # pylint: disable=E1101
 
+from marshmallow import ValidationError
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from sqlalchemy import orm
@@ -35,10 +38,11 @@ class TagCRUD(ContentCRUD):
                  context=TagResource)
     def create(self):
         form_data = self.request.POST.mixed()
-        data, errors = self.schema.load(form_data)
 
-        if errors:
-            raise HTTPInternalServerError()
+        try:
+            data = self.schema.load(form_data)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
 
         new_entity = self.context.create(data)
 

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from marshmallow import ValidationError
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
@@ -75,10 +77,11 @@ class DocumentCRUD(ContentCRUD):
     def create(self):
         ''' Create a new Document '''
         form_data = self.request.POST.mixed()
-        data, errors = self.schema.load(form_data)
 
-        if errors:
-            return self.edit_form(form_data, errors)
+        try:
+            data = self.schema.load(form_data)
+        except ValidationError as error:
+            return self.edit_form(form_data, error.messages)
 
         new_entity = self.context.create(data)
 
@@ -97,10 +100,11 @@ class DocumentCRUD(ContentCRUD):
                  permission='update')
     def update(self):
         form_data = self.request.POST.mixed()
-        data, errors = self.schema.load(form_data)
 
-        if errors:
-            return self.edit_form(form_data, errors)
+        try:
+            data = self.schema.load(form_data)
+        except ValidationError as error:
+            return self.edit_form(form_data, error.messages)
 
         updated_entity = self.context.update(data)
 

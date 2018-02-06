@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from marshmallow import ValidationError
+
 from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.view import view_defaults
 from pyramid.view import view_config
@@ -32,10 +34,11 @@ class Register(BaseView):
     @view_config(request_method='POST')
     def post(self):
         form_data = self.request.POST.mixed()
-        result, errors = AccountSchema().load(form_data)
 
-        if errors:
-            return {'form': self.form(form_data, errors)}
+        try:
+            result = AccountSchema().load(form_data)
+        except ValidationError as error:
+            return {'form': self.form(form_data, error.messages)}
 
         if self.context.find_login(result['login']):
             errors = {'login': 'Login already exist'}

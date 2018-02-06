@@ -2,6 +2,8 @@
 
 from random import choice
 
+from marshmallow import ValidationError
+
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
@@ -28,10 +30,11 @@ class FolderBrowserView(BaseView):
     def browse_json(self):
         params = self.request.GET.mixed()
         schema = FolderBrowserSchema(context={'request': self.request})
-        data, errors = schema.load(params)
 
-        if errors:
-            raise HTTPBadRequest(errors)
+        try:
+            data = schema.load(params)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
 
         browser = FolderBrowser(self.context.entity, self.request.dbsession)
         result = browser.query(**data)
@@ -42,10 +45,11 @@ class FolderBrowserView(BaseView):
     def browse(self, **kwargs):
         params = self.request.GET.mixed()
         schema = FolderBrowserSchema(context={'request': self.request})
-        data, errors = schema.load(params)
 
-        if errors:
-            raise HTTPBadRequest(errors)
+        try:
+            data = schema.load(params)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
 
         browser = FolderBrowser(self.context.entity, self.request.dbsession)
         result = browser.query(**data)

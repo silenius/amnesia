@@ -2,9 +2,11 @@
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPInternalServerError
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid_mailer.message import Message
 
 from marshmallow import Schema
+from marshmallow import ValidationError
 from marshmallow.fields import String
 from marshmallow.fields import Email
 from marshmallow.fields import Integer
@@ -35,10 +37,11 @@ class MessageValidation(Schema):
              renderer='amnesia:templates/contact/success.pt')
 def contact(request):
     recipients = request.registry.settings['contact_recipients'].split(',')
-    data, errors = MessageValidation().load(request.POST.mixed())
 
-    if errors:
-        raise HTTPInternalServerError()
+    try:
+        data = MessageValidation().load(request.POST.mixed())
+    except ValidationError as error:
+        raise HTTPBadRequest(error.messages)
 
     if recaptcha.verify(request, data['captcha_token']):
         mailer = request.mailer
@@ -65,5 +68,3 @@ def contact(request):
         }
 
     raise HTTPInternalServerError()
-
-
