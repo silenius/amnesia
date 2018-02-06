@@ -4,7 +4,9 @@
 
 import logging
 
-from pyramid.httpexceptions import HTTPInternalServerError
+from marshmallow import ValidationError
+
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
@@ -84,10 +86,10 @@ class ContentCRUD(BaseView):
 @view_config(request_method='POST', context=EntityManager, name='delete',
              renderer='json', permission='delete')
 def delete(context, request):
-    result, errors = IdListSchema().load(request.POST.mixed())
-
-    if errors:
-        raise HTTPInternalServerError()
+    try:
+        result = IdListSchema().load(request.POST.mixed())
+    except ValidationError as error:
+        raise HTTPBadRequest(error.messages)
 
     dbsession = request.dbsession
 

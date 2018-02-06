@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.httpexceptions import HTTPServerError
+from marshmallow import ValidationError
+
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_config
 
 from sqlalchemy import orm
@@ -18,10 +20,11 @@ def includeme(config):
 
 def polymorphic_orders(request):
     schema = PolymorphicOrderSelectionSchema()
-    result, errors = schema.load(request.GET.mixed())
 
-    if errors:
-        raise HTTPServerError(errors)
+    try:
+        result = schema.load(request.GET.mixed())
+    except ValidationError as error:
+        raise HTTPBadRequest(error.messages)
 
     # Selected entities
     entities = result['entities']

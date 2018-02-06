@@ -2,8 +2,11 @@
 
 # pylint: disable=E1101
 
+from marshmallow import ValidationError
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPBadRequest
 
 from marshmallow import Schema
 from marshmallow import pre_load
@@ -45,10 +48,10 @@ def archives(context, request):
     except ValueError:
         raise HTTPNotFound()
 
-    data, errors = ArchiveSchema().load(request.GET.mixed())
-
-    if errors:
-        raise HTTPNotFound()
+    try:
+        data = ArchiveSchema().load(request.GET.mixed())
+    except ValidationError as error:
+        raise HTTPBadRequest(error.messages)
 
     if data['ids']:
         types = polymorphic_cls(Content, data['ids'])

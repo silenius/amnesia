@@ -8,6 +8,8 @@ import unicodedata
 
 import magic
 
+from marshmallow import ValidationError
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPNotFound
@@ -139,10 +141,11 @@ class FileCRUD(ContentCRUD):
                  context=FileResource)
     def create(self):
         form_data = self.request.POST.mixed()
-        data, errors = self.schema.load(form_data)
 
-        if errors:
-            return self.edit_form(form_data, errors)
+        try:
+            data = self.schema.load(form_data)
+        except ValidationError as error:
+            return self.edit_form(form_data, error.messages)
 
         # The primary key of file_obj will be used for the filename (so that it
         # ensures uniqueness). If it's a new file_obj (so no id yet) we have to
@@ -164,10 +167,11 @@ class FileCRUD(ContentCRUD):
                  context=FileEntity)
     def update(self):
         form_data = self.request.POST.mixed()
-        data, errors = self.schema.load(form_data)
 
-        if errors:
-            return self.edit_form(form_data, errors)
+        try:
+            data = self.schema.load(form_data)
+        except ValidationError as error:
+            return self.edit_form(form_data, error.messages)
 
         updated_entity = self.context.update(data)
 
