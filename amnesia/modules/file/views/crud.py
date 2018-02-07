@@ -122,8 +122,8 @@ class FileCRUD(ContentCRUD):
     @view_config(context=FileEntity, request_method='GET', name='edit',
                  renderer='amnesia:templates/file/edit.pt')
     def edit(self):
-        result = self.schema.dump(self.entity)
-        return self.edit_form(result.data)
+        data = self.schema.dump(self.entity)
+        return self.edit_form(data)
 
     @view_config(request_method='GET', name='new',
                  renderer='amnesia:templates/file/edit.pt',
