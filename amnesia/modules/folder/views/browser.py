@@ -39,7 +39,7 @@ class FolderBrowserView(BaseView):
         browser = FolderBrowser(self.context.entity, self.request.dbsession)
         result = browser.query(**data)
         schema = self.context.get_validation_schema()
-        return {'results': schema.dump(result.query.all(), many=True).data}
+        return {'results': schema.dump(result.query.all(), many=True)}
 
     @view_config(request_method='GET', name='browse')
     def browse(self, **kwargs):

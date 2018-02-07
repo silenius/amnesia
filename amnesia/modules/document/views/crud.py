@@ -58,7 +58,7 @@ class DocumentCRUD(ContentCRUD):
                  context=DocumentEntity)
     def read_json(self):
         schema = self.context.get_validation_schema()
-        return schema.dump(self.context.entity, many=False).data
+        return schema.dump(self.context.entity, many=False)
 
     @view_config(request_method='GET',
                  accept='text/html', permission='read',
