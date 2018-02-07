@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from marshmallow import ValidationError
+
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember
 from pyramid.view import view_defaults
@@ -29,10 +33,10 @@ class Login(BaseView):
 
     @view_config(request_method='POST')
     def post(self):
-        result = LoginSchema().load(self.request.POST.mixed())
-
-        if result.errors:
-            return {'form': self.form(result.data, result.errors)}
+        try:
+            result = LoginSchema().load(self.request.POST.mixed())
+        except ValidationError as error:
+            return {'form': self.form(result.data, error.messages)}
 
         login = result.data['login']
         password = result.data['password']
