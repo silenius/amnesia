@@ -33,13 +33,15 @@ class Login(BaseView):
 
     @view_config(request_method='POST')
     def post(self):
-        try:
-            result = LoginSchema().load(self.request.POST.mixed())
-        except ValidationError as error:
-            return {'form': self.form(result.data, error.messages)}
+        params = self.request.POST.mixed()
 
-        login = result.data['login']
-        password = result.data['password']
+        try:
+            data = LoginSchema().load(params)
+        except ValidationError as error:
+            return {'form': self.form(params, error.messages)}
+
+        login = data['login']
+        password = data['password']
 
         user = self.context.find_login(login)
 
@@ -55,6 +57,6 @@ class Login(BaseView):
         else:
             errors = {'login': 'Login failed'}
 
-        form = self.form(result.data, errors)
+        form = self.form(data, errors)
 
         return {'form': form}
