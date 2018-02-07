@@ -63,13 +63,12 @@ class FolderCRUD(ContentCRUD):
                  renderer='amnesia:templates/folder/edit.pt',
                  permission='update')
     def edit(self):
-        result = self.schema.dump(self.entity)
-        return self.edit_form(result.data)
+        data = self.schema.dump(self.entity)
+        return self.edit_form(data)
 
     @view_config(request_method='GET', name='new',
                  renderer='amnesia:templates/folder/edit.pt',
-                 context=FolderResource,
-                 permission='create')
+                 context=FolderResource, permission='create')
     def new(self):
         form_data = self.request.GET.mixed()
         return self.edit_form(form_data)
