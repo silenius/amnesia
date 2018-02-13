@@ -52,13 +52,18 @@ class Content(Base):
         else:
             return mapper.class_
 
-    def find_prop(self, key):
+    def find_prop(self, key, maxdepth=None):
+        ''' Loop through all parents (or until maxdepth is reached) and check
+        for key in props (and return it). A maxdepth==0 will only search on
+        current object '''
         def walk_up(node):
             while node is not None:
                 yield node
                 node = node.parent
 
-        for node in walk_up(self):
+        for cpt, node in enumerate(walk_up(self)):
+            if maxdepth is not None and cpt > maxdepth:
+                break
             if node.props and key in node.props:
                 return node.props[key]
 
