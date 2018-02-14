@@ -8,3 +8,4 @@ def includeme(config):
     config.include('.admin')
     config.include('.browser')
     config.include('.crud')
+    config.include('.paste')
