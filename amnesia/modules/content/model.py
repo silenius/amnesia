@@ -49,8 +49,8 @@ class Content(Base):
 
         if ident is not None:
             return mapper.polymorphic_map[ident].class_
-        else:
-            return mapper.class_
+
+        return mapper.class_
 
     def find_prop(self, key, maxdepth=None):
         ''' Loop through all parents (or until maxdepth is reached) and check
@@ -74,7 +74,7 @@ class Content(Base):
         return self.updated if self.updated else self.added
 
     @last_update.expression
-    def last_update(cls):
+    def last_update(self, cls):
         return sql.func.coalesce(cls.updated, cls.added)
 
     ###########
