@@ -14,19 +14,19 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 install_requires = [
-    'pyramid>=1.9.0,<1.10',
+    'pyramid~=1.9',
     'Chameleon>3.0',
     'pyramid_chameleon',
     'pyramid_beaker',
     'pyramid_tm',
     'pyramid_mailer',
-    'SQLAlchemy>=1.2.0,<1.3.0',
+    'SQLAlchemy~=1.2',
     'transaction',
     'zope.sqlalchemy',
     'psycopg2',
     'pytz',
     'rutter',
-    'marshmallow>=3.0.0b2',
+    'marshmallow>=3.0.0b7',
     'bcrypt',
     'file-magic',
     'saexts'
@@ -44,7 +44,7 @@ extra_requires = {
 
 setup(
     name='amnesiacms',
-    version='0.1.1',
+    version='0.1.2',
     description='amnesia CMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
