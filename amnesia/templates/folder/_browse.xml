@@ -14,7 +14,7 @@
     <components tal:define="components components | ('main', 'pagination')">
 
         <navigation tal:condition="'navigation' in components" xmlns="http://www.w3.org/1999/xhtml">
-            ${structure: widgets.Navigation(request, content.id, obj_dump=dump_obj)}
+            ${structure: widgets.navigation(request, content.id, obj_dump=dump_obj)}
         </navigation>
 
         <main tal:condition="'main' in components" xmlns="http://www.w3.org/1999/xhtml">
