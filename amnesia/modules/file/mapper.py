@@ -22,7 +22,7 @@ def includeme(config):
     orm.mapper(
         FileTranslation, tables['content_translation'],
         inherits=ContentTranslation,
-        polymorphic_identify=get_type_id(config, 'file')
+        polymorphic_identity=get_type_id(config, 'file')
     )
 
     orm.mapper(
