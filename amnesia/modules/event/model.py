@@ -2,9 +2,12 @@
 
 from datetime import datetime
 
-from sqlalchemy import sql
-
 from ..content import Content
+from ..content import ContentTranslation
+
+
+class EventTranslation(ContentTranslation):
+    ''' Holds translations '''
 
 
 class Event(Content):

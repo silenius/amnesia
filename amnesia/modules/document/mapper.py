@@ -3,8 +3,9 @@
 from sqlalchemy import orm
 
 from .model import Document
+from .model import DocumentTranslation
 from ..content import Content
-from ..content_type import ContentType
+from ..content import ContentTranslation
 from ..content_type.utils import get_type_id
 
 
@@ -14,5 +15,14 @@ def includeme(config):
     config.include('amnesia.modules.content.mapper')
     config.include('amnesia.modules.content_type.mapper')
 
-    orm.mapper(Document, tables['document'], inherits=Content,
-        polymorphic_identity=get_type_id(config, 'document'))
+    orm.mapper(
+        DocumentTranslation, tables['document_translation'],
+        inherits=ContentTranslation,
+        polymorphic_identity=get_type_id(config, 'document'),
+        polymorphic_load='inline'
+    )
+
+    orm.mapper(
+        Document, tables['document'], inherits=Content,
+        polymorphic_identity=get_type_id(config, 'document'),
+    )

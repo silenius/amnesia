@@ -17,6 +17,10 @@ from saexts import Serializer
 from .. import Base
 
 
+class ContentTranslation(Base):
+    ''' Holds translations '''
+
+
 class Content(Base):
     """This is the base class for all the different types of Content (Event,
         News, Page, etc)"""
@@ -30,6 +34,7 @@ class Content(Base):
     def __repr__(self):
         return u'<{0}:{1} ({2})>'.format(self.__class__.__name__, self.id,
                                          self.title)
+
     def format(self, format, **kwargs):
         serializer = Serializer(self)
         return getattr(serializer, format)(**kwargs)

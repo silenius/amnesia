@@ -27,18 +27,6 @@ create domain mediumtext as text
 -- TABLES --
 ------------
 
-create table schema_version (
-    version     integer     not null,
-    applied_at  timestamptz not null default now(),
-    notes       text,
-
-    constraint pk__meta
-        primary key(version)
-);
-
-insert into schema_version(version, notes)
-values (1, 'init');
-
 ------------------
 -- content_type --
 ------------------
@@ -60,6 +48,20 @@ insert into content_type(name) values('folder');
 insert into content_type(name) values('document');
 insert into content_type(name) values('event');
 insert into content_type(name) values('file');
+
+--------------
+-- language --
+--------------
+
+create table language (
+    id      char(2)     not null,
+    name    smalltext   not null,
+
+    constraint pk_language
+        primary key(id)
+);
+
+insert into language(id, name) values ('en', 'English');
 
 -----------
 -- state --
@@ -212,15 +214,12 @@ create table content (
     id                  serial      not null,
     added               timestamptz not null    default current_timestamp,
     updated             timestamptz,
-    title               mediumtext  not null,
-    description         text,
     effective           timestamptz,
     expiration          timestamptz,
     exclude_nav         boolean     not null    default false,
     weight              integer     not null,
     is_fts              boolean     not null    default true,
     props               json,
-    fts                 tsvector,
 
     content_type_id     smallint    not null,
     owner_id            integer     not null,
@@ -273,11 +272,13 @@ create index idx_content_weight
 create index idx_content_coalesce_updated_added 
     on content(COALESCE(updated, added));
 
-create index idx_content_fts
-    on content using gin(fts);
-
-insert into content (title, content_type_id, owner_id, state_id, weight) 
-values ('Home', (select id from content_type where name='folder'), (select id from account where login='admin'), (select id from state where name='published'), 1);
+insert into content (content_type_id, owner_id, state_id, weight) 
+values (
+    (select id from content_type where name='folder'), 
+    (select id from account where login='admin'), 
+    (select id from state where name='published'), 
+    1
+);
 
 create or replace function compute_weight() returns trigger as $weight$
     begin
@@ -305,6 +306,33 @@ $weight$ language plpgsql;
 create trigger compute_weight before insert or update on content
     for each row execute procedure compute_weight();
 
+-------------------------
+-- content translation --
+-------------------------
+
+create table content_translation (
+    language_id char(2)     not null,
+    content_id  integer     not null,
+    title       mediumtext  not null,
+    description text,
+    fts         tsvector,
+
+    constraint pk_content_translation
+        primary key(language_id, content_id),
+
+    constraint fk_content_translation_language
+        foreign key(language_id) references language(id),
+
+    constraint fk_content_translation_content
+        foreign key(content_id) references content(id)
+);
+
+create index idx_content_translation_fts
+    on content_translation using gin(fts);
+
+insert into content_translation(language_id, content_id, title, description)
+values ('en', 1, 'Home', 'Website''s root');
+
 -----------------
 -- content tag --
 -----------------
@@ -329,13 +357,32 @@ create table content_tag (
 
 create table document (
     content_id  integer not null,
-    body        text    not null,
 
     constraint pk_document
         primary key(content_id),
 
     constraint fk_content
         foreign key(content_id) references content(id)
+);
+
+--------------------------
+-- document_translation --
+--------------------------
+
+create table document_translation (
+    language_id char(2) not null,
+    content_id  integer not null,
+    body        text    not null,
+
+    constraint pk_document_translation
+        primary key(language_id, content_id),
+
+    constraint fk_document_translation_content_translation
+        foreign key(language_id, content_id) 
+        references content_translation(language_id, content_id),
+
+    constraint fk_document_translation_document
+        foreign key(content_id) references document(content_id)
 );
 
 ------------
@@ -430,7 +477,6 @@ create table event (
     address_latitude    float,
     address_longitude   float,
     url                 url,
-    body                text        not null,
     attendees           text,
     contact_name        text,
     contact_email       text,
@@ -462,3 +508,23 @@ create index idx_event_starts
 
 create index idx_event_country_iso
     on event(country_iso);
+
+--------------------------
+-- event_translation --
+--------------------------
+
+create table event_translation (
+    language_id char(2) not null,
+    content_id  integer not null,
+    body        text    not null,
+
+    constraint pk_event_translation
+        primary key(language_id, content_id),
+
+    constraint fk_event_translation_content_translation
+        foreign key(language_id, content_id) 
+        references content_translation(language_id, content_id),
+
+    constraint fk_event_translation_event
+        foreign key(content_id) references event(content_id)
+);
