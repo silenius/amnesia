@@ -2,6 +2,7 @@
 
 from .event import EventCreatedEvent
 from .model import Event
+from .model import EventTranslation
 from .resources import EventEntity
 from .resources import EventResource
 

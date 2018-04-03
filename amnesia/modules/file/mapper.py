@@ -4,9 +4,11 @@ from sqlalchemy import orm
 
 from amnesia.modules.mime import Mime
 from amnesia.modules.file import File
+from amnesia.modules.file import FileTranslation
 from amnesia.modules.content import Content
+from amnesia.modules.content import ContentTranslation
 
-from ..content_type.utils import get_type_id
+from amnesia.modules.content_type.utils import get_type_id
 
 
 def includeme(config):
@@ -18,11 +20,14 @@ def includeme(config):
     config.include('amnesia.modules.mime.mapper')
 
     orm.mapper(
-        File,
-        tables['data'],
-        inherits=Content,
+        FileTranslation, tables['content_translation'],
+        inherits=ContentTranslation,
+        polymorphic_identify=get_type_id(config, 'file')
+    )
+
+    orm.mapper(
+        File, tables['data'], inherits=Content,
         polymorphic_identity=get_type_id(config, 'file'),
-        #inherit_condition=tables['data'].c.content_id == tables['content'].c.id
         properties={
             'mime': orm.relationship(Mime, lazy='joined')
         }

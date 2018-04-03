@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import orm
-from sqlalchemy import sql
 
 from amnesia.modules.folder import Folder
+from amnesia.modules.folder import FolderTranslation
 from amnesia.modules.content import Content
+from amnesia.modules.content import ContentTranslation
 from amnesia.modules.document import Document
 from amnesia.modules.content_type.utils import get_type_id
 from amnesia.modules.content_type import ContentType
@@ -18,26 +19,22 @@ def includeme(config):
 
     tables = config.registry['metadata'].tables
 
-    t_content = tables['content']
-    t_folder = tables['folder']
-    t_document = tables['document']
-
-#    q_count_children = sql.select([
-#        sql.func.count('*').label('cpt')
-#    ]).where(
-#        t_content.c.container_id == t_folder.c.content_id
-#    ).lateral('children')
+    orm.mapper(
+        FolderTranslation, tables['content_translation'],
+        inherits=ContentTranslation,
+        polymorphic_identity=get_type_id(config, 'folder')
+    )
 
     orm.mapper(
-        Folder,
-        t_folder,
-        inherits=Content,
+        Folder, tables['folder'], inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
-        inherit_condition=t_folder.c.content_id == t_content.c.id,
+        inherit_condition=tables['folder'].c.content_id ==
+        tables['content'].c.id,
         properties={
             'alternate_index': orm.relationship(
                 Document,
-                primaryjoin=t_folder.c.index_content_id == t_document.c.content_id,
+                primaryjoin=tables['folder'].c.index_content_id ==
+                tables['document'].c.content_id,
                 innerjoin=True,
                 uselist=False,
                 post_update=True,

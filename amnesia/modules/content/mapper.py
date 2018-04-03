@@ -7,15 +7,18 @@ from pyramid.threadlocal import get_current_registry
 from pytz import timezone
 
 from sqlalchemy import orm
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy import sql
 from sqlalchemy import event
 
 from .model import Content
+from .model import ContentTranslation
 from amnesia.modules.account import Account
 from ..state import State
 from ..content_type import ContentType
 from ..tag import Tag
 from ..folder import Folder
+from amnesia.modules.language import Language
 
 
 @event.listens_for(Content, 'before_update', propagate=True)
@@ -53,7 +56,6 @@ def update_fts_listener(mapper, connection, target):
     target.fts = fts
 
 
-
 def includeme(config):
     tables = config.registry['metadata'].tables
 
@@ -61,16 +63,47 @@ def includeme(config):
     config.include('amnesia.modules.state.mapper')
     config.include('amnesia.modules.content_type.mapper')
     config.include('amnesia.modules.tag.mapper')
+    config.include('amnesia.modules.language.mapper')
 
     _count_alias = tables['content'].alias('_count_children')
+
+    orm.mapper(
+        ContentTranslation, tables['content_translation'],
+        polymorphic_on=tables['content_translation'].c.content_type_id,
+        properties={
+            'language': orm.relationship(
+                Language,
+                lazy='joined',
+                innerjoin=True
+            ),
+
+            'content': orm.relationship(
+                Content,
+                innerjoin=True,
+                back_populates='translations'
+            ),
+
+            'type': orm.relationship(
+                ContentType,
+                lazy='joined',
+                innerjoin=True
+            ),
+
+            #'content_type_id': orm.column_property(
+            #    sql.select(
+            #        [tables['content'].c.content_type_id]
+            #    ).where(
+            #        tables['content_translation'].c.content_id ==
+            #        tables['content'].c.id
+            #    ), deferred=True
+            #)
+        }
+    )
 
     orm.mapper(
         Content, tables['content'],
         polymorphic_on=tables['content'].c.content_type_id,
         properties={
-
-            # no need to load this column by default
-            'fts': orm.deferred(tables['content'].c.fts),
 
             #################
             # RELATIONSHIPS #
@@ -109,6 +142,14 @@ def includeme(config):
                 backref=orm.backref('children', cascade='all, delete-orphan')
             ),
 
+            'translations': orm.relationship(
+                ContentTranslation,
+                back_populates='content',
+                cascade='all, delete-orphan',
+                lazy='subquery',
+                collection_class=attribute_mapped_collection('language_id')
+            ),
+
             #####################
             # COLUMN PROPERTIES #
             #####################
@@ -122,11 +163,11 @@ def includeme(config):
             ),
 
             # FIXME: move to folder mapper with a LATERAL expression
-            'count_children' : orm.column_property(
+            'count_children': orm.column_property(
                 sql.select([sql.func.count()]).where(
                     _count_alias.c.container_id == tables['content'].c.id
                 ).correlate(tables['content']).label('count_children'),
-                deferred = True
+                deferred=True
             ),
 
         })

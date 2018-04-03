@@ -3,7 +3,9 @@
 from sqlalchemy import orm
 
 from amnesia.modules.event import Event
+from amnesia.modules.event import EventTranslation
 from amnesia.modules.content import Content
+from amnesia.modules.content import ContentTranslation
 from amnesia.modules.content_type.utils import get_type_id
 from amnesia.modules.country import Country
 
@@ -16,11 +18,18 @@ def includeme(config):
     config.include('amnesia.modules.country.mapper')
 
     orm.mapper(
-        Event,
-        tables['event'],
-        inherits=Content,
+        EventTranslation, tables['event_translation'],
+        inherits=ContentTranslation,
+        polymorphic_identity=get_type_id(config, 'event'),
+        polymorphic_load='inline'
+    )
+
+    orm.mapper(
+        Event, tables['event'], inherits=Content,
         polymorphic_identity=get_type_id(config, 'event'),
         properties={
-            'country': orm.relationship(Country, lazy='joined')
+            'country': orm.relationship(
+                Country, lazy='joined'
+            )
         }
     )
