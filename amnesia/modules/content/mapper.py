@@ -86,7 +86,8 @@ def includeme(config):
             'type': orm.relationship(
                 ContentType,
                 lazy='joined',
-                innerjoin=True
+                innerjoin=True,
+                viewonly=True
             ),
 
             #'content_type_id': orm.column_property(
