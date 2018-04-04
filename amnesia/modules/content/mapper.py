@@ -132,7 +132,8 @@ def includeme(config):
 
             'tags': orm.relationship(
                 Tag,
-                secondary=tables['content_tag']
+                secondary=tables['content_tag'],
+                back_populates='contents'
             ),
 
             'parent': orm.relationship(
