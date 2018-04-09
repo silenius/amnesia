@@ -3,13 +3,15 @@
 from datetime import datetime
 
 from pyramid.threadlocal import get_current_registry
+from pyramid.threadlocal import get_current_request
 
 from pytz import timezone
 
+from sqlalchemy import event
+from sqlalchemy import sql
 from sqlalchemy import orm
 from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy import sql
-from sqlalchemy import event
+from sqlalchemy.types import String
 
 from .model import Content
 from .model import ContentTranslation
@@ -74,12 +76,14 @@ def includeme(config):
             'language': orm.relationship(
                 Language,
                 lazy='joined',
-                innerjoin=True
+                innerjoin=True,
+                uselist=False
             ),
 
             'content': orm.relationship(
                 Content,
                 innerjoin=True,
+                uselist=False,
                 back_populates='translations'
             ),
 
@@ -87,17 +91,9 @@ def includeme(config):
                 ContentType,
                 lazy='joined',
                 innerjoin=True,
-                viewonly=True
+                viewonly=True,
+                uselist=False
             ),
-
-            #'content_type_id': orm.column_property(
-            #    sql.select(
-            #        [tables['content'].c.content_type_id]
-            #    ).where(
-            #        tables['content_translation'].c.content_id ==
-            #        tables['content'].c.id
-            #    ), deferred=True
-            #)
         }
     )
 
@@ -144,11 +140,31 @@ def includeme(config):
                 backref=orm.backref('children', cascade='all, delete-orphan')
             ),
 
+            # pylint: disable=no-member
+            'current_translation': orm.relationship(
+                ContentTranslation,
+                primaryjoin=lambda: sql.and_(
+                    ContentTranslation.content_id == Content.id,
+                    ContentTranslation.language_id == sql.bindparam(
+                        None,
+                        callable_=lambda: get_current_request().locale_name,
+                        type_=String()
+                    )
+                ),
+                lazy='joined',
+                uselist=False,
+                innerjoin=True,
+                viewonly=True,
+                bake_queries=False,
+                #back_populates='content'
+            ),
+
             'translations': orm.relationship(
                 ContentTranslation,
                 back_populates='content',
                 cascade='all, delete-orphan',
-                lazy='subquery',
+                #lazy='subquery',
+                innerjoin=True,
                 collection_class=attribute_mapped_collection('language_id')
             ),
 
