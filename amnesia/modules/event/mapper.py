@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import orm
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from amnesia.modules.event import Event
 from amnesia.modules.event import EventTranslation
@@ -30,6 +31,15 @@ def includeme(config):
         properties={
             'country': orm.relationship(
                 Country, lazy='joined'
-            )
+            ),
+            'translations': orm.relationship(
+                EventTranslation,
+                cascade='all, delete-orphan',
+                lazy='subquery',
+                innerjoin=True,
+                back_populates='content',
+                collection_class=attribute_mapped_collection('language_id')
+            ),
+
         }
     )

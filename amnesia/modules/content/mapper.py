@@ -13,13 +13,13 @@ from sqlalchemy import orm
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.types import String
 
-from .model import Content
-from .model import ContentTranslation
+from amnesia.modules.content import Content
+from amnesia.modules.content import ContentTranslation
 from amnesia.modules.account import Account
-from ..state import State
-from ..content_type import ContentType
-from ..tag import Tag
-from ..folder import Folder
+from amnesia.modules.state import State
+from amnesia.modules.content_type import ContentType
+from amnesia.modules.tag import Tag
+from amnesia.modules.folder import Folder
 from amnesia.modules.language import Language
 
 
@@ -58,6 +58,11 @@ def update_fts_listener(mapper, connection, target):
     target.fts = fts
 
 
+def _get_locale():
+    req = get_current_request()
+    return req.locale_name
+
+
 def includeme(config):
     tables = config.registry['metadata'].tables
 
@@ -84,7 +89,7 @@ def includeme(config):
                 Content,
                 innerjoin=True,
                 uselist=False,
-                back_populates='translations'
+                back_populates='translations',
             ),
 
             'type': orm.relationship(
@@ -141,30 +146,30 @@ def includeme(config):
             ),
 
             # pylint: disable=no-member
-            'current_translation': orm.relationship(
-                ContentTranslation,
-                primaryjoin=lambda: sql.and_(
-                    ContentTranslation.content_id == Content.id,
-                    ContentTranslation.language_id == sql.bindparam(
-                        None,
-                        callable_=lambda: get_current_request().locale_name,
-                        type_=String()
-                    )
-                ),
-                lazy='joined',
-                uselist=False,
-                innerjoin=True,
-                viewonly=True,
-                bake_queries=False,
-                #back_populates='content'
-            ),
+#            'current_translation': orm.relationship(
+#                ContentTranslation,
+#                primaryjoin=lambda: sql.and_(
+#                    ContentTranslation.content_id == Content.id,
+#                    ContentTranslation.language_id == sql.bindparam(
+#                        None,
+#                        callable_=lambda: _get_locale(),
+#                        type_=String()
+#                    )
+#                ),
+#                #lazy='joined',
+#                uselist=False,
+#                innerjoin=True,
+#                viewonly=True,
+#                bake_queries=False,
+#                back_populates='content'
+#            ),
 
             'translations': orm.relationship(
                 ContentTranslation,
-                back_populates='content',
                 cascade='all, delete-orphan',
-                #lazy='subquery',
+                lazy='subquery',
                 innerjoin=True,
+                back_populates='content',
                 collection_class=attribute_mapped_collection('language_id')
             ),
 
@@ -189,3 +194,43 @@ def includeme(config):
             ),
 
         })
+
+
+    # XXX TEST
+#    j = orm.join(
+#        ContentTranslation, Content,
+#        ContentTranslation.content_id == Content.id
+#    ).join(
+#        ContentType,
+#        ContentType.id == Content.content_type_id
+#    )
+#
+#    foo_mapper = orm.mapper(
+#        ContentTranslation, j,
+#        polymorphic_on=j.c.content_content_type_id,
+#        non_primary=True, properties={
+#            'id': orm.column_property(
+#                j.c.content_id
+#            ),
+#
+#            'content_type_id': orm.column_property(
+#                j.c.content_content_type_id,
+#                j.c.content_type_id
+#            ),
+#
+#            'description': orm.column_property(
+#                j.c.content_translation_description
+#            ),
+#
+#            'content_type_description': orm.column_property(
+#                j.c.content_type_description
+#            ),
+#        }
+#    )
+#
+#    content_mapper.add_property('translations', orm.relationship(
+#        foo_mapper,
+#        primaryjoin=ContentTranslation.content_id==foo_mapper.c.id,
+#        innerjoin=True,
+#        collection_class=attribute_mapped_collection('language_id')
+#    ))

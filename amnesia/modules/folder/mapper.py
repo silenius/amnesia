@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from pyramid.events import subscriber
+from pyramid.events import ApplicationCreated
+
 from sqlalchemy import orm
 
 from amnesia.modules.folder import Folder
@@ -12,6 +15,8 @@ from amnesia.modules.content_type import ContentType
 
 
 def includeme(config):
+
+    config.scan(__name__)
 
     config.include('amnesia.modules.content.mapper')
     config.include('amnesia.modules.content_type.mapper')
@@ -48,9 +53,17 @@ def includeme(config):
         }
     )
 
-    dbsession = config.registry['dbsession_factory']()
-    config.registry['root_folder'] = dbsession.query(Folder).filter_by(
-        container_id=None).one()
+
+@subscriber(ApplicationCreated)
+def configure_root_folder(event):
+    registry = event.app.registry
+
+    dbsession = registry['dbsession_factory']()
+
+    registry['root_folder'] = dbsession.query(Folder).options(
+        orm.noload('*')
+    ).filter_by(
+        container_id=None
+    ).one()
+
     dbsession.close()
-
-
