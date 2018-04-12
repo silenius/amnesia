@@ -80,36 +80,39 @@ class Tabs(Widget):
     def __init__(self, request, root_id=None, **kwargs):
         super().__init__(request)
 
-        q = sql.text('''WITH RECURSIVE parents AS (
-            SELECT
-                c.*, 1 AS level
-            FROM
-                folder f
-            JOIN
-                content c ON c.id = f.content_id
-            WHERE
-                c.exclude_nav = FALSE
-                AND c.container_id = :container_id
-            UNION ALL
-            SELECT
-                c.*, level+1
-            FROM
-                content c
-            JOIN
-                folder f ON c.id = f.content_id
-            JOIN
-                parents p ON p.id = c.container_id
-            WHERE
-                c.container_id IS NOT NULL
-                AND c.exclude_nav=FALSE
-        )
-        SELECT * FROM parents ORDER BY container_id, level DESC, weight DESC''')
+        stmt = sql.text('''
+            WITH RECURSIVE parents AS (
+                SELECT
+                    c.*, 1 AS level
+                FROM
+                    folder f
+                JOIN
+                    content c ON c.id = f.content_id
+                WHERE
+                    c.exclude_nav = FALSE
+                    AND c.container_id = :container_id
+                UNION ALL
+                SELECT
+                    c.*, level+1
+                FROM
+                    content c
+                JOIN
+                    folder f ON c.id = f.content_id
+                JOIN
+                    parents p ON p.id = c.container_id
+                WHERE
+                    c.container_id IS NOT NULL
+                    AND c.exclude_nav=FALSE
+            )
+            SELECT *
+            FROM parents
+            ORDER BY container_id, level DESC, weight DESC ''')
 
         self.kwargs = kwargs
         if 'template' in kwargs:
             self.template = kwargs['template']
 
-        self.tabs = self.dbsession.query(Content).from_statement(q).\
+        self.tabs = self.dbsession.query(Content).from_statement(stmt).\
             params(container_id=root_id).all()
 
         self.root_id = root_id
@@ -117,7 +120,6 @@ class Tabs(Widget):
         # Group tabs per container_id:
         grp_by_container = groupby(self.tabs, lambda x: x.container_id)
         self.grouped_tabs = {i[0]: tuple(i[1]) for i in grp_by_container}
-
 
 
 @widget_config('recent_posts')

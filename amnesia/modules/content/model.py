@@ -32,8 +32,7 @@ class Content(Base):
         super().__init__(**kwargs)
 
     def __repr__(self):
-        return u'<{0}:{1} ({2})>'.format(self.__class__.__name__, self.id,
-                                         self.title)
+        return u'<{0}:{1}>'.format(self.__class__.__name__, self.id)
 
     def format(self, format, **kwargs):
         serializer = Serializer(self)
@@ -81,6 +80,22 @@ class Content(Base):
     @last_update.expression
     def last_update(self, cls):
         return sql.func.coalesce(cls.updated, cls.added)
+
+    @hybrid_property
+    def title(self):
+        return self.current_translation.title
+
+    @title.setter
+    def title(self, value):
+        self.current_translation.title = value
+
+    @hybrid_property
+    def description(self):
+        return self.current_translation.description
+
+    @description.setter
+    def description(self, value):
+        self.current_translation.description = value
 
     ###########
     # Filters #

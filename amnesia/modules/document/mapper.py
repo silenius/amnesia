@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import orm
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from .model import Document
 from .model import DocumentTranslation
@@ -25,4 +26,14 @@ def includeme(config):
     orm.mapper(
         Document, tables['document'], inherits=Content,
         polymorphic_identity=get_type_id(config, 'document'),
+        properties={
+            'translations': orm.relationship(
+                DocumentTranslation,
+                cascade='all, delete-orphan',
+                lazy='subquery',
+                innerjoin=True,
+                back_populates='content',
+                collection_class=attribute_mapped_collection('language_id')
+            ),
+        }
     )
