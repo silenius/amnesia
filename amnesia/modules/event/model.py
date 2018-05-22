@@ -4,8 +4,8 @@ from datetime import datetime
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from ..content import Content
-from ..content import ContentTranslation
+from amnesia.modules.content import Content
+from amnesia.modules.content.translations import ContentTranslation
 
 
 class EventTranslation(ContentTranslation):

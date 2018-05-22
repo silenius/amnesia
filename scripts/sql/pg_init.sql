@@ -313,7 +313,6 @@ create trigger compute_weight before insert or update on content
 create table content_translation (
     language_id     char(2)     not null,
     content_id      integer     not null,
-    content_type_id integer     not null
     title           mediumtext  not null,
     description     text,
     fts             tsvector,
@@ -326,33 +325,10 @@ create table content_translation (
 
     constraint fk_content_translation_content
         foreign key(content_id) references content(id),
-
-    constraint fk_content_translation_content_type_id
-        foreign key(content_type_id) references content_type(id)
 );
 
 create index idx_content_translation_fts
     on content_translation using gin(fts);
-
-create or replace function content_translation_content_id()
-returns trigger as $content_id$
-    begin
-        NEW.content_type_id := (
-            select
-                content_type_id
-            from 
-                content
-            where
-                content.id = NEW.content_id
-        );
-
-        return NEW;
-    end;
-$content_id$ language plpgsql;
-
-create trigger content_translation_content_id 
-    before insert or update on content_translation
-    for each row execute procedure content_translation_content_id();
 
 insert into content_translation(language_id, content_id, title, description)
 values ('en', 1, 'Home', 'Website''s root');

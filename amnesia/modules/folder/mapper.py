@@ -6,16 +6,13 @@ from pyramid.events import ApplicationCreated
 from sqlalchemy import orm
 
 from amnesia.modules.folder import Folder
-from amnesia.modules.folder import FolderTranslation
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentTranslation
 from amnesia.modules.document import Document
 from amnesia.modules.content_type.utils import get_type_id
 from amnesia.modules.content_type import ContentType
 
 
 def includeme(config):
-
     config.scan(__name__)
 
     config.include('amnesia.modules.content.mapper')
@@ -25,19 +22,13 @@ def includeme(config):
     tables = config.registry['metadata'].tables
 
     orm.mapper(
-        FolderTranslation, tables['content_translation'],
-        inherits=ContentTranslation,
-        polymorphic_identity=get_type_id(config, 'folder')
-    )
-
-    orm.mapper(
         Folder, tables['folder'], inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=tables['folder'].c.content_id ==
         tables['content'].c.id,
         properties={
             'alternate_index': orm.relationship(
-                Document,
+                lambda: Document,
                 primaryjoin=tables['folder'].c.index_content_id ==
                 tables['document'].c.content_id,
                 innerjoin=True,

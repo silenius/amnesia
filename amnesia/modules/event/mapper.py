@@ -1,14 +1,27 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import orm
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy import event
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.event import Event
-from amnesia.modules.event import EventTranslation
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentTranslation
 from amnesia.modules.content_type.utils import get_type_id
 from amnesia.modules.country import Country
+
+
+@event.listens_for(Event, 'mapper_configured', once=True)
+def add_translation_hybrid_properties(mapper, class_):
+
+    @hybrid_property
+    def body(self):
+        return getattr(self.current_translation, 'body')
+
+    @body.setter
+    def body(self, value):
+        setattr(self.current_translation, 'body', value)
+
+    setattr(class_, 'body', body)
 
 
 def includeme(config):
@@ -19,27 +32,11 @@ def includeme(config):
     config.include('amnesia.modules.country.mapper')
 
     orm.mapper(
-        EventTranslation, tables['event_translation'],
-        inherits=ContentTranslation,
-        polymorphic_identity=get_type_id(config, 'event'),
-        polymorphic_load='inline'
-    )
-
-    orm.mapper(
         Event, tables['event'], inherits=Content,
         polymorphic_identity=get_type_id(config, 'event'),
         properties={
             'country': orm.relationship(
                 Country, lazy='joined'
             ),
-            'translations': orm.relationship(
-                EventTranslation,
-                cascade='all, delete-orphan',
-                lazy='subquery',
-                innerjoin=True,
-                back_populates='content',
-                collection_class=attribute_mapped_collection('language_id')
-            ),
-
         }
     )

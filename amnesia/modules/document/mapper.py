@@ -1,13 +1,26 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import orm
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy import event
+from sqlalchemy.ext.hybrid import hybrid_property
 
-from .model import Document
-from .model import DocumentTranslation
-from ..content import Content
-from ..content import ContentTranslation
-from ..content_type.utils import get_type_id
+from amnesia.modules.document import Document
+from amnesia.modules.content import Content
+from amnesia.modules.content_type.utils import get_type_id
+
+
+@event.listens_for(Document, 'mapper_configured', once=True)
+def add_translation_hybrid_properties(mapper, class_):
+
+    @hybrid_property
+    def body(self):
+        return getattr(self.current_translation, 'body')
+
+    @body.setter
+    def body(self, value):
+        setattr(self.current_translation, 'body', value)
+
+    setattr(class_, 'body', body)
 
 
 def includeme(config):
@@ -17,23 +30,6 @@ def includeme(config):
     config.include('amnesia.modules.content_type.mapper')
 
     orm.mapper(
-        DocumentTranslation, tables['document_translation'],
-        inherits=ContentTranslation,
-        polymorphic_identity=get_type_id(config, 'document'),
-        polymorphic_load='inline'
-    )
-
-    orm.mapper(
         Document, tables['document'], inherits=Content,
-        polymorphic_identity=get_type_id(config, 'document'),
-        properties={
-            'translations': orm.relationship(
-                DocumentTranslation,
-                cascade='all, delete-orphan',
-                lazy='subquery',
-                innerjoin=True,
-                back_populates='content',
-                collection_class=attribute_mapped_collection('language_id')
-            ),
-        }
+        polymorphic_identity=get_type_id(config, 'document')
     )

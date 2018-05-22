@@ -8,7 +8,7 @@ from pyramid.threadlocal import get_current_registry
 from sqlalchemy import orm
 
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentTranslation
+#from amnesia.modules.content import ContentTranslation
 
 
 PolymorphicConfig = namedtuple(
@@ -16,8 +16,8 @@ PolymorphicConfig = namedtuple(
 )
 
 
-class FolderTranslation(ContentTranslation):
-    ''' Holds translations '''
+#class FolderTranslation(ContentTranslation):
+#    ''' Holds translations '''
 
 
 class Folder(Content):

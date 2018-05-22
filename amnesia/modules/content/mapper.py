@@ -3,24 +3,20 @@
 from datetime import datetime
 
 from pyramid.threadlocal import get_current_registry
-from pyramid.threadlocal import get_current_request
 
 from pytz import timezone
 
 from sqlalchemy import event
 from sqlalchemy import sql
 from sqlalchemy import orm
-from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy.types import String
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentTranslation
 from amnesia.modules.account import Account
 from amnesia.modules.state import State
 from amnesia.modules.content_type import ContentType
 from amnesia.modules.tag import Tag
 from amnesia.modules.folder import Folder
-from amnesia.modules.language import Language
 
 
 @event.listens_for(Content, 'before_update', propagate=True)
@@ -58,9 +54,27 @@ def update_fts_listener(mapper, connection, target):
     target.fts = fts
 
 
-def _get_locale():
-    req = get_current_request()
-    return req.locale_name
+@event.listens_for(Content, 'mapper_configured', once=True)
+def add_translation_hybrid_properties(mapper, class_):
+
+    @hybrid_property
+    def title(self):
+        return getattr(self.current_translation, 'title')
+
+    @title.setter
+    def title(self, value):
+        setattr(self.current_translation, 'title', value)
+
+    @hybrid_property
+    def description(self):
+        return getattr(self.current_translation, 'description')
+
+    @description.setter
+    def description(self, value):
+        setattr(self.current_translation, 'description', value)
+
+    setattr(class_, 'title', title)
+    setattr(class_, 'description', description)
 
 
 def includeme(config):
@@ -73,34 +87,6 @@ def includeme(config):
     config.include('amnesia.modules.language.mapper')
 
     _count_alias = tables['content'].alias('_count_children')
-
-    orm.mapper(
-        ContentTranslation, tables['content_translation'],
-        polymorphic_on=tables['content_translation'].c.content_type_id,
-        properties={
-            'language': orm.relationship(
-                Language,
-                lazy='joined',
-                innerjoin=True,
-                uselist=False
-            ),
-
-            'content': orm.relationship(
-                Content,
-                innerjoin=True,
-                uselist=False,
-                back_populates='translations',
-            ),
-
-            'type': orm.relationship(
-                ContentType,
-                lazy='joined',
-                innerjoin=True,
-                viewonly=True,
-                uselist=False
-            ),
-        }
-    )
 
     orm.mapper(
         Content, tables['content'],
@@ -138,39 +124,11 @@ def includeme(config):
             ),
 
             'parent': orm.relationship(
-                Folder,
+                lambda: Folder,
                 foreign_keys=tables['content'].c.container_id,
                 innerjoin=True,
                 uselist=False,
                 backref=orm.backref('children', cascade='all, delete-orphan')
-            ),
-
-            # pylint: disable=no-member
-#            'current_translation': orm.relationship(
-#                ContentTranslation,
-#                primaryjoin=lambda: sql.and_(
-#                    ContentTranslation.content_id == Content.id,
-#                    ContentTranslation.language_id == sql.bindparam(
-#                        None,
-#                        callable_=lambda: _get_locale(),
-#                        type_=String()
-#                    )
-#                ),
-#                #lazy='joined',
-#                uselist=False,
-#                innerjoin=True,
-#                viewonly=True,
-#                bake_queries=False,
-#                back_populates='content'
-#            ),
-
-            'translations': orm.relationship(
-                ContentTranslation,
-                cascade='all, delete-orphan',
-                lazy='subquery',
-                innerjoin=True,
-                back_populates='content',
-                collection_class=attribute_mapped_collection('language_id')
             ),
 
             #####################
@@ -194,43 +152,3 @@ def includeme(config):
             ),
 
         })
-
-
-    # XXX TEST
-#    j = orm.join(
-#        ContentTranslation, Content,
-#        ContentTranslation.content_id == Content.id
-#    ).join(
-#        ContentType,
-#        ContentType.id == Content.content_type_id
-#    )
-#
-#    foo_mapper = orm.mapper(
-#        ContentTranslation, j,
-#        polymorphic_on=j.c.content_content_type_id,
-#        non_primary=True, properties={
-#            'id': orm.column_property(
-#                j.c.content_id
-#            ),
-#
-#            'content_type_id': orm.column_property(
-#                j.c.content_content_type_id,
-#                j.c.content_type_id
-#            ),
-#
-#            'description': orm.column_property(
-#                j.c.content_translation_description
-#            ),
-#
-#            'content_type_description': orm.column_property(
-#                j.c.content_type_description
-#            ),
-#        }
-#    )
-#
-#    content_mapper.add_property('translations', orm.relationship(
-#        foo_mapper,
-#        primaryjoin=ContentTranslation.content_id==foo_mapper.c.id,
-#        innerjoin=True,
-#        collection_class=attribute_mapped_collection('language_id')
-#    ))
