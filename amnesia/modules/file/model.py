@@ -5,11 +5,6 @@
 import os.path
 
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentTranslation
-
-
-class FileTranslation(ContentTranslation):
-    ''' Holds translations '''
 
 
 class File(Content):

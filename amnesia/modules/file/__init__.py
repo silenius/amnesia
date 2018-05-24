@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from .model import File
-from .model import FileTranslation
 from .resources import FileEntity
 from .resources import FileResource
 

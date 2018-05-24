@@ -2,7 +2,6 @@
 
 from .event import FolderCreatedEvent
 from .model import Folder
-from .model import FolderTranslation
 from .browser import FolderBrowser
 from .resources import FolderEntity
 from .resources import FolderResource

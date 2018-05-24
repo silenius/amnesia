@@ -17,10 +17,6 @@ from saexts import Serializer
 from .. import Base
 
 
-class ContentTranslation(Base):
-    ''' Holds translations '''
-
-
 class Content(Base):
     """This is the base class for all the different types of Content (Event,
         News, Page, etc)"""
@@ -80,22 +76,6 @@ class Content(Base):
     @last_update.expression
     def last_update(self, cls):
         return sql.func.coalesce(cls.updated, cls.added)
-
-    @hybrid_property
-    def title(self):
-        return self.current_translation.title
-
-    @title.setter
-    def title(self, value):
-        self.current_translation.title = value
-
-    @hybrid_property
-    def description(self):
-        return self.current_translation.description
-
-    @description.setter
-    def description(self, value):
-        self.current_translation.description = value
 
     ###########
     # Filters #

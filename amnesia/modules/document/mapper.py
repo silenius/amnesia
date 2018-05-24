@@ -1,26 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import orm
-from sqlalchemy import event
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.document import Document
 from amnesia.modules.content import Content
 from amnesia.modules.content_type.utils import get_type_id
-
-
-@event.listens_for(Document, 'mapper_configured', once=True)
-def add_translation_hybrid_properties(mapper, class_):
-
-    @hybrid_property
-    def body(self):
-        return getattr(self.current_translation, 'body')
-
-    @body.setter
-    def body(self, value):
-        setattr(self.current_translation, 'body', value)
-
-    setattr(class_, 'body', body)
 
 
 def includeme(config):

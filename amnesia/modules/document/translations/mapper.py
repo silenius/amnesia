@@ -8,6 +8,7 @@ from amnesia.modules.document import Document
 from amnesia.modules.content.translations import ContentTranslation
 from amnesia.modules.document.translations import DocumentTranslation
 
+
 def includeme(config):
     tables = config.registry['metadata'].tables
 

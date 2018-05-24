@@ -9,7 +9,6 @@ from pytz import timezone
 from sqlalchemy import event
 from sqlalchemy import sql
 from sqlalchemy import orm
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.content import Content
 from amnesia.modules.account import Account
@@ -52,29 +51,6 @@ def update_fts_listener(mapper, connection, target):
             fts = _fts if fts is None else fts.op('||')(_fts)
 
     target.fts = fts
-
-
-@event.listens_for(Content, 'mapper_configured', once=True)
-def add_translation_hybrid_properties(mapper, class_):
-
-    @hybrid_property
-    def title(self):
-        return getattr(self.current_translation, 'title')
-
-    @title.setter
-    def title(self, value):
-        setattr(self.current_translation, 'title', value)
-
-    @hybrid_property
-    def description(self):
-        return getattr(self.current_translation, 'description')
-
-    @description.setter
-    def description(self, value):
-        setattr(self.current_translation, 'description', value)
-
-    setattr(class_, 'title', title)
-    setattr(class_, 'description', description)
 
 
 def includeme(config):
@@ -150,5 +126,4 @@ def includeme(config):
                 ).correlate(tables['content']).label('count_children'),
                 deferred=True
             ),
-
         })

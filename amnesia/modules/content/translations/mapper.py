@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import event
 from sqlalchemy import orm
 from sqlalchemy import sql
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.translations import setup_translation
 from amnesia.modules.content import Content

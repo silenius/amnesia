@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 
+from pyramid.threadlocal import get_current_registry
+
 from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy import event
 from sqlalchemy.types import String
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.content import Content
 
 
 def _localizer():
     return 'en'
+
+#from types import MappingProxyType
+#default_config = {'a': 1}
+#DEFAULTS = MappingProxyType(default_config)
 
 def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
     '''Helper to setup translations'''
@@ -61,13 +68,60 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
         ),
     })
 
-def add_translation(config, content_cls, translation_cls,
-                    localizer=_localizer):
-    def register():
-        trans = config.registry.setdefault('amnesia.translations', {})
-        trans[content_cls] = translation_cls
-    config.action(content_cls, register)
+
+def make_hybrid(name):
+
+    @hybrid_property
+    def _column(self):
+        return getattr(self.current_translation, name)
+
+    @_column.setter
+    def _column(self, value):
+        setattr(self.current_translation, name, value)
+
+    _column.__name__ = name
+
+    return _column
+
+
+_TRANSLATIONS_KEY = 'amnesia.translations'
+
+
+def _setup_translation():
+    registry = get_current_registry()
+
+    if _TRANSLATIONS_KEY not in registry:
+        return
+
+    _cfg = registry[_TRANSLATIONS_KEY]
+
+    if 'mappings' in _cfg:
+        for cls, tr_cls in _cfg['mappings'].items():
+            setup_translation(cls, tr_cls)
+
+    if 'attrs' in _cfg:
+        for cls, cols in _cfg['attrs'].items():
+            for col in cols:
+                setattr(cls, col, make_hybrid(col))
+
+
+def set_translatable_attrs(config, cls, cols):
+    _attrs = config.registry.\
+        setdefault(_TRANSLATIONS_KEY, {}).\
+        setdefault('attrs', {})
+
+    _attrs[cls] = cols
+
+
+def set_translatable_mapping(config, cls, trans_cls):
+    _mappings = config.registry.\
+        setdefault(_TRANSLATIONS_KEY, {}).\
+        setdefault('mappings', {})
+
+    _mappings[cls] = trans_cls
 
 
 def includeme(config):
-    config.add_directive('add_translation', add_translation)
+    event.listen(orm.mapper, 'after_configured', _setup_translation)
+    config.add_directive('set_translatable_attrs', set_translatable_attrs)
+    config.add_directive('set_translatable_mapping', set_translatable_mapping)
