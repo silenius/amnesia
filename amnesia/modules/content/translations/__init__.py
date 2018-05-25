@@ -4,4 +4,5 @@ from .model import ContentTranslation
 
 
 def includeme(config):
+    config.include('.mapper')
     config.include('.config')

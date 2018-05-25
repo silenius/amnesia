@@ -51,10 +51,11 @@ def include_amnesia(config):
     config.include('amnesia.modules.document.translations')
     config.include('amnesia.modules.event')
     config.include('amnesia.modules.event.translations')
+    config.include('amnesia.modules.file')
+    config.include('amnesia.modules.file.translations')
     config.include('amnesia.modules.account')
     config.include('amnesia.modules.tag')
     config.include('amnesia.modules.state')
-    config.include('amnesia.modules.file')
     config.include('amnesia.modules.search')
 
     config.include('amnesia.modules.content.views')

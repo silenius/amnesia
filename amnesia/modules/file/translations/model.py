@@ -3,5 +3,5 @@
 from amnesia.modules.content.translations import ContentTranslation
 
 
-class FolderTranslation(ContentTranslation):
-    ''' Holds translations '''
+class FileTranslation(ContentTranslation):
+    ''' Holds File translations '''

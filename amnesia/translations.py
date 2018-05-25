@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from pyramid.threadlocal import get_current_registry
 
 from sqlalchemy import orm
@@ -11,6 +13,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.content import Content
 
+log = logging.getLogger(__name__)
+
 
 def _localizer():
     return 'en'
@@ -21,6 +25,9 @@ def _localizer():
 
 def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
     '''Helper to setup translations'''
+
+    log.debug('Adding translation properties: %s to %s', content_cls,
+              translation_cls)
 
     if not localizer:
         localizer = _localizer
@@ -79,6 +86,11 @@ def make_hybrid(name):
     def _column(self, value):
         setattr(self.current_translation, name, value)
 
+    @_column.expression
+    def _column(cls):
+        # TODO
+        pass
+
     _column.__name__ = name
 
     return _column
@@ -88,6 +100,7 @@ _TRANSLATIONS_KEY = 'amnesia.translations'
 
 
 def _setup_translation():
+    log.info('SQLAlchemy after_configured handler _setup_translation called')
     registry = get_current_registry()
 
     if _TRANSLATIONS_KEY not in registry:
@@ -102,6 +115,7 @@ def _setup_translation():
     if 'attrs' in _cfg:
         for cls, cols in _cfg['attrs'].items():
             for col in cols:
+                log.debug('Adding hybrid attribute: %s.%s', cls, col)
                 setattr(cls, col, make_hybrid(col))
 
 

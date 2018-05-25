@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-from .model import FolderTranslation
+from .model import FileTranslation
 
 
 def includeme(config):

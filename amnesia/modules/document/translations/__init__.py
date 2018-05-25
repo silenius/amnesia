@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
 from .model import DocumentTranslation
-from amnesia.modules.document import Document
 
 
 def includeme(config):

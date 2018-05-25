@@ -3,8 +3,6 @@
 from sqlalchemy import orm
 
 from amnesia.modules.content_type.utils import get_type_id
-from amnesia.translations import setup_translation
-from amnesia.modules.event import Event
 from amnesia.modules.event.translations import EventTranslation
 from amnesia.modules.content.translations import ContentTranslation
 
@@ -20,5 +18,3 @@ def includeme(config):
         inherits=ContentTranslation,
         polymorphic_identity=get_type_id(config, 'event')
     )
-
-    setup_translation(Event, EventTranslation)
