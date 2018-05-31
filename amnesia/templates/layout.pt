@@ -1,6 +1,6 @@
 <metal:block define-macro="page" tal:define="json import: json; content content|None">
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:tal="http://xml.zope.org/namespaces/tal" xmlns:metal="http://xml.zope.org/namespaces/metal" xmlns:i18n="http://xml.zope.org/namespaces/i18n" i18n:domain="amnesia">
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -20,6 +20,8 @@
     <metal:block define-slot="head-bottom" />
   </head>
   <body>
+      <span i18n:translate=''>test</span>
+      <h2 i18n:translate="search_documentation">Search documentation</h2>
 
   <!-- Navigation -->
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark fixed-top">

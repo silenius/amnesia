@@ -59,7 +59,7 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
         'translations': orm.relationship(
             lambda: translation_cls,
             cascade='all, delete-orphan',
-            #lazy='subquery',
+           # lazy='subquery',
             innerjoin=True,
             back_populates='content',
             collection_class=attribute_mapped_collection('language_id')
@@ -86,10 +86,9 @@ def make_hybrid(name):
     def _column(self, value):
         setattr(self.current_translation, name, value)
 
-    @_column.expression
-    def _column(cls):
-        # TODO
-        pass
+    #@_column.expression
+    #def _column(cls):
+    #    return cls.current_translation.has()
 
     _column.__name__ = name
 
@@ -139,3 +138,4 @@ def includeme(config):
     event.listen(orm.mapper, 'after_configured', _setup_translation)
     config.add_directive('set_translatable_attrs', set_translatable_attrs)
     config.add_directive('set_translatable_mapping', set_translatable_mapping)
+    config.add_translation_dirs('amnesia:locale/')

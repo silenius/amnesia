@@ -33,12 +33,10 @@ def includeme(config):
 
             'content': orm.relationship(
                 Content,
-                lazy='joined',
+                #lazy='joined',
                 innerjoin=True,
                 uselist=False
             ),
 
         }
     )
-
-    setup_translation(Content, ContentTranslation)
