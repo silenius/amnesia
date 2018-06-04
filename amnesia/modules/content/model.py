@@ -52,7 +52,7 @@ class Content(Base):
 
         return mapper.class_
 
-    def find_prop(self, key, maxdepth=None):
+    def find_prop(self, key, maxdepth=None, default=None):
         ''' Loop through all parents (or until maxdepth is reached) and check
         for key in props (and return it). A maxdepth==0 will only search on
         current object '''
@@ -67,7 +67,7 @@ class Content(Base):
             if node.props and key in node.props:
                 return node.props[key]
 
-        return None
+        return default
 
     @hybrid_property
     def last_update(self):
