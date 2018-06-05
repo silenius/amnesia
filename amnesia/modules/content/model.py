@@ -82,7 +82,7 @@ class Content(Base):
         return self.updated if self.updated else self.added
 
     @last_update.expression
-    def last_update(self, cls):
+    def last_update(cls):
         return sql.func.coalesce(cls.updated, cls.added)
 
     ###########
