@@ -67,7 +67,7 @@ class ContentCRUD(BaseView):
 
         try:
             template = self.entity.props['template_show']
-        except (TypeError, KeyError):
+        except (TypeError, KeyError, FileNotFoundError):
             template = "amnesia:templates/{}/show.pt".format(
                 self.context.entity.type.name
             )
