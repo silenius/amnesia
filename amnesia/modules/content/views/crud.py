@@ -7,6 +7,7 @@ import logging
 from marshmallow import ValidationError
 
 from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
@@ -67,12 +68,14 @@ class ContentCRUD(BaseView):
 
         try:
             template = self.entity.props['template_show']
-        except (TypeError, KeyError, FileNotFoundError):
-            template = "amnesia:templates/{}/show.pt".format(
-                self.context.entity.type.name
-            )
+        except (TypeError, KeyError):
+            template = 'amnesia:templates/{}/show.pt'.format(
+                self.entity.type.name)
 
-        return render_to_response(template, context, request=self.request)
+        try:
+            return render_to_response(template, context, request=self.request)
+        except (FileNotFoundError, ValueError):
+            raise HTTPNotFound()
 
     #########################################################################
     # DELETE                                                                #
