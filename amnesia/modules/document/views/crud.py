@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from marshmallow import ValidationError
 
 from pyramid.view import view_config
@@ -9,6 +11,9 @@ from amnesia.modules.document import DocumentEntity
 from amnesia.modules.document import DocumentResource
 
 from ...content.views import ContentCRUD
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
 
 def includeme(config):
     ''' Pyramid includeme func'''

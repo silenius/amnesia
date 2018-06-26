@@ -22,7 +22,7 @@ from amnesia.modules.tag import Tag
 from amnesia.utils.forms import render_form
 from amnesia.views import BaseView
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def includeme(config):
