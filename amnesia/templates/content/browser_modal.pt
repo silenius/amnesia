@@ -6,9 +6,9 @@
                 <h4 class="modal-title">Browse site</h4>
             </div>
             <div class="modal-body container-fluid">
-                <div id="browser-nav"></div>
-                <div id="browser-main" class="row"></div>
-                <div id="browser-pagination"></div>
+                <div data-modal="nav"></div>
+                <div data-modal="main" class="row"></div>
+                <div data-modal="pagination"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

@@ -17,10 +17,35 @@
     function _browser_callback(field_name, url, type, win) {
         //window.console.log("Field_Name: " + field_name + " | URL: " + url + " | Type: " + type + " | Win: " + win);
 
-        var browser_modal = jQuery('#browser_modal'),
-            _folder_main = Yeti.Element('browser-main'),
-            _folder_pagination = Yeti.Element('browser-pagination'),
-            _folder_navigation = Yeti.Element('browser-nav'),
+        var field = Yeti.Element(field_name);
+
+        Bbpf.utils.browse_site('browser_modal', type, function(elem) {
+            var obj_meta = JSON.parse(elem.getAttribute('data-obj'));
+
+            field.value = obj_meta.id;
+
+            switch(type) {
+                case 'image':
+                case 'media':
+                    field.value += '/download';
+                    break;
+                case 'file':
+                    if (obj_meta.type.name == 'file') {
+                        field.value += '/download';
+                    }
+                    break;
+            }
+        });
+
+        return false;
+    }
+
+    Bbpf.utils.browse_site = function(ident, type, callback) {
+        var browser_modal = jQuery("#" + ident),
+            _folder_main = browser_modal.context.querySelector("div[data-modal='main']"),
+            _folder_pagination = browser_modal.context.querySelector("div[data-modal='pagination']"),
+            _folder_navigation = browser_modal.context.querySelector("div[data-modal='nav']"),
+            _callback = callback,
             pagination = new Bbpf.Pagination({}),
             browser = new Bbpf.FolderController({
                 url : site_url('1/browse'),
@@ -53,6 +78,9 @@
             browser.parameters.display = 'icon';
             browser.parameters.filter_types = ['folder', 'file'];
             browser.parameters.filter_mime = ['video/*'];
+        } else if (type == 'folder') {
+            browser.parameters.display = 'icon';
+            browser.parameters.filter_types = ['folder'];
         }
 
         browser.load();
@@ -66,37 +94,6 @@
         });
 
         browser.dispatcher.add('after_load_success', function() {
-
-            /* Add handlers on the <button> tags. They're used to select the
-               object for insertion in the TinyMCE editor */
-
-            var select = Yeti.Element(this.components.main.container).getElementsByTagName('button'),
-                field = Yeti.Element(field_name);
-
-            for (var i=0, _len = select.length; i<_len; i++) {
-                (function(elem) {
-                    elem.addEventListener('click', function(e) {
-                        var obj_meta = JSON.parse(this.getAttribute('data-obj'));
-
-                        field.value = obj_meta.id;
-
-                        switch(type) {
-                            case 'image':
-                            case 'media':
-                                field.value += '/download';
-                                break;
-                            case 'file':
-                                if (obj_meta.type.name == 'file') {
-                                    field.value += '/download';
-                                }
-                                break;
-                        }
-
-                        browser_modal.modal('hide');
-                    });
-                })(select[i]);
-
-            }
 
             /* Add handlers on the folder objects */
 
@@ -134,9 +131,21 @@
                     });
                 })(links[i]);
             }
-        });
 
-        return false;
+            /* Add handlers on the <button> tags. They're used to select the
+               object for insertion in the TinyMCE editor */
+
+            var select = Yeti.Element(this.components.main.container).getElementsByTagName('button');
+
+            for (var i=0, _len = select.length; i<_len; i++) {
+                (function(elem) {
+                    elem.addEventListener('click', function(e) {
+                        _callback(elem);
+                        browser_modal.modal('hide');
+                    });
+                })(select[i]);
+            }
+        });
     }
 
     // Create/initialize a preconfigured editor
@@ -220,7 +229,8 @@
             content_css : [
                 site_url('static/css/custom.css'), 
                 site_url('static/css/bootstrap.css'), 
-                site_url('static/css/color.css')
+                site_url('static/css/color.css'),
+                site_url('static/css/font-awesome.min.css')
             ],
             style_formats: [
                 { title: 'Title green', block: 'h4', classes: 'title_green' }, 

@@ -29,7 +29,7 @@ install_requires = [
     'marshmallow>=3.0.0b7',
     'bcrypt',
     'file-magic',
-    'saexts'
+#    'saexts'
 ]
 
 extra_requires = {
@@ -44,7 +44,7 @@ extra_requires = {
 
 setup(
     name='amnesiacms',
-    version='0.1.2',
+    version='0.1.3',
     description='amnesia CMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[

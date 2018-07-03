@@ -9,6 +9,7 @@ from marshmallow import ValidationError
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPNotFound
 
 from sqlalchemy import orm
 
@@ -120,7 +121,10 @@ class FolderCRUD(ContentCRUD):
         except (TypeError, KeyError):
             template = 'amnesia:templates/folder/show/default.pt'
 
-        return render_to_response(template, context, request=self.request)
+        try:
+            return render_to_response(template, context, request=self.request)
+        except (FileNotFoundError, ValueError):
+            raise HTTPNotFound()
 
     #########################################################################
     # UPDATE                                                                #
