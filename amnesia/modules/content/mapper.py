@@ -123,11 +123,11 @@ def includeme(config):
             ),
 
             # FIXME: move to folder mapper with a LATERAL expression
-            'count_children' : orm.column_property(
+            'count_children': orm.column_property(
                 sql.select([sql.func.count()]).where(
                     _count_alias.c.container_id == tables['content'].c.id
                 ).correlate(tables['content']).label('count_children'),
-                deferred = True
+                deferred=True
             ),
 
         })
