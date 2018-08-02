@@ -59,7 +59,7 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
         'translations': orm.relationship(
             lambda: translation_cls,
             cascade='all, delete-orphan',
-           # lazy='subquery',
+            #lazy='subquery',
             innerjoin=True,
             back_populates='content',
             collection_class=attribute_mapped_collection('language_id')
