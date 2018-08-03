@@ -3,7 +3,7 @@
         <div class="holder">
             <h3><a href="${request.resource_path(content)}">${h.shorten(request, content.title, 35)}</a></h3>
             <div class="tags-row"> 
-                <!--! <a href="#" class="link"><i class="fa fa-user" aria-hidden="true"></i>${content.owner.first_name} ${content.owner.name}</a> -->
+            <!--! <a href="#" class="link"><i class="fa fa-user" aria-hidden="true"></i>${content.owner.full_name}</a> -->
                 <a href="#" class="link"><i class="fa fa-calendar" aria-hidden="true"></i>${content.added.strftime('%d %b, %Y')}</a> 
             </div>
             <p tal:condition="content.description">${h.shorten(request, content.description)}</p>

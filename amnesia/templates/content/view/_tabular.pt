@@ -9,7 +9,7 @@
         <i class="fa ${content.fa_icon}" tal:condition="content.fa_icon"></i>
     </td>
     <td>${h.fmt_datetime(request, content.last_update)}</td>
-    <td><img class="img-circle" src="${h.gravatar(request, content.owner.email, 20)}" /> ${content.owner.first_name} ${content.owner.name}</td>
+    <td><img class="img-circle" src="${h.gravatar(request, content.owner.email, 20)}" /> ${content.owner.full_name}</td>
     <td><span class="badge">${content.position_in_container}</span></td>
     <td>${content.state.name}</td>
     <td>

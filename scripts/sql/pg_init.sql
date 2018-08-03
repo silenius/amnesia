@@ -44,10 +44,10 @@ create table content_type (
 create unique index u_idx_content_type_name
     on content_type(lower(name));
 
-insert into content_type(name) values('folder');
-insert into content_type(name) values('document');
-insert into content_type(name) values('event');
-insert into content_type(name) values('file');
+insert into content_type(name, icons) values('folder', '{"fa": "fa-folder"}');
+insert into content_type(name, icons) values('document', '{"fa": "fa-file-text-o"}');
+insert into content_type(name, icons) values('event', '{"fa": "fa-calendar"}');
+insert into content_type(name, icons) values('file', '{"fa": "fa-file-o"}');
 
 --------------
 -- language --

@@ -44,7 +44,7 @@ extra_requires = {
 
 setup(
     name='amnesiacms',
-    version='0.1.3',
+    version='0.1.4',
     description='amnesia CMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[

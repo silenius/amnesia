@@ -17,4 +17,4 @@ class Account(Base):
 
     @hybrid_property
     def full_name(self):
-        return '{0} {1}'.format(self.first_name, self.name)
+        return '{0} {1}'.format(self.first_name, self.last_name)
