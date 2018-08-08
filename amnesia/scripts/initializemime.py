@@ -75,13 +75,14 @@ def main(argv=sys.argv):
                     )
 
                     try:
-                        dbsession.query(Mime)\
+                        minor = dbsession.query(Mime)\
                             .join(Mime.major)\
                             .options(orm.contains_eager(Mime.major))\
                             .filter(filters)\
                             .one()
+                        minor.template = row['Template']
                     except NoResultFound:
                         minor = Mime(name=row['Name'], template=row['Template'],
                                      major=major)
 
-                        dbsession.add(minor)
+                    dbsession.add(minor)
