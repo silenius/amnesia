@@ -19,7 +19,7 @@ class AccountSchema(Schema):
     password = String(required=True, load_only=True, validate=Length(min=4))
     password_repeat = String(required=True, load_only=True,
                              validate=Length(min=4))
-    name = String(required=True, load_from='account_name')
+    last_name = String(required=True, load_from='account_last_name')
     first_name = String(required=True, load_from='account_first_name')
     email = Email(required=True)
     captcha_token = String(required=True, load_from='g-recaptcha-response',

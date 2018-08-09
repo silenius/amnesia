@@ -18,12 +18,12 @@ from pyramid.scripts.common import parse_vars
 from pyramid.paster import get_appsettings
 from pyramid.paster import setup_logging
 
-from ..db import get_engine
-from ..db import get_session_factory
-from ..db import get_tm_session
+from amnesia.db import get_engine
+from amnesia.db import get_session_factory
+from amnesia.db import get_tm_session
 
-from ..modules.mime import Mime
-from ..modules.mime import MimeMajor
+from amnesia.modules.mime import Mime
+from amnesia.modules.mime import MimeMajor
 
 TYPES = {'application', 'audio', 'image', 'message', 'model', 'multipart',
          'text', 'video'}
@@ -48,8 +48,8 @@ def main(argv=sys.argv):
     setup_logging(config_uri)
     settings = get_appsettings(config_uri, options=options)
     config = Configurator(settings=settings)
-    config.include('..db')
-    config.include('..modules.mime.mapper')
+    config.include('amnesia.db')
+    config.include('amnesia.modules.mime.mapper')
     engine = get_engine(settings)
     session_factory = get_session_factory(engine)
 
@@ -75,13 +75,14 @@ def main(argv=sys.argv):
                     )
 
                     try:
-                        dbsession.query(Mime)\
+                        minor = dbsession.query(Mime)\
                             .join(Mime.major)\
                             .options(orm.contains_eager(Mime.major))\
                             .filter(filters)\
                             .one()
+                        minor.template = row['Template']
                     except NoResultFound:
                         minor = Mime(name=row['Name'], template=row['Template'],
                                      major=major)
 
-                        dbsession.add(minor)
+                    dbsession.add(minor)

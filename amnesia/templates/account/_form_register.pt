@@ -1,11 +1,11 @@
 <div class="form-group">
     <label for="register_name">Name</label>
-    <input type="text" id="register_name" name="account_name" class="form-control" placeholder="name" required />
+    <input type="text" id="register_last_name" name="account_last_name" class="form-control" placeholder="name" required />
 </div>
 
 <div class="form-group">
     <label for="register_first_name">First name</label>
-    <input type="text" id="register_firt_name" name="account_first_name" class="form-control" placeholder="first name" required />
+    <input type="text" id="register_first_name" name="account_first_name" class="form-control" placeholder="first name" required />
 </div>
 
 <div class="form-group">
