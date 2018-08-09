@@ -190,6 +190,9 @@ create table mime (
 create index idx_mime_major_id
     on mime(major_id);
 
+create unique index u_idx_mime_name_major_id 
+    on mime(lower(name), major_id);
+
 ---------
 -- tag --
 ---------
