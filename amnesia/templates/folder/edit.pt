@@ -1,4 +1,4 @@
-<metal:block use-macro="load: ../layout.pt" tal:define="js_tinymce True">
+<metal:block use-macro="load: amnesia:templates/layout.pt" tal:define="js_tinymce True">
 <metal:block fill-slot="title_more">: folder</metal:block>
 <metal:block fill-slot="content">
     <div id ="main">
