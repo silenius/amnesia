@@ -32,8 +32,7 @@
                         limit : pagination.get('limit'),
                         filter_types : ['document']
                     }
-                })
-            ;
+                });
 
             pagination.dispatcher.add('pagination_change', function() {
                 folder_browser.refresh({
@@ -100,7 +99,7 @@
             <div id="polymorphic_loading_selection" style="display:none">
                 <div class="col-xs-2">
                     <select data-select="polymorphic_children" id="polymorphic_children" name="polymorphic_children_ids" multiple="multiple" class="form-control">
-                        <tal:block repeat="m h['polymorphic_hierarchy']()">
+                        <tal:block repeat="m h.polymorphic_hierarchy()">
                             <option tal:condition="m.polymorphic_identity" value="${m.polymorphic_identity}">${m.class_.__name__}</option>
                         </tal:block>
                     </select>
