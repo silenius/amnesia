@@ -63,3 +63,4 @@ development.ini
 production.ini
 
 tmp/
+node_modules/

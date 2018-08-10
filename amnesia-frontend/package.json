@@ -1,0 +1,21 @@
+{
+  "name": "amnesia-frontend",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^1.0.0",
+    "style-loader": "^0.22.1",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0"
+  },
+  "dependencies": {
+    "promise-polyfill": "^8.0.0",
+    "qs": "^6.5.2",
+    "tinymce": "^4.8.2",
+    "whatwg-fetch": "^2.0.4"
+  }
+}
