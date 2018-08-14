@@ -70,6 +70,7 @@ setup(
         'console_scripts': [
             'initialize_amnesia_db = amnesia.scripts.initializedb:main',
             'initialize_amnesia_mime = amnesia.scripts.initializemime:main',
+            'build_statics = amnesia.scripts.build_statics:main',
         ]
     }
 )
