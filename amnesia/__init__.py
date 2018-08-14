@@ -2,10 +2,10 @@
 
 import logging
 
+from pkg_resources import iter_entry_points
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-
 from pyramid.settings import asbool
 
 from amnesia.resources import get_root
@@ -35,6 +35,12 @@ def include_authorization(config):
     config.set_authorization_policy(authz_policy)
 
 
+def include_entry_points(config):
+    for entry_point in iter_entry_points(group='amnesiacms.pkgs'):
+        plugin = entry_point.load()
+        plugin.includeme(config)
+
+
 def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
@@ -56,6 +62,8 @@ def include_amnesia(config):
     config.include('amnesia.modules.content.views')
     config.include('amnesia.views')
     config.include('amnesia.widgets')
+
+    config.include(include_entry_points)
 
     config.add_static_view(name='static', path='amnesia:static/')
 
