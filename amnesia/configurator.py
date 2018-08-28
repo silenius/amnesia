@@ -6,9 +6,9 @@ from collections import OrderedDict
 
 log = logging.getLogger(__name__)
 
-FRONTEND_ASSET_CONFIG_KEYS = (
+FRONTEND_ASSET_CONFIG_KEYS = {
     'name', 'build_script', 'asset_path'
-)
+}
 
 
 def cms_register_frontend_asset(config, asset_name, asset_config):
@@ -17,7 +17,7 @@ def cms_register_frontend_asset(config, asset_name, asset_config):
         registry.cms_frontend_assets = OrderedDict()
 
     def register():
-        log.info('Registering frontend asset: {}'.format(asset_name))
+        log.info('===>>> Registering frontend asset: {}'.format(asset_name))
         if asset_name not in config.registry.cms_frontend_assets:
             to_reg_config = {}
 
