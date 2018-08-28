@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from marshmallow import ValidationError
+from marshmallow import EXCLUDE
 
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember
@@ -36,7 +37,7 @@ class Login(BaseView):
         params = self.request.POST.mixed()
 
         try:
-            data = LoginSchema().load(params)
+            data = LoginSchema(unknown=EXCLUDE).load(params)
         except ValidationError as error:
             return {'form': self.form(params, error.messages)}
 
