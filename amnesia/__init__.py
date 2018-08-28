@@ -35,6 +35,10 @@ def include_authorization(config):
     config.set_authorization_policy(authz_policy)
 
 
+def include_security(config):
+    config.set_default_csrf_options(require_csrf=True)
+
+
 def include_entry_points(config):
     for entry_point in iter_entry_points(group='amnesiacms.pkgs'):
         plugin = entry_point.load()
@@ -45,6 +49,7 @@ def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
+    config.include(include_security)
 
     config.include('amnesia.subscribers')
     config.include('amnesia.renderers')
