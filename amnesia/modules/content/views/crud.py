@@ -54,6 +54,9 @@ class ContentCRUD(BaseView):
         if 'is_fts' not in data:
             data['is_fts'] = True
 
+        if 'csrf_token' not in data:
+            data['csrf_token'] = self.request.session.get_csrf_token()
+
         return render_form(self.form_tmpl, self.request, data, errors=errors)
 
     #########################################################################
