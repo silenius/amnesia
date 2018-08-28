@@ -6,7 +6,7 @@ Chameleon==3.2
 file-magic==0.3.0
 gunicorn==19.7.1
 hupper==1.0
-marshmallow==3.0.0b7
+marshmallow==3.0.0b13
 PasteDeploy==1.5.2
 plaster==1.0
 plaster-pastedeploy==0.4.2
