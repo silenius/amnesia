@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+__version__ = '0.1.5-dev'
 
 import os
 
@@ -26,7 +27,7 @@ install_requires = [
     'psycopg2',
     'pytz',
     'rutter',
-    'marshmallow>=3.0.0b7',
+    'marshmallow>=3.0.0b13',
     'bcrypt',
     'file-magic',
 #    'saexts'
@@ -44,7 +45,7 @@ extra_requires = {
 
 setup(
     name='amnesiacms',
-    version='0.1.4',
+    version=__version__,
     description='amnesia CMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
