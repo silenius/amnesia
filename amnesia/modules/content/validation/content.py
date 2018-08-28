@@ -8,6 +8,7 @@ from datetime import date
 from datetime import datetime
 
 from marshmallow import Schema
+from marshmallow import EXCLUDE
 from marshmallow import post_dump
 from marshmallow import post_load
 from marshmallow import pre_load
@@ -67,6 +68,9 @@ class ContentSchema(Schema, PyramidContextMixin):
     expiration_day = Integer(load_only=True, required=False, allow_none=True)
     expiration_hour = Integer(load_only=True, required=False, allow_none=True)
     expiration_minute = Integer(load_only=True, required=False, allow_none=True)
+
+    class Meta:
+        unknown = EXCLUDE
 
     ########
     # LOAD #
