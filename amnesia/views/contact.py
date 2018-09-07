@@ -36,6 +36,7 @@ class MessageValidation(Schema):
     class Meta:
         unknown = EXCLUDE
 
+
 @view_config(name='contact', request_method='POST',
              renderer='amnesia:templates/contact/success.pt')
 def contact(request):
