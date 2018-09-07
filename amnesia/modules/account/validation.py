@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from marshmallow import Schema
+from marshmallow import EXCLUDE
 from marshmallow import post_load
 from marshmallow import ValidationError
 from marshmallow.fields import String
@@ -19,11 +20,14 @@ class AccountSchema(Schema):
     password = String(required=True, load_only=True, validate=Length(min=4))
     password_repeat = String(required=True, load_only=True,
                              validate=Length(min=4))
-    last_name = String(required=True, load_from='account_last_name')
-    first_name = String(required=True, load_from='account_first_name')
+    last_name = String(required=True, data_key='account_last_name')
+    first_name = String(required=True, data_key='account_first_name')
     email = Email(required=True)
-    captcha_token = String(required=True, load_from='g-recaptcha-response',
+    captcha_token = String(required=True, data_key='g-recaptcha-response',
                            validate=[Length(min=1, error='captcha missing')])
+
+    class Meta:
+        unknown = EXCLUDE
 
     @post_load
     def check_password_repeat(self, data):
@@ -38,8 +42,11 @@ class AccountSchema(Schema):
 
 class ForgotPasswordSchema(Schema):
     email = Email(required=True)
-    captcha_token = String(required=True, load_from='g-recaptcha-response',
+    captcha_token = String(required=True, data_key='g-recaptcha-response',
                            validate=[Length(min=1, error='captcha missing')])
+
+    class Meta:
+        unknown = EXCLUDE
 
 class RecoverPasswordSchema(AccountSchema):
     token = String(required=True, validate=[Length(equal=32)])
