@@ -423,8 +423,8 @@ create unique index u_idx_country_name
 -----------
 
 create table event (
-    starts              timestamptz not null,
-    ends                timestamptz not null,
+    starts              timestamp   not null,
+    ends                timestamp   not null,
     location            text,
     address             text,
     address_latitude    float,
