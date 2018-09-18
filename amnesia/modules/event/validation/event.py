@@ -2,7 +2,6 @@
 
 # pylint: disable=E1101
 
-
 from marshmallow.fields import Integer
 from marshmallow.fields import Float
 from marshmallow.fields import String
@@ -28,5 +27,5 @@ class EventSchema(ContentSchema):
     contact_phone = String(allow_none=True)
     country_iso = String(allow_none=True, validate=Length(equal=2))
 
-    starts = DateTime(required=True)
-    ends = DateTime(required=True)
+    starts = DateTime('%Y-%m-%d %H:%M', required=True)
+    ends = DateTime('%Y-%m-%d %H:%M', required=True)
