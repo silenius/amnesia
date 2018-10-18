@@ -60,7 +60,6 @@ def polymorphic_orders(request):
         'orders': all_orders
     }
 
-
 # JSON
 
 @view_config(name='polymorphic_orders', context=FolderEntity,
