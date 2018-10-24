@@ -2,6 +2,8 @@
 
 # pylint: disable=E1101
 
+from marshmallow import validates_schema
+from marshmallow import ValidationError
 from marshmallow.fields import Integer
 from marshmallow.fields import Float
 from marshmallow.fields import String
@@ -29,3 +31,8 @@ class EventSchema(ContentSchema):
 
     starts = DateTime('%Y-%m-%d %H:%M', required=True)
     ends = DateTime('%Y-%m-%d %H:%M', required=True)
+
+    @validates_schema
+    def validate_dates(self, data):
+        if data['ends'] < data['starts']:
+            raise ValidationError('End date must be greater than Start date')
