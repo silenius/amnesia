@@ -2,11 +2,15 @@
 
 # pylint: disable=E1101
 
+from marshmallow import ValidationError
+
 from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPBadRequest
 
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
+from amnesia.modules.content.validation import IdListSchema
 from amnesia.modules.content import Content
 from amnesia.modules.folder import FolderEntity
 
@@ -16,15 +20,16 @@ def includeme(config):
 
 
 @view_config(request_method='POST', name='paste', context=FolderEntity,
-             renderer='json')
+             renderer='json', permission='paste')
 def paste(context, request):
-    session = request.session
     dbsession = request.dbsession
 
-    oids = session.get('copy_oids')
-
-    if not oids:
-        return {'pasted': False}
+    try:
+        result = IdListSchema().load(request.POST.mixed())
+        if not result['oid']:
+            return {'pasted': False}
+    except ValidationError as error:
+        raise HTTPBadRequest(error.messages)
 
     target = context.entity
 
@@ -35,7 +40,7 @@ def paste(context, request):
     # UPDATE statement.
 
     filters = sql.and_(
-        Content.id.in_(oids),
+        Content.id.in_(result['oid']),
         Content.container_id != target.id
     )
 
@@ -66,7 +71,6 @@ def paste(context, request):
 
     try:
         request.tm.commit()
-        del session['copy_oids']
         return {'pasted': True}
     except DatabaseError:
         request.tm.abort()

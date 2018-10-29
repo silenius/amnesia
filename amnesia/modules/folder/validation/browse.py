@@ -4,6 +4,7 @@ import copy
 
 from marshmallow import Schema
 from marshmallow import EXCLUDE
+from marshmallow import INCLUDE
 from marshmallow import post_load
 from marshmallow import pre_load
 
@@ -77,7 +78,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
     only_published = Boolean(missing=True)
 
     class Meta:
-        unknown = EXCLUDE
+        unknown = INCLUDE
 
     @pre_load
     def ensure_list(self, data):

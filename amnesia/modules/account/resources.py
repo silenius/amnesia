@@ -105,7 +105,7 @@ class DatabaseAuthResource(AuthResource):
         mailer = self.request.mailer
 
         body = '''
-Hello {name} {first_name},
+Hello {last_name} {first_name},
 
 You have recently requested to reset the password for your account.
 
@@ -117,7 +117,7 @@ If you require assistance or further information, contact us at {contact}.
 
 Best whishes,
 The Belgian Biodiversity Platform'''.format(
-    name=principal.name, first_name=principal.first_name,
+    last_name=principal.last_name, first_name=principal.first_name,
     url=self.request.resource_url(
         self, 'recover', query={'token': principal.lost_token}
     ),

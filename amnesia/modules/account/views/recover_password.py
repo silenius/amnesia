@@ -62,6 +62,8 @@ class RecoverPassword(BaseView):
             errors = {'captcha': 'Captcha validation failed'}
         elif not self.context.reset_password(principal, result['password']):
             errors = {'password': 'Cannot reset password'}
+        else:
+            errors = False
 
         if errors:
             return {'form': self.form(form_data, errors)}

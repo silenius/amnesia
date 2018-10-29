@@ -46,6 +46,11 @@ def include_entry_points(config):
 
 
 def include_amnesia(config):
+    config.add_directive(
+        'cms_register_frontend_asset',
+        'amnesia.configurator.cms_register_frontend_asset'
+    )
+
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)

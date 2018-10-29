@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.1.5-dev'
+__version__ = '0.1.5.dev1'
 
 import os
 
@@ -71,6 +71,7 @@ setup(
         'console_scripts': [
             'initialize_amnesia_db = amnesia.scripts.initializedb:main',
             'initialize_amnesia_mime = amnesia.scripts.initializemime:main',
+            'build_statics = amnesia.scripts.build_statics:main',
         ]
     }
 )
