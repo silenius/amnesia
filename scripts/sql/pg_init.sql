@@ -280,23 +280,81 @@ insert into content (title, content_type_id, owner_id, state_id, weight)
 values ('Home', (select id from content_type where name='folder'), (select id from account where login='admin'), (select id from state where name='published'), 1);
 
 create or replace function compute_weight() returns trigger as $weight$
+    declare
+        container_id_changed CONSTANT boolean := TG_OP = 'UPDATE' AND NEW.container_id IS DISTINCT FROM OLD.container_id;
+        compute_new_weight CONSTANT boolean := TG_OP = 'INSERT' OR container_id_changed;
     begin
-        if (TG_OP = 'INSERT' or (TG_OP = 'UPDATE' and NEW.container_id is distinct from OLD.container_id)) then
-            
-            PERFORM 1 
+        if container_id_changed then
+            -- Prevent concurrent modifications.
+            PERFORM 1
             FROM folder
-            WHERE content_id = NEW.container_id 
+            WHERE content_id = NEW.container_id
             FOR UPDATE;
-            
+
+            -- Do we update the container_id of a folder?
+            PERFORM 1
+            FROM folder
+            WHERE content_id = NEW.id
+            FOR UPDATE;
+
+            IF FOUND THEN
+
+                /*
+                    Imagine we have the following:
+
+                           A
+                          / \
+                        B     C
+                       / \   /
+                      D   F G
+                     /     \
+                    E       H
+                           / \
+                          I   J
+               
+                    We must ensure that the NEW.container_id is not part of it's 
+                    lower hierarchy. 
+
+                    For example an error must be raised if:
+                    - we update B and NEW.container_id equals to the id 
+                      of any D,F,E,H,I,J
+                    - we update F and NEW.container_id equals to the id 
+                      of any H,I,J
+                    - ...
+
+                    The query below checks that if we update B.container_id the 
+                    NEW.container_id is not a child of B.
+                */
+
+                IF EXISTS (
+                    WITH RECURSIVE children AS (
+                            SELECT c1.id
+                            FROM content c1
+                            JOIN folder f1 ON c1.id = f1.content_id 
+                            WHERE c1.container_id = NEW.id
+                        UNION ALL 
+                            SELECT c2.id
+                            FROM content c2 
+                            JOIN folder f2 ON c2.id = f2.content_id 
+                            JOIN children ch ON ch.id = c2.container_id
+                    ) 
+
+                    SELECT * FROM children WHERE id = NEW.container_id
+                ) THEN
+                    RAISE EXCEPTION 'Wrong container_id';
+                END IF;
+                
+            END IF;  -- FOUND
+
+        END IF;  -- container_id_changed
+
+        IF compute_new_weight THEN
             NEW.weight := (
-                select
-                    coalesce(max(weight) + 1, 1)
-                from
-                    content
-                where
-                    container_id = NEW.container_id
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM content
+                WHERE container_id = NEW.container_id
             );
-        end if;
+        END IF;  -- compute_new_weight
 
         return NEW;
     end;
