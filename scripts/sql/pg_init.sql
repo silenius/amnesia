@@ -279,7 +279,7 @@ create index idx_content_fts
 insert into content (title, content_type_id, owner_id, state_id, weight) 
 values ('Home', (select id from content_type where name='folder'), (select id from account where login='admin'), (select id from state where name='published'), 1);
 
-create or replace function compute_weight() returns trigger as $weight$
+create or replace function t_container_id() returns trigger as $weight$
     declare
         container_id_changed CONSTANT boolean := TG_OP = 'UPDATE' AND NEW.container_id IS DISTINCT FROM OLD.container_id;
         compute_new_weight CONSTANT boolean := TG_OP = 'INSERT' OR container_id_changed;
@@ -291,7 +291,6 @@ create or replace function compute_weight() returns trigger as $weight$
             WHERE content_id = NEW.container_id
             FOR UPDATE;
 
-            -- Do we update the container_id of a folder?
             PERFORM 1
             FROM folder
             WHERE content_id = NEW.id
@@ -340,8 +339,10 @@ create or replace function compute_weight() returns trigger as $weight$
                     ) 
 
                     SELECT * FROM children WHERE id = NEW.container_id
-                ) THEN
-                    RAISE EXCEPTION 'Wrong container_id';
+                ) 
+                THEN
+                    RAISE EXCEPTION '% is a child of %', NEW.container_id, 
+                        NEW.id;
                 END IF;
                 
             END IF;  -- FOUND
@@ -354,14 +355,17 @@ create or replace function compute_weight() returns trigger as $weight$
                 FROM content
                 WHERE container_id = NEW.container_id
             );
+
+            RAISE NOTICE 'weight of % within container % set to %', NEW.id, 
+                NEW.container_id, NEW.weight;
         END IF;  -- compute_new_weight
 
         return NEW;
     end;
 $weight$ language plpgsql;
 
-create trigger compute_weight before insert or update on content
-    for each row execute procedure compute_weight();
+create trigger t_container_id before insert or update on content
+    for each row execute procedure t_container_id();
 
 -----------------
 -- content tag --
