@@ -15,10 +15,12 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 install_requires = [
-    'pyramid~=1.9',
-    'Chameleon>3.0',
+    'plaster_pastedeploy',
+    'pyramid',
+    'Chameleon',
     'pyramid_chameleon',
     'pyramid_beaker',
+    'alembic',
     'pyramid_tm',
     'pyramid_mailer',
     'SQLAlchemy~=1.2',
@@ -40,6 +42,11 @@ extra_requires = {
     'development': [
         'pyramid_debugtoolbar',
         'waitress',
+    ],
+    'testing': [
+        'WebTest >= 1.3.1',  # py3 compat
+        'pytest >= 3.7.4',
+        'pytest-cov',
     ]
 }
 
@@ -61,7 +68,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    test_suite='amnesia',
     install_requires=install_requires,
     extras_require=extra_requires,
     entry_points={
