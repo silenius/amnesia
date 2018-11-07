@@ -74,11 +74,13 @@ def includeme(config):
 
     """
     settings = config.get_settings()
-    #settings['tm.manager_hook'] = 'pyramid_tm.explicit_manager'
+    settings['tm.manager_hook'] = 'pyramid_tm.explicit_manager'
 
     # use pyramid_tm to hook the transaction lifecycle to the request
     config.include('pyramid_tm')
 
+    # use pyramid_retry to retry a request when transient exceptions occur
+    config.include('pyramid_retry')
     engine = get_engine(settings)
     meta = get_metadata(settings)
     meta.reflect(bind=engine)
