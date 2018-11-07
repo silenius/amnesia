@@ -8,11 +8,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPInternalServerError
 
-from sqlalchemy import sql
-from sqlalchemy.exc import DatabaseError
-
 from amnesia.modules.content.validation import IdListSchema
-from amnesia.modules.content import Content
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder.exc import PasteError
 
