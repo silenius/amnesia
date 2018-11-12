@@ -44,15 +44,7 @@ class Root(Resource):
         # Access to a specific resource through it's id, ex: /123
         if path.isdigit():
             entity = self.dbsession.query(Content).get(path)
-
-            if isinstance(entity, Folder):
-                return FolderEntity(self.request, entity)
-            elif isinstance(entity, Document):
-                return DocumentEntity(self.request, entity)
-            elif isinstance(entity, Event):
-                return EventEntity(self.request, entity)
-            elif isinstance(entity, File):
-                return FileEntity(self.request, entity)
+            return self.request.registry['cms_entity_resources'][entity.__class__]
 
         return _tree[path](self.request, self)
 

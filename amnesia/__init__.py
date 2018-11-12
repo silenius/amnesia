@@ -45,12 +45,35 @@ def include_entry_points(config):
         plugin.includeme(config)
 
 
-def include_amnesia(config):
-    config.add_directive(
-        'cms_register_frontend_asset',
-        'amnesia.configurator.cms_register_frontend_asset'
-    )
+def include_config_directives(config):
+    config.add_directive('cms_register_frontend_asset',
+                         'amnesia.configurator.cms_register_frontend_asset')
 
+    config.add_directive('cms_add_entity_resource',
+                         'amnesia.configurator.cms_add_entity_resource')
+
+
+def include_cms_modules(config):
+    config.include('amnesia.modules.folder')
+    config.include('amnesia.modules.document')
+    config.include('amnesia.modules.event')
+    config.include('amnesia.modules.account')
+    config.include('amnesia.modules.tag')
+    config.include('amnesia.modules.state')
+    config.include('amnesia.modules.file')
+    config.include('amnesia.modules.search')
+    config.include('amnesia.modules.content.views')
+
+
+def include_entity_resource_mapping(config):
+    config.cms_add_entity_resource(Folder, FolderEntity)
+    config.cms_add_entity_resource(Document, DocumentEntity)
+    config.cms_add_entity_resource(Event, EventEntity)
+    config.cms_add_entity_resource(File, FileEntity)
+
+
+def include_amnesia(config):
+    config.include(include_config_directives)
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
@@ -60,16 +83,9 @@ def include_amnesia(config):
     config.include('amnesia.renderers')
     config.include('amnesia.db')
 
-    config.include('amnesia.modules.folder')
-    config.include('amnesia.modules.document')
-    config.include('amnesia.modules.event')
-    config.include('amnesia.modules.account')
-    config.include('amnesia.modules.tag')
-    config.include('amnesia.modules.state')
-    config.include('amnesia.modules.file')
-    config.include('amnesia.modules.search')
+    config.include(include_cms_modules)
+    config.include(include_entity_resource_mapping)
 
-    config.include('amnesia.modules.content.views')
     config.include('amnesia.views')
     config.include('amnesia.widgets')
 
