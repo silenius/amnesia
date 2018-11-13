@@ -53,6 +53,11 @@ def include_config_directives(config):
                          'amnesia.configurator.cms_add_entity_resource')
 
 
+def include_request_methods(config):
+    config.add_request_method('amnesia.configurator.cms_get_resource',
+                              'cms_get_resource')
+
+
 def include_cms_modules(config):
     config.include('amnesia.modules.folder')
     config.include('amnesia.modules.document')
@@ -74,6 +79,7 @@ def include_entity_resource_mapping(config):
 
 def include_amnesia(config):
     config.include(include_config_directives)
+    config.include(include_request_methods)
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)

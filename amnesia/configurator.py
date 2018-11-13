@@ -35,3 +35,8 @@ def cms_add_entity_resource(config, entity, resource):
         cfg[entity] = resource
 
     config.action('amnesiacms_entity_resource={}'.format(entity), register)
+
+
+def cms_get_resource(request, entity):
+    cfg = request.registry['cms_entity_resources']
+    return cfg[type(entity)]

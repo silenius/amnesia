@@ -44,7 +44,8 @@ class Root(Resource):
         # Access to a specific resource through it's id, ex: /123
         if path.isdigit():
             entity = self.dbsession.query(Content).get(path)
-            return self.request.registry['cms_entity_resources'][entity.__class__]
+            resource = self.request.cms_get_resource(entity)
+            return resource(self.request, entity)
 
         return _tree[path](self.request, self)
 
