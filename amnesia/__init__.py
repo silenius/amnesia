@@ -9,6 +9,14 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 
 from amnesia.resources import get_root
+from amnesia.modules.folder import Folder
+from amnesia.modules.folder import FolderEntity
+from amnesia.modules.document import Document
+from amnesia.modules.document import DocumentEntity
+from amnesia.modules.event import Event
+from amnesia.modules.event import EventEntity
+from amnesia.modules.file import File
+from amnesia.modules.file import FileEntity
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -99,8 +107,6 @@ def include_amnesia(config):
 
     config.add_static_view(name='static', path='amnesia:static/')
 
-    config.add_resource_url_adapter(entity_resource_adapter)
-
     #config.scan()
     #config.add_renderer('.html', 'pyramid_chameleon.zpt.renderer_factory')
     config.add_renderer('.xml', 'pyramid_chameleon.zpt.renderer_factory')
@@ -119,27 +125,3 @@ def main(global_config, **settings):
     config.include(include_amnesia)
 
     return config.make_wsgi_app()
-
-
-# XXX
-from amnesia.modules.folder import Folder
-from amnesia.modules.folder import FolderEntity
-from amnesia.modules.document import Document
-from amnesia.modules.document import DocumentEntity
-from amnesia.modules.event import Event
-from amnesia.modules.event import EventEntity
-from amnesia.modules.file import File
-from amnesia.modules.file import FileEntity
-from pyramid.traversal import ResourceURL
-
-def entity_resource_adapter(resource, request):
-    if isinstance(resource, Folder):
-        resource = FolderEntity(request, resource)
-    elif isinstance(resource, Document):
-        resource = DocumentEntity(request, resource)
-    elif isinstance(resource, Event):
-        resource = EventEntity(request, resource)
-    elif isinstance(resource, File):
-        resource = FileEntity(request, resource)
-
-    return ResourceURL(resource, request)

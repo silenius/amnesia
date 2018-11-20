@@ -4,6 +4,8 @@ import logging
 
 from collections import OrderedDict
 
+from pyramid.traversal import ResourceURL
+
 log = logging.getLogger(__name__)
 
 FRONTEND_ASSET_CONFIG_KEYS = {
@@ -27,12 +29,18 @@ def cms_register_frontend_asset(config, asset_name, asset_config):
     config.action('amnesiacms_frontend_asset={}'.format(asset_name), register)
 
 
-def cms_add_entity_resource(config, entity, resource):
+def cms_add_entity_resource(config, entity, resource, add_url_adapter=True):
     cfg = config.registry.setdefault('cms_entity_resources', OrderedDict())
 
     def register():
         log.info('===>>> Mapping {} to resource {}'.format(entity, resource))
         cfg[entity] = resource
+
+        if add_url_adapter:
+            config.add_resource_url_adapter(
+                lambda resource2, request:
+                    ResourceURL(resource(request, resource2), request),
+                entity)
 
     config.action('amnesiacms_entity_resource={}'.format(entity), register)
 
