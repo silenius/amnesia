@@ -52,5 +52,5 @@ def cms_add_entity_resource(config, entity, resource, add_url_adapter=True):
 
 
 def cms_get_resource(request, entity):
-    cfg = request.registry['cms_entity_resources']
+    cfg = request.registry.cms_entity_resources
     return cfg[type(entity)]
