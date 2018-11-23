@@ -32,7 +32,7 @@ def main(argv=sys.argv):
 
         if not hasattr(registry, 'cms_frontend_assets'):
             print('===>>> No static packages registered')
-            return 2
+            return
 
         assets = registry.cms_frontend_assets
 
