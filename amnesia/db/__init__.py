@@ -3,21 +3,11 @@
 from sqlalchemy import engine_from_config
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import configure_mappers
 from sqlalchemy.pool import NullPool
 
+# from .meta import metadata
+
 import zope.sqlalchemy
-
-# import or define all models here to ensure they are attached to the
-# Base.metadata prior to any initialization routines
-#from .mymodel import MyModel # flake8: noqa
-
-#from .meta import metadata
-
-# run configure_mappers after defining all of the models to ensure
-# all relationships can be setup
-#configure_mappers()
-
 
 def get_engine(settings, prefix='sqlalchemy.'):
     if settings.get('sqlalchemy.poolclass') == 'NullPool':
@@ -82,6 +72,7 @@ def includeme(config):
     # use pyramid_retry to retry a request when transient exceptions occur
     config.include('pyramid_retry')
     engine = get_engine(settings)
+    #meta = metadata
     meta = get_metadata(settings)
     meta.reflect(bind=engine)
     session_factory = get_session_factory(engine)
