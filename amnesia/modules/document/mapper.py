@@ -14,5 +14,7 @@ def includeme(config):
     config.include('amnesia.modules.content.mapper')
     config.include('amnesia.modules.content_type.mapper')
 
-    orm.mapper(Document, tables['document'], inherits=Content,
-        polymorphic_identity=get_type_id(config, 'document'))
+    orm.mapper(
+        Document, tables['document'], inherits=Content,
+        polymorphic_identity=get_type_id(config, 'document')
+    )
