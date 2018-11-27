@@ -54,16 +54,22 @@ def include_entry_points(config):
 
 
 def include_config_directives(config):
-    config.add_directive('cms_register_frontend_asset',
-                         'amnesia.configurator.cms_register_frontend_asset')
+    config.add_directive(
+        'cms_register_frontend_asset',
+        'amnesia.lib.configurator.cms_register_frontend_asset'
+    )
 
-    config.add_directive('cms_add_entity_resource',
-                         'amnesia.configurator.cms_add_entity_resource')
+    config.add_directive(
+        'cms_add_entity_resource',
+        'amnesia.lib.configurator.cms_add_entity_resource'
+    )
 
 
 def include_request_methods(config):
-    config.add_request_method('amnesia.configurator.cms_get_resource',
-                              'cms_get_resource')
+    config.add_request_method(
+        'amnesia.lib.configurator.cms_get_resource',
+        'cms_get_resource'
+    )
 
 
 def include_cms_modules(config):
