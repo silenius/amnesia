@@ -10,9 +10,9 @@ def includeme(config):
     tables = config.registry['metadata'].tables
 
     orm.mapper(
-        Tag, tables['tag'], properties={
+        Tag, tables['public.tag'], properties={
             'contents': orm.relationship(
-                Content, secondary=tables['content_tag'],
+                Content, secondary=tables['public.content_tag'],
                 back_populates='tags'
             )
         }

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pyramid.settings import aslist
+
 from sqlalchemy import engine_from_config
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import sessionmaker
@@ -72,9 +74,12 @@ def includeme(config):
     # use pyramid_retry to retry a request when transient exceptions occur
     config.include('pyramid_retry')
     engine = get_engine(settings)
-    #meta = metadata
     meta = get_metadata(settings)
-    meta.reflect(bind=engine)
+
+    # reflection
+    for schema in aslist(settings.get('amnesia.reflect_schemas', [])):
+        meta.reflect(bind=engine, schema=schema)
+
     session_factory = get_session_factory(engine)
     config.registry['dbsession_factory'] = session_factory
     config.registry['metadata'] = meta

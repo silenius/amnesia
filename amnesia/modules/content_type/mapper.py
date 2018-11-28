@@ -5,4 +5,4 @@ from .model import ContentType
 
 def includeme(config):
     tables = config.registry['metadata'].tables
-    orm.mapper(ContentType, tables['content_type'])
+    orm.mapper(ContentType, tables['public.content_type'])

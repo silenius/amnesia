@@ -62,15 +62,15 @@ def includeme(config):
     config.include('amnesia.modules.content_type.mapper')
     config.include('amnesia.modules.tag.mapper')
 
-    _count_alias = tables['content'].alias('_count_children')
+    _count_alias = tables['public.content'].alias('_count_children')
 
     orm.mapper(
-        Content, tables['content'],
-        polymorphic_on=tables['content'].c.content_type_id,
+        Content, tables['public.content'],
+        polymorphic_on=tables['public.content'].c.content_type_id,
         properties={
 
             # no need to load this column by default
-            'fts': orm.deferred(tables['content'].c.fts),
+            'fts': orm.deferred(tables['public.content'].c.fts),
 
             #################
             # RELATIONSHIPS #
@@ -98,13 +98,13 @@ def includeme(config):
 
             'tags': orm.relationship(
                 Tag,
-                secondary=tables['content_tag'],
+                secondary=tables['public.content_tag'],
                 back_populates='contents'
             ),
 
             'parent': orm.relationship(
                 Folder,
-                foreign_keys=tables['content'].c.container_id,
+                foreign_keys=tables['public.content'].c.container_id,
                 innerjoin=True,
                 uselist=False,
                 backref=orm.backref('children', cascade='all, delete-orphan')
@@ -116,17 +116,21 @@ def includeme(config):
 
             'position_in_container': orm.column_property(
                 sql.func.row_number().
-                over(partition_by=tables['content'].c.container_id,
-                     order_by=tables['content'].c.weight.desc()),
+                over(partition_by=tables['public.content'].c.container_id,
+                     order_by=tables['public.content'].c.weight.desc()),
                 deferred=True,
                 group='window_func'
             ),
 
             # FIXME: move to folder mapper with a LATERAL expression
             'count_children': orm.column_property(
-                sql.select([sql.func.count()]).where(
-                    _count_alias.c.container_id == tables['content'].c.id
-                ).correlate(tables['content']).label('count_children'),
+                sql.select(
+                    [sql.func.count()]
+                ).where(
+                    _count_alias.c.container_id == tables['public.content'].c.id
+                ).correlate(
+                    tables['public.content']
+                ).label('count_children'),
                 deferred=True
             ),
 
