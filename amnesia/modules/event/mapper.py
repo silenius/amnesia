@@ -17,7 +17,7 @@ def includeme(config):
 
     orm.mapper(
         Event,
-        tables['public.event'],
+        tables['event'],
         inherits=Content,
         polymorphic_identity=get_type_id(config, 'event'),
         properties={

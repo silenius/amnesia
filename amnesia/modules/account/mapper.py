@@ -7,12 +7,12 @@ from .model import Account
 def includeme(config):
     tables = config.registry['metadata'].tables
 
-    orm.mapper(Account, tables['public.account'],
+    orm.mapper(Account, tables['account'],
         properties={
             'count_content': orm.column_property(
                 sql.select(
                     [sql.func.count()],
-                    tables['public.account'].c.id == tables['public.content'].c.owner_id
+                    tables['account'].c.id == tables['content'].c.owner_id
                 ).label('count_content'),
                 deferred=True
             )

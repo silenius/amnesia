@@ -18,9 +18,9 @@ def includeme(config):
 
     tables = config.registry['metadata'].tables
 
-    t_content = tables['public.content']
-    t_folder = tables['public.folder']
-    t_document = tables['public.document']
+    t_content = tables['content']
+    t_folder = tables['folder']
+    t_document = tables['document']
 
 #    q_count_children = sql.select([
 #        sql.func.count('*').label('cpt')
@@ -46,7 +46,7 @@ def includeme(config):
 
             'polymorphic_children': orm.relationship(
                 ContentType,
-                secondary=tables['public.folder_polymorphic_loading']
+                secondary=tables['folder_polymorphic_loading']
             ),
         }
     )

@@ -5,19 +5,18 @@ from sqlalchemy import orm
 from .model import MimeMajor
 from .model import Mime
 
-
 def includeme(config):
     ''' Pyramid includeme '''
     tables = config.registry['metadata'].tables
 
     orm.mapper(
         MimeMajor,
-        tables['public.mime_major']
+        tables['mime_major']
     )
 
     orm.mapper(
         Mime,
-        tables['public.mime'],
+        tables['mime'],
         properties={
             'major': orm.relationship(MimeMajor, lazy='joined')
         }

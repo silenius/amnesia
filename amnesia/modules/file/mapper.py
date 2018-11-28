@@ -19,7 +19,7 @@ def includeme(config):
 
     orm.mapper(
         File,
-        tables['public.data'],
+        tables['data'],
         inherits=Content,
         polymorphic_identity=get_type_id(config, 'file'),
         #inherit_condition=tables['data'].c.content_id == tables['content'].c.id

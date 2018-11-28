@@ -11,8 +11,8 @@ def get_type_id(config, name):
     dbsession = config.registry['dbsession_factory']()
     tables = config.registry['metadata'].tables
 
-    q = sql.select([tables['public.content_type'].c.id])\
-        .where(tables['public.content_type'].c.name == name)
+    q = sql.select([tables['content_type'].c.id])\
+        .where(tables['content_type'].c.name == name)
 
     # FIXME: let the transaction manager handle that lifecycle
     content_type_id = dbsession.execute(q).scalar()
