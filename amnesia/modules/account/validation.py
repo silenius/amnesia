@@ -20,8 +20,8 @@ class AccountSchema(Schema):
     password = String(required=True, load_only=True, validate=Length(min=4))
     password_repeat = String(required=True, load_only=True,
                              validate=Length(min=4))
-    last_name = String(required=True, data_key='account_last_name')
-    first_name = String(required=True, data_key='account_first_name')
+    last_name = String(required=True)
+    first_name = String(required=True)
     email = Email(required=True)
     captcha_token = String(required=True, data_key='g-recaptcha-response',
                            validate=[Length(min=1, error='captcha missing')])
