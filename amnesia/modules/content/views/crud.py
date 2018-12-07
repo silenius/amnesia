@@ -69,11 +69,15 @@ class ContentCRUD(BaseView):
         }
 
         try:
+            # Is a default template registered for this entity ?
             template = self.entity.props['template_show']
             return render_to_response(template, context, request=self.request)
         except (TypeError, KeyError):
+            # No default template is defined in props['template_show']
+            # The caller should provide a renderer='mypacakge:sometemplate.pt'
             return context
         except (FileNotFoundError, ValueError):
+            # A default template has been provided, but is not found
             raise HTTPNotFound()
 
     #########################################################################
