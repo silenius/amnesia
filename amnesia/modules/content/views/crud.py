@@ -106,8 +106,7 @@ def delete(context, request):
         dbsession.delete(entity)
 
     try:
-        request.tm.commit()
+        dbsession.flush()
         return {'deleted': True}
     except DatabaseError:
-        request.tm.abort()
         return {'deleted': False}
