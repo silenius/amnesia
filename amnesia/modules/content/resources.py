@@ -13,7 +13,6 @@ from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentDeletedEvent
 from amnesia.resources import Resource
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -58,8 +57,6 @@ class Entity(Resource):
         try:
             self.dbsession.delete(self.entity)
             self.dbsession.flush()
-            event = ContentDeletedEvent(self.request, self.entity)
-            self.request.registry.notify(event)
             return True
         except DatabaseError:
             return False
