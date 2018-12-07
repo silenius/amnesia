@@ -70,12 +70,9 @@ class ContentCRUD(BaseView):
 
         try:
             template = self.entity.props['template_show']
-        except (TypeError, KeyError):
-            template = 'amnesia:templates/{}/show.pt'.format(
-                self.entity.type.name)
-
-        try:
             return render_to_response(template, context, request=self.request)
+        except (TypeError, KeyError):
+            return context
         except (FileNotFoundError, ValueError):
             raise HTTPNotFound()
 
