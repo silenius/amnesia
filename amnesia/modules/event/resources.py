@@ -8,7 +8,6 @@ from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.event import Event
 from amnesia.modules.event.validation import EventSchema
-from amnesia.modules.event import EventCreatedEvent
 from amnesia.modules.state import State
 from amnesia.modules.folder import Folder
 
@@ -52,8 +51,6 @@ class EventResource(EntityManager):
         try:
             self.dbsession.add(new_entity)
             self.dbsession.flush()
-            event = EventCreatedEvent(self.request, new_entity)
-            self.request.registry.notify(event)
             return new_entity
         except DatabaseError:
             return False
