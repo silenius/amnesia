@@ -66,6 +66,7 @@ class DocumentCRUD(ContentCRUD):
         return schema.dump(self.context.entity, many=False)
 
     @view_config(request_method='GET',
+                 renderer='amnesia:templates/document/show.pt',
                  accept='text/html', permission='read',
                  context=DocumentEntity)
     def read_html(self):
