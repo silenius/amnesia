@@ -133,6 +133,24 @@ class FileCRUD(ContentCRUD):
         return self.edit_form(form_data)
 
     #########################################################################
+    # READ                                                                  #
+    #########################################################################
+
+    @view_config(request_method='GET', renderer='json',
+                 accept='application/json', permission='read',
+                 context=FileEntity)
+    def read_json(self):
+        schema = self.context.get_validation_schema()
+        return schema.dump(self.context.entity, many=False)
+
+    @view_config(request_method='GET',
+                 renderer='amnesia:templates/file/show.pt',
+                 accept='text/html', permission='read',
+                 context=FileEntity)
+    def read_html(self):
+        return super().read()
+
+    #########################################################################
     # CREATE                                                                #
     #########################################################################
 
