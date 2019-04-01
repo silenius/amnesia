@@ -3,6 +3,10 @@
 from pyramid.security import unauthenticated_userid
 
 from .model import Account
+from .model import Role
+from .model import Permission
+from .model import AccountRole
+from .model import RolePermission
 
 from .resources import AuthResource
 from .resources import DatabaseAuthResource

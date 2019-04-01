@@ -34,10 +34,8 @@ class AuthResource(Resource):
         self.__parent__ = parent
 
     def __acl__(self):
-        yield Deny, Authenticated, 'login'
-        yield Allow, Authenticated, 'logout'
-        yield Deny, Everyone, 'logout'
         yield Allow, Everyone, 'login'
+        yield Allow, Everyone, 'logout'
         yield Allow, Everyone, 'lost'
 
         if self.registration_enabled:

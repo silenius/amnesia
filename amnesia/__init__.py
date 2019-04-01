@@ -9,6 +9,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 
 from amnesia.resources import get_root
+from amnesia.modules.account.security import get_principals
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
@@ -20,7 +21,6 @@ from amnesia.modules.file import FileEntity
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-
 def include_pyramid_addons(config):
     config.include('pyramid_chameleon')
     config.include('pyramid_beaker')
@@ -29,16 +29,25 @@ def include_pyramid_addons(config):
 
 
 def include_authentication(config):
+    """Authentication is merely the mechanism by which credentials provided in
+    the request are resolved to one or more principal identifiers."""
+
     settings = config.registry.settings
     debug = asbool(settings.get('auth.debug', 'false'))
     http_only = asbool(settings.get('auth.http_only', 'true'))
     authn_policy = AuthTktAuthenticationPolicy(
-        settings['auth.secret'], debug=debug, http_only=http_only
+        settings['auth.secret'],
+        callback=get_principals,
+        debug=debug,
+        http_only=http_only
     )
     config.set_authentication_policy(authn_policy)
 
 
 def include_authorization(config):
+    """Authorization then determines access based on the principal identifiers,
+    the requested permission, and a context"""
+
     authz_policy = ACLAuthorizationPolicy()
     config.set_authorization_policy(authz_policy)
 
@@ -97,7 +106,7 @@ def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
-    config.include(include_security)
+    #config.include(include_security)
 
     config.include('amnesia.subscribers')
     config.include('amnesia.renderers')

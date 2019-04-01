@@ -123,6 +123,7 @@ create table role (
     name        smalltext   not null,
     created     timestamptz not null    default current_timestamp,
     enabled     boolean     not null    default false,
+    locked      boolean     not null    default false,
     description text,
 
     constraint pk_role
@@ -130,6 +131,29 @@ create table role (
 );
 
 create unique index u_idx_role_name on role(lower(name));
+
+insert into role(name, enabled, locked, description)
+values ('system.Everyone', true, true, 'This principal id is granted to all requests');
+
+insert into role(name, enabled, locked, description)
+values ('system.Authenticated', true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
+
+----------------
+-- permission --
+----------------
+
+create table permission (
+    id          serial      not null,
+    name        smalltext   not null,
+    created     timestamptz not null    default current_timestamp,
+    enabled     boolean     not null    default false,
+    description text,
+
+    constraint pk_permission
+        primary key(id)
+);
+
+create unique index u_idx_permisison_name on permission(lower(name));
 
 ------------------
 -- account_role --
@@ -148,6 +172,25 @@ create table account_role (
 
     constraint fk_role
         foreign key(role_id) references role(id)
+);
+
+---------------------
+-- role_permission --
+---------------------
+
+create table role_permission (
+    role_id         integer     not null,
+    permission_id   integer     not null,
+    created         timestamptz not null    default current_timestamp,
+
+    constraint pk_role_permission
+        primary key (role_id, permission_id),
+
+    constraint fk_role
+        foreign key(role_id) references role(id),
+
+    constraint fk_permission
+        foreign key (permission_id) references permission(id)
 );
 
 ----------------

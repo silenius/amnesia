@@ -18,3 +18,31 @@ class Account(Base):
     @hybrid_property
     def full_name(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
+
+
+class Role(Base):
+
+    def __init__(self, name, description=None):
+        self.name = name
+        self.description = description
+
+
+class AccountRole(Base):
+
+    def __init__(self, account, role):
+        self.account = account
+        self.role = role
+
+
+class Permission(Base):
+
+    def __init__(self, name, description=None):
+        self.name = name
+        self.description = description
+
+
+class RolePermission(Base):
+
+    def __init__(self, role, permission):
+        self.role = role
+        self.permission = permission
