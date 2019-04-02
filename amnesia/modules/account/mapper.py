@@ -1,5 +1,8 @@
+from sqlalchemy import event
 from sqlalchemy import orm
 from sqlalchemy import sql
+
+from amnesia.modules.content import Content
 
 from .model import Account
 from .model import Role
@@ -64,5 +67,17 @@ def includeme(config):
 
         'permission': orm.relationship(
             Permission, back_populates='roles'
+        ),
+
+        'content': orm.relationship(
+            Content, back_populates='permissions'
         )
     })
+
+
+@event.listens_for(orm.mapper, 'before_configured', once=True)
+def _content_callback():
+    orm.class_mapper(Content).add_property('permissions', orm.relationship(
+        RolePermission, back_populates='content',
+        order_by=RolePermission.weight
+    ))

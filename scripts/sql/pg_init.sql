@@ -138,6 +138,9 @@ values ('system.Everyone', true, true, 'This principal id is granted to all requ
 insert into role(name, enabled, locked, description)
 values ('system.Authenticated', true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
 
+insert into role(name, enabled, locked, description)
+values ('Manager', true, true, 'The Manager role is the role that can do everything.');
+
 ----------------
 -- permission --
 ----------------
@@ -181,6 +184,9 @@ create table account_role (
 create table role_permission (
     role_id         integer     not null,
     permission_id   integer     not null,
+    content_id      integer,
+    allow           boolean     not null,
+    weight          smallint    not null,
     created         timestamptz not null    default current_timestamp,
 
     constraint pk_role_permission
@@ -190,7 +196,10 @@ create table role_permission (
         foreign key(role_id) references role(id),
 
     constraint fk_permission
-        foreign key (permission_id) references permission(id)
+        foreign key (permission_id) references permission(id),
+
+    constraint fk_content
+        foreign key (content_id) references content(id)
 );
 
 ----------------
