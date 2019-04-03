@@ -43,6 +43,8 @@ class Permission(Base):
 
 class RolePermission(Base):
 
-    def __init__(self, role, permission):
+    def __init__(self, role, permission, allow, content=None):
         self.role = role
         self.permission = permission
+        self.allow = allow
+        self.content = content
