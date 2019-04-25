@@ -9,7 +9,9 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 
 from amnesia.resources import get_root
-from amnesia.modules.account.security import get_principals
+from amnesia.authentication import AmnesiaAuthenticationPolicy
+from amnesia.modules.account import Account
+from amnesia.modules.account import AccountEntity
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
@@ -35,9 +37,8 @@ def include_authentication(config):
     settings = config.registry.settings
     debug = asbool(settings.get('auth.debug', 'false'))
     http_only = asbool(settings.get('auth.http_only', 'true'))
-    authn_policy = AuthTktAuthenticationPolicy(
+    authn_policy = AmnesiaAuthenticationPolicy(
         settings['auth.secret'],
-        callback=get_principals,
         debug=debug,
         http_only=http_only
     )

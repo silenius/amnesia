@@ -124,6 +124,7 @@ create table role (
     created     timestamptz not null    default current_timestamp,
     enabled     boolean     not null    default false,
     locked      boolean     not null    default false,
+    virtual     boolean     not null    default false,
     description text,
 
     constraint pk_role
@@ -132,31 +133,17 @@ create table role (
 
 create unique index u_idx_role_name on role(lower(name));
 
-insert into role(name, enabled, locked, description)
-values ('system.Everyone', true, true, 'This principal id is granted to all requests');
+insert into role(name, enabled, locked, virtual, description)
+values ('system.Everyone', true, true, true, 'This principal id is granted to all requests');
 
-insert into role(name, enabled, locked, description)
-values ('system.Authenticated', true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
+insert into role(name, enabled, locked, virtual, description)
+values ('system.Authenticated', true, true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
+
+insert into role(name, enabled, locked, virtual, description)
+values ('Owner', true, true, true, 'The Owner role is automatically granted to the creator of a content');
 
 insert into role(name, enabled, locked, description)
 values ('Manager', true, true, 'The Manager role is the role that can do everything.');
-
-----------------
--- permission --
-----------------
-
-create table permission (
-    id          serial      not null,
-    name        smalltext   not null,
-    created     timestamptz not null    default current_timestamp,
-    enabled     boolean     not null    default false,
-    description text,
-
-    constraint pk_permission
-        primary key(id)
-);
-
-create unique index u_idx_permisison_name on permission(lower(name));
 
 ------------------
 -- account_role --
@@ -177,6 +164,39 @@ create table account_role (
         foreign key(role_id) references role(id)
 );
 
+----------------
+-- permission --
+----------------
+
+create table permission (
+    id          serial      not null,
+    name        smalltext   not null,
+    created     timestamptz not null    default current_timestamp,
+    enabled     boolean     not null    default false,
+    description text,
+
+    constraint pk_permission
+        primary key(id)
+);
+
+create unique index u_idx_permisison_name on permission(lower(name));
+
+------------
+-- policy --
+------------
+
+create table policy (
+    id      serial  not null,
+    name    text    not null,
+
+    constraint pk_policy
+        primary key (id)
+);
+
+create unique index u_idx_policy_name on policy(lower(name));
+
+insert into policy(name) values ('GLOBAL');
+
 ---------------------
 -- role_permission --
 ---------------------
@@ -184,13 +204,13 @@ create table account_role (
 create table role_permission (
     role_id         integer     not null,
     permission_id   integer     not null,
-    content_id      integer,
+    policy_id       integer     not null,
     allow           boolean     not null,
     weight          smallint    not null,
     created         timestamptz not null    default current_timestamp,
 
     constraint pk_role_permission
-        primary key (role_id, permission_id),
+        primary key (role_id, permission_id, policy_id),
 
     constraint fk_role
         foreign key(role_id) references role(id),
@@ -198,9 +218,36 @@ create table role_permission (
     constraint fk_permission
         foreign key (permission_id) references permission(id),
 
-    constraint fk_content
-        foreign key (content_id) references content(id)
+    constraint fk_policy
+        foreign key (policy_id) references policy(id),
+
+    constraint unique_role_policy_weight
+        unique (role_id, policy_id, weight) deferrable initially deferred
 );
+
+create or replace function t_role_permission_weight() returns trigger as $weight$
+    BEGIN
+        PERFORM 1
+            FROM role_permission
+            WHERE role_id = NEW.role_id 
+                AND policy_id = NEW.policy_id
+            FOR UPDATE;
+
+        IF TG_OP = 'INSERT' THEN
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM role_permission
+                WHERE role_id = NEW.role_id 
+                    AND policy_id = NEW.policy_id
+            );
+        END IF;
+
+        RETURN NEW;
+    END;
+$weight$ language plpgsql;
+
+create trigger t_role_permission_weight before insert on role_permission
+    for each row execute procedure t_role_permission_weight();
 
 ----------------
 -- mime_major --

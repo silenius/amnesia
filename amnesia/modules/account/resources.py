@@ -3,14 +3,15 @@
 # pylint: disable=E1101
 
 import os
+import operator
+
 from binascii import hexlify
 
 from pyramid.security import DENY_ALL
 from pyramid.security import Everyone
-from pyramid.security import Authenticated
 from pyramid.security import Allow
-from pyramid.security import Deny
 from pyramid.settings import asbool
+from pyramid.security import ALL_PERMISSIONS
 
 from pyramid_mailer.message import Message
 
@@ -20,7 +21,11 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy import sql
 
 from amnesia.resources import Resource
+from amnesia.modules.content import Entity
 from amnesia.modules.account import Account
+from amnesia.modules.account import Role
+from amnesia.modules.account import RolePermission
+
 from .util import bcrypt_hash_password
 from .util import bcrypt_check_password
 
@@ -34,6 +39,7 @@ class AuthResource(Resource):
         self.__parent__ = parent
 
     def __acl__(self):
+        yield Allow, 'role:Manager', ALL_PERMISSIONS
         yield Allow, Everyone, 'login'
         yield Allow, Everyone, 'logout'
         yield Allow, Everyone, 'lost'
@@ -49,6 +55,14 @@ class AuthResource(Resource):
 
 
 class DatabaseAuthResource(AuthResource):
+
+    def __getitem__(self, path):
+        if path.isdigit():
+            account = self.query.get(path)
+            if account:
+                return AccountEntity(self.request, account)
+
+        raise KeyError
 
     @property
     def query(self):
@@ -151,3 +165,148 @@ The Belgian Biodiversity Platform'''.format(
             return False
 
         return False
+
+
+class AccountEntity(Resource):
+
+    __parent__ = DatabaseAuthResource
+
+    def __init__(self, request, entity):
+        super().__init__(request)
+        self.entity = entity
+
+    @property
+    def __name__(self):
+        return self.entity.id
+
+
+###############################################################################
+# ROLE                                                                        #
+###############################################################################
+
+class RoleResource(Resource):
+
+    __name__ = 'roles'
+
+    def __init__(self, request, parent):
+        super().__init__(request)
+        self.__parent__ = parent
+
+    @property
+    def query(self):
+        return self.dbsession.query(Role)
+
+    def __getitem__(self, path):
+        if path.isdigit():
+            entity = self.dbsession.query(Role).get(path)
+            if entity:
+                return RoleEntity(self.request, entity)
+
+        raise KeyError
+
+
+class RoleEntity(Resource):
+
+    __parent__ = RoleResource
+
+    def __init__(self, request, entity):
+        super().__init__(request)
+        self.entity = entity
+
+    def set_permission(self, permission, allow, policy):
+        filters = sql.and_(
+            RolePermission.role == self.entity,
+            RolePermission.permission == permission,
+            RolePermission.policy == policy
+        )
+
+        query = self.dbsession.query(RolePermission)
+
+        try:
+            role_perm = query.filter(filters).with_lockmode('update').one()
+            role_perm.allow = allow
+        except NoResultFound:
+            role_perm = RolePermission(
+                role=self.entity, permission=permission, allow=allow,
+                policy=policy
+            )
+
+        try:
+            self.dbsession.add(role_perm)
+            self.dbsession.flush()
+        except DatabaseError:
+            return False
+
+        return role_perm
+
+    def delete_permission(self, perm_id, policy_id):
+        filters = sql.and_(
+            RolePermission.role == self.entity,
+            RolePermission.permission_id == perm_id,
+            RolePermission.policy_id == policy_id
+        )
+
+        query = self.dbsession.query(RolePermission)
+
+        try:
+            role_perm = query.filter(filters).with_lockmode('update').one()
+        except NoResultFound:
+            return False
+
+        try:
+            self.dbsession.delete(role_perm)
+            self.dbsession.flush()
+        except DatabaseError:
+            return False
+
+        return role_perm
+
+    def update_permission_weight(self, permission_id, policy_id, new_weight):
+        """ Change the weight of a permission. """
+
+        filters = sql.and_(
+            RolePermission.role == self.entity,
+            RolePermission.permission_id == permission_id,
+            RolePermission.policy_id == policy_id
+        )
+
+        query = self.dbsession.query(RolePermission)
+
+        try:
+            obj = query.enable_eagerloads(False).filter(filters).\
+                with_lockmode('update').one()
+        except NoResultFound:
+            return False
+
+        (min_weight, max_weight) = sorted((new_weight, obj.weight))
+
+        # Do we move downwards or upwards ?
+        if new_weight - obj.weight > 0:
+            operation = operator.sub
+            whens = {min_weight: max_weight}
+        else:
+            operation = operator.add
+            whens = {max_weight: min_weight}
+
+        # Select all the rows between the current weight and the new weight
+        filters = sql.and_(
+            RolePermission.role == self.entity,
+            RolePermission.policy_id == policy_id,
+            RolePermission.weight.between(min_weight, max_weight)
+        )
+
+        # Swap min_weight/max_weight, or increment/decrement by one depending
+        # on whether one moves up or down
+        new_weight = sql.case(
+            value=RolePermission.weight, whens=whens,
+            else_=operation(RolePermission.weight, 1)
+        )
+
+        try:
+            # The UPDATE statement
+            updated = query.enable_eagerloads(False).filter(filters).\
+                update({'weight': new_weight}, synchronize_session=False)
+            self.dbsession.flush()
+            return updated
+        except DatabaseError:
+            return None

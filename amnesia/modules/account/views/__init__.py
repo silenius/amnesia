@@ -7,3 +7,5 @@ def includeme(config):
     config.include('.register')
     config.include('.forgot_password')
     config.include('.recover_password')
+    config.include('.browse')
+    config.include('.permissions')

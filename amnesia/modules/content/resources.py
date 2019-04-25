@@ -6,8 +6,7 @@ import logging
 import operator
 
 from pyramid.security import Allow
-from pyramid.security import Everyone
-from pyramid.security import ALL_PERMISSIONS
+from pyramid.security import Deny
 
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
@@ -27,8 +26,7 @@ class Entity(Resource):
         self.parent = parent
 
     def __acl__(self):
-        yield Allow, Everyone, 'read'
-        yield Allow, self.entity.owner.id, ALL_PERMISSIONS
+        # FIXME
         yield from super().__acl__()
 
     @property

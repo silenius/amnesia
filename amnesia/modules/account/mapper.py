@@ -8,6 +8,7 @@ from .model import Account
 from .model import Role
 from .model import AccountRole
 from .model import Permission
+from .model import Policy
 from .model import RolePermission
 
 
@@ -52,6 +53,14 @@ def includeme(config):
         ),
     })
 
+    # POLICIES
+
+    orm.mapper(Policy, tables['policy'], properties={
+        'rights': orm.relationship(
+            RolePermission, back_populates='policy'
+        )
+    })
+
     # PERMISSIONS
 
     orm.mapper(Permission, tables['permission'], properties={
@@ -69,15 +78,15 @@ def includeme(config):
             Permission, back_populates='roles'
         ),
 
-        'content': orm.relationship(
-            Content, back_populates='permissions'
+        'policy': orm.relationship(
+            Policy, back_populates='rights'
         )
     })
 
 
-@event.listens_for(orm.mapper, 'before_configured', once=True)
-def _content_callback():
-    orm.class_mapper(Content).add_property('permissions', orm.relationship(
-        RolePermission, back_populates='content',
-        order_by=RolePermission.weight
-    ))
+#@event.listens_for(orm.mapper, 'before_configured', once=True)
+#def _content_callback():
+#    orm.class_mapper(Content).add_property('permissions', orm.relationship(
+#        RolePermission, back_populates='content',
+#        order_by=RolePermission.weight
+#    ))

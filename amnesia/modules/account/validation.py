@@ -6,8 +6,11 @@ from marshmallow import post_load
 from marshmallow import ValidationError
 from marshmallow.fields import String
 from marshmallow.fields import Email
+from marshmallow.fields import Integer
+from marshmallow.fields import Boolean
 
 from marshmallow.validate import Length
+from marshmallow.validate import Range
 
 
 class LoginSchema(Schema):
@@ -50,3 +53,28 @@ class ForgotPasswordSchema(Schema):
 
 class RecoverPasswordSchema(AccountSchema):
     token = String(required=True, validate=[Length(equal=32)])
+
+
+class BrowseAccountSchema(Schema):
+    limit = Integer(validate=Range(min=1, max=100), missing=50)
+    offset = Integer(validate=Range(min=0), missing=0)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+class BrowseRoleSchema(Schema):
+    limit = Integer(validate=Range(min=1, max=100), missing=50)
+    offset = Integer(validate=Range(min=0), missing=0)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+class RolePermissionSchema(Schema):
+    policy_id = Integer(validate=Range(min=1))
+    perm_id = Integer(validate=Range(min=1))
+    allow = Boolean()
+
+    class Meta:
+        unknown = EXCLUDE

@@ -1,0 +1,71 @@
+<metal:block use-macro="layout.macros['layout']">
+<metal:block fill-slot="title_more">: permissions</metal:block>
+<metal:block fill-slot="content">
+<div id="main" data-role_id="${role.id}" data-browse-url="${'{}/roles/{}/permissions'.format(request.script_name, context.entity.id)}" data-manage-url="${'{}/roles/{}/permissions'.format(request.script_name, context.entity.id)}" >
+    <section class="permissions">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Manage permissions of ${role.name}</h3>
+                </div>
+            </div>
+
+            <!-- PERMISSION LIST -->
+
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Policy</th>
+                                <th class="text-center">Allow / Deny</th>
+                                <th>Permission</th>
+                                <th>Control</th>
+                            </tr>
+                        </thead>
+                        <tbody id="content"></tbody>
+                    </table>
+                    <div id="pagination"></div>
+                </div>
+            </div>
+
+            <!-- ADD PERMISSION -->
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="allow" value="yes" checked="True" />
+                            Allow
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="allow" value="no" />
+                            Deny
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownperms" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            Add permission
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownperms" id="permissions">
+                            <li tal:repeat="p permissions"><a data-role_id="${role.id}" data-permission_id="${p.id}" href="#">${p.name}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</metal:block>
+
+<metal:block fill-slot="head-bottom">
+    <script src="${request.static_url('amnesia:static/dist/role_permission.bundle.js')}"></script>
+    <link href="${request.static_url('amnesia:static/dist/styles/role_permission.css')}" rel="stylesheet">
+</metal:block>
+
+</metal:block>
