@@ -181,36 +181,36 @@ create table permission (
 
 create unique index u_idx_permisison_name on permission(lower(name));
 
-------------
--- policy --
-------------
+---------------
+-- resources --
+---------------
 
-create table policy (
+create table resource (
     id      serial  not null,
     name    text    not null,
 
-    constraint pk_policy
+    constraint pk_resource
         primary key (id)
 );
 
-create unique index u_idx_policy_name on policy(lower(name));
+create unique index u_idx_resource_name on resource(lower(name));
 
-insert into policy(name) values ('GLOBAL');
+insert into resource(name) values ('GLOBAL');
 
----------------------
--- role_permission --
----------------------
+---------
+-- acl --
+---------
 
-create table role_permission (
+create table acl (
     role_id         integer     not null,
     permission_id   integer     not null,
-    policy_id       integer     not null,
+    resource_id     integer     not null,
     allow           boolean     not null,
     weight          smallint    not null,
     created         timestamptz not null    default current_timestamp,
 
-    constraint pk_role_permission
-        primary key (role_id, permission_id, policy_id),
+    constraint pk_acl
+        primary key (role_id, permission_id, resource_id),
 
     constraint fk_role
         foreign key(role_id) references role(id),
@@ -218,36 +218,34 @@ create table role_permission (
     constraint fk_permission
         foreign key (permission_id) references permission(id),
 
-    constraint fk_policy
-        foreign key (policy_id) references policy(id),
+    constraint fk_resource
+        foreign key (resource_id) references resource(id),
 
-    constraint unique_role_policy_weight
-        unique (role_id, policy_id, weight) deferrable initially deferred
+    constraint unique_role_resource_weight
+        unique (role_id, resource_id, weight) deferrable initially deferred
 );
 
-create or replace function t_role_permission_weight() returns trigger as $weight$
+create or replace function t_acl_weight() returns trigger as $weight$
     BEGIN
         PERFORM 1
-            FROM role_permission
+            FROM acl
             WHERE role_id = NEW.role_id 
-                AND policy_id = NEW.policy_id
+                AND resource_id = NEW.resource_id
             FOR UPDATE;
 
-        IF TG_OP = 'INSERT' THEN
-            NEW.weight := (
-                SELECT coalesce(max(weight) + 1, 1)
-                FROM role_permission
-                WHERE role_id = NEW.role_id 
-                    AND policy_id = NEW.policy_id
-            );
-        END IF;
+        NEW.weight := (
+            SELECT coalesce(max(weight) + 1, 1)
+            FROM acl
+            WHERE role_id = NEW.role_id 
+                AND resource_id = NEW.resource_id
+        );
 
         RETURN NEW;
     END;
 $weight$ language plpgsql;
 
-create trigger t_role_permission_weight before insert on role_permission
-    for each row execute procedure t_role_permission_weight();
+create trigger t_acl_weight before insert on acl
+    for each row execute procedure t_acl_weight();
 
 ----------------
 -- mime_major --

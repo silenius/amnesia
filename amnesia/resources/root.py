@@ -18,6 +18,7 @@ from amnesia.modules.file import FileResource
 from amnesia.modules.account import DatabaseAuthResource
 from amnesia.modules.account import RoleResource
 from amnesia.modules.account import RoleEntity
+from amnesia.modules.account import ACLEntity
 from amnesia.modules.search import SearchResource
 from amnesia.modules.tag import TagResource
 
@@ -34,7 +35,7 @@ _tree = {
     'file': FileResource,
     'search': SearchResource,
     'tag': TagResource,
-    'roles': RoleResource,
+    'roles': RoleResource
 }
 
 

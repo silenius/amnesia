@@ -1,7 +1,7 @@
 <metal:block use-macro="layout.macros['layout']">
 <metal:block fill-slot="title_more">: permissions</metal:block>
 <metal:block fill-slot="content">
-<div id="main" data-role_id="${role.id}" data-browse-url="${'{}/roles/{}/permissions'.format(request.script_name, context.entity.id)}" data-manage-url="${'{}/roles/{}/permissions'.format(request.script_name, context.entity.id)}" >
+<div id="main" data-role_id="${role.id}" data-browse-url="${'{}/roles/{}/acls'.format(request.script_name, context.role.id)}" data-manage-url="${'{}/roles/{}/acls'.format(request.script_name, context.role.id)}" >
     <section class="permissions">
         <div class="container">
             <div class="row">
@@ -17,7 +17,7 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr>
-                                <th>Policy</th>
+                                <th>Resource</th>
                                 <th class="text-center">Allow / Deny</th>
                                 <th>Permission</th>
                                 <th>Control</th>

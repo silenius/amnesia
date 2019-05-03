@@ -11,9 +11,10 @@ from marshmallow import ValidationError
 from amnesia.views import BaseView
 from amnesia.modules.account import Role
 from amnesia.modules.account import Permission
-from amnesia.modules.account import RoleEntity
-from amnesia.modules.account import Policy
-from amnesia.modules.account.validation import RolePermissionSchema
+from amnesia.modules.account import ACL
+from amnesia.modules.account import ACLEntity
+from amnesia.modules.account import ACLResource
+from amnesia.modules.account.validation import ACLSchema
 
 log = logging.getLogger(__name__)
 
@@ -22,15 +23,19 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_defaults(context=RoleEntity)
-class RolePermission(BaseView):
+@view_defaults(context=ACLEntity, name='')
+class ACLView(BaseView):
 
-    @view_config(request_method='GET', name='permissions',
+    #######
+    # GET #
+    #######
+
+    @view_config(request_method='GET',
                  permission='list_permissions',
                  accept='text/html',
                  renderer='amnesia:templates/role/permissions.pt')
-    def permissions_get_html(self):
-        role = self.context.entity
+    def get_html(self):
+        role = self.context.role
         all_permissions = self.context.dbsession.query(Permission).\
             order_by(Permission.name)
 
@@ -39,42 +44,77 @@ class RolePermission(BaseView):
             'permissions': all_permissions
         }
 
-    @view_config(request_method='GET', name='permissions',
+    @view_config(request_method='GET',
                  permission='list_permissions',
                  accept='application/xml',
                  renderer='amnesia:templates/permissions/_browse.xml')
-    def permissions_get_xml(self):
-        role = self.context.entity
+    def get_xml(self):
         self.request.response.content_type='application/xml'
 
+        permissions = self.context.query().order_by(
+            ACL.weight.desc()
+        )
+
         return {
-            'role': role
+            'permissions': permissions
         }
 
-    @view_config(request_method='POST', name='permissions',
-                 permission='change_permissions',
+    ########
+    # POST #
+    ########
+
+    @view_config(request_method='POST',
+                 permission='manage_permission',
                  renderer='json')
-    def permissions_post(self):
+    def post(self):
         form_data = self.request.POST.mixed()
-        schema = RolePermissionSchema()
+        schema = ACLSchema()
 
         try:
             data = schema.load(form_data)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        permission = self.context.dbsession.query(Permission).get(data['perm_id'])
+        permission = self.context.dbsession.query(Permission).get(data['permission_id'])
         # FIXME
-        policy = self.context.dbsession.query(Policy).filter_by(name='GLOBAL').one()
-        self.context.set_permission(permission, data['allow'], policy=policy)
+        resource = self.context.dbsession.query(ACLResource).filter_by(name='GLOBAL').one()
+        self.context.create(permission, data['allow'], resource=resource)
 
         return data
 
-    @view_config(request_method='DELETE', name='permissions',
-                 permission='delete_permission', renderer='json')
-    def permission_delete(self):
+    #########
+    # PATCH #
+    #########
+
+    @view_config(request_method='PATCH',
+                 permission='manage_permission',
+                 renderer='json')
+    def patch(self):
         form_data = self.request.POST.mixed()
-        schema = RolePermissionSchema()
+        schema = ACLSchema()
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as errors:
+            raise HTTPBadRequest('Validation error')
+
+        permission = self.context.dbsession.query(Permission).get(data['permission_id'])
+        # FIXME
+        resource = self.context.dbsession.query(ACLResource).filter_by(name='GLOBAL').one()
+
+        self.context.update(permission, resource, **data)
+
+        return data
+
+    ##########
+    # DELETE #
+    ##########
+
+    @view_config(request_method='DELETE',
+                 permission='manage_permission', renderer='json')
+    def delete(self):
+        form_data = self.request.POST.mixed()
+        schema = ACLSchema()
 
         try:
             data = schema.load(form_data)

@@ -8,8 +8,8 @@ from .model import Account
 from .model import Role
 from .model import AccountRole
 from .model import Permission
-from .model import Policy
-from .model import RolePermission
+from .model import ACLResource
+from .model import ACL
 
 
 def includeme(config):
@@ -35,11 +35,11 @@ def includeme(config):
 
     orm.mapper(Role, tables['role'], properties={
         'accounts': orm.relationship(
-            AccountRole, back_populates="role"
+            AccountRole, back_populates="role", cascade='all, delete-orphan'
         ),
 
-        'permissions': orm.relationship(
-            RolePermission, back_populates="role"
+        'acls': orm.relationship(
+            ACL, back_populates="role", cascade='all, delete-orphan'
         )
     })
 
@@ -53,33 +53,35 @@ def includeme(config):
         ),
     })
 
-    # POLICIES
+    # ACL RESOURCES
 
-    orm.mapper(Policy, tables['policy'], properties={
-        'rights': orm.relationship(
-            RolePermission, back_populates='policy'
+    orm.mapper(ACLResource, tables['resource'], properties={
+        'acls': orm.relationship(
+            ACL, back_populates='resource'
         )
     })
 
     # PERMISSIONS
 
     orm.mapper(Permission, tables['permission'], properties={
-        'roles': orm.relationship(
-            RolePermission, back_populates='permission'
+        'acls': orm.relationship(
+            ACL, back_populates='permission'
         )
     })
 
-    orm.mapper(RolePermission, tables['role_permission'], properties={
+    # ACCESS CONTROL LIST
+
+    orm.mapper(ACL, tables['acl'], properties={
         'role': orm.relationship(
-            Role, back_populates='permissions'
+            Role, back_populates='acls'
         ),
 
         'permission': orm.relationship(
-            Permission, back_populates='roles'
+            Permission, back_populates='acls'
         ),
 
-        'policy': orm.relationship(
-            Policy, back_populates='rights'
+        'resource': orm.relationship(
+            ACLResource, back_populates='acls'
         )
     })
 
@@ -87,6 +89,6 @@ def includeme(config):
 #@event.listens_for(orm.mapper, 'before_configured', once=True)
 #def _content_callback():
 #    orm.class_mapper(Content).add_property('permissions', orm.relationship(
-#        RolePermission, back_populates='content',
-#        order_by=RolePermission.weight
+#        ACL, back_populates='content',
+#        order_by=ACL.weight
 #    ))

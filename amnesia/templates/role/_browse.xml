@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <?python
-    import json
+import json
 ?>
 <response xmlns:tal="http://xml.zope.org/namespaces/tal" xmlns:metal="http://xml.zope.org/namespaces/metal" tal:define="page_total (count / limit if count % limit == 0 else count / limit + 1) ; page_current (offset / limit + 1);">
 
@@ -30,10 +30,23 @@
                     <span tal:case="False">no</span>
                 </td>
                 <td>
-                    <a href="${request.resource_url(context, content.id)}"><i class="fa fa-eye" aria-hidden="true"></i></a>
-                    <a href="${request.resource_url(context, content.id, 'edit')}"><i class="fa fa-pencil-square" aria-hidden="true"></i></a>
-                    <a href="${request.resource_url(context, content.id, 'permissions')}"><i class="fas fa-key" aria-hidden="true"></i></a>
-                    <!--<a href="#"><i class="fa fa-trash" aria-hidden="true"></i></a>-->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            actions
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            <li>
+                                <a href="${request.resource_url(context, content.id, 'acls')}">Manage permissions</a>
+                            </li>
+                            <li>
+                                <a href="${request.resource_url(context, content.id, 'members')}">Manage members</a>
+                            </li>
+                            <li>
+                                <a href="#" data-control="delete" type="button">Delete role</a>
+                            </li>
+                        </ul>
+                    </div>
                 </td>
             </tr>
         </main>

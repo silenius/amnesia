@@ -43,6 +43,11 @@ class AccountSchema(Schema):
         return data
 
 
+class RoleSchema(Schema):
+    role = String(required=True, validate=[Length(min=4)])
+    description = String()
+
+
 class ForgotPasswordSchema(Schema):
     email = Email(required=True)
     captcha_token = String(required=True, data_key='g-recaptcha-response',
@@ -71,9 +76,10 @@ class BrowseRoleSchema(Schema):
         unknown = EXCLUDE
 
 
-class RolePermissionSchema(Schema):
-    policy_id = Integer(validate=Range(min=1))
-    perm_id = Integer(validate=Range(min=1))
+class ACLSchema(Schema):
+    resource_id = Integer(validate=Range(min=1))
+    permission_id = Integer(validate=Range(min=1))
+    weight = Integer(validation=Range(min=1))
     allow = Boolean()
 
     class Meta:

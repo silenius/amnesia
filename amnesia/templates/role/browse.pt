@@ -1,7 +1,7 @@
 <metal:block use-macro="layout.macros['layout']">
 <metal:block fill-slot="title_more">: browse</metal:block>
 <metal:block fill-slot="content">
-<div id="main" data-browse-url="${request.resource_path(request.context, 'browse')}">
+<div id="main" data-collection-url="${request.resource_path(request.context)}" data-browse-url="${request.resource_path(request.context, 'browse')}">
     <section class="browse">
         <div class="container">
             <div class="row">
@@ -26,6 +26,7 @@
                     <div id="pagination"></div>
                 </div>
             </div>
+            <a class="btn btn-default" href="${request.resource_path(request.context, 'new')}" role="button">Add a Role</a>
         </div>
     </section>
 </div>

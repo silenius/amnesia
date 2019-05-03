@@ -24,7 +24,8 @@ from amnesia.resources import Resource
 from amnesia.modules.content import Entity
 from amnesia.modules.account import Account
 from amnesia.modules.account import Role
-from amnesia.modules.account import RolePermission
+from amnesia.modules.account import ACL
+from amnesia.modules.account import AccountRole
 
 from .util import bcrypt_hash_password
 from .util import bcrypt_check_password
@@ -192,7 +193,6 @@ class RoleResource(Resource):
         super().__init__(request)
         self.__parent__ = parent
 
-    @property
     def query(self):
         return self.dbsession.query(Role)
 
@@ -204,6 +204,16 @@ class RoleResource(Resource):
 
         raise KeyError
 
+    def create(self, name, description):
+        role = Role(name=name, description=description)
+
+        try:
+            self.dbsession.add(role)
+            self.dbsession.flush()
+            return role
+        except DatabaseError:
+            return False
+
 
 class RoleEntity(Resource):
 
@@ -213,40 +223,148 @@ class RoleEntity(Resource):
         super().__init__(request)
         self.entity = entity
 
-    def set_permission(self, permission, allow, policy):
-        filters = sql.and_(
-            RolePermission.role == self.entity,
-            RolePermission.permission == permission,
-            RolePermission.policy == policy
+    @property
+    def __name__(self):
+        return self.entity.id
+
+    def __getitem__(self, path):
+        if path == 'acls':
+            return ACLEntity(self.request, role=self.entity)
+        if path == 'members':
+            return RoleMember(self.request, role=self.entity)
+
+        raise KeyError
+
+    def delete(self):
+        try:
+            self.dbsession.delete(self.entity)
+            self.dbsession.flush()
+            return True
+        except DatabaseError:
+            return False
+
+
+class RoleMember(Resource):
+
+    __parent__ = RoleEntity
+    __name__ = 'members'
+
+    def __init__(self, request, role):
+        super().__init__(request)
+        self.role = role
+
+    def __getitem__(self, path):
+        if path.isdigit():
+            account = self.dbsession.query(Account).get(path)
+            if account:
+                return RoleMemberEntity(self.request, role=self.role,
+                                        account=account, parent=self,
+                                        name=account.id)
+        raise KeyError
+
+    def query(self):
+        return self.dbsession.query(AccountRole).filter(
+            AccountRole == self.role)
+
+    def get_members(self):
+        return self.dbsession.query(Account).filter(
+            Account.roles.any(role=self.role)
+        ).all()
+
+    def add_member(self, account):
+        try:
+            self.role.accounts.append(account)
+            self.dbsession.flush()
+            return True
+        except DatabaseError:
+            return False
+
+    def delete(self):
+        try:
+            deleted = self.query().delete()
+            self.dbsession.flush()
+            return deleted
+        except DatabaseError:
+            return False
+
+
+class RoleMemberEntity(Resource):
+
+    def __init__(self, request, role, account, parent, name):
+        super().__init__(request)
+        self.role = role
+        self.account = account
+        self.__parent__ = parent
+        self.__name__ = name
+
+    def query(self):
+        filters = sql.and_(AccountRole.role == self.role,
+                           AccountRole.account == self.account)
+        return self.dbsession.query(AccountRole).filter(filters)
+
+    def delete(self):
+        try:
+            deleted = self.query().delete()
+            self.dbsession.flush()
+            return deleted
+        except DatabaseError:
+            return False
+
+
+class ACLEntity(Resource):
+    ''' Manage ACL for a role '''
+
+    __name__ = 'acls'
+    __parent__ = RoleEntity
+
+    def __init__(self, request, role):
+        super().__init__(request)
+        self.role = role
+
+    def query(self):
+        return self.dbsession.query(ACL).filter(
+            ACL.role == self.role
         )
 
-        query = self.dbsession.query(RolePermission)
-
-        try:
-            role_perm = query.filter(filters).with_lockmode('update').one()
-            role_perm.allow = allow
-        except NoResultFound:
-            role_perm = RolePermission(
-                role=self.entity, permission=permission, allow=allow,
-                policy=policy
-            )
+    def create(self, permission, allow, resource):
+        role_perm = ACL(role=self.role, permission=permission, allow=allow,
+                        resource=resource)
 
         try:
             self.dbsession.add(role_perm)
             self.dbsession.flush()
+            return role_perm
         except DatabaseError:
             return False
 
-        return role_perm
+    def update(self, permission, resource, **data):
+        filters = sql.and_(ACL.permission == permission,
+                           ACL.resource == resource)
 
-    def delete_permission(self, perm_id, policy_id):
+        query = self.query()
+
+        try:
+            role_perm = query.filter(filters).with_lockmode('update').one()
+            if 'weight' in data:
+                self.update_permission_weight(
+                    permission, resource, data['weight']
+                )
+
+            role_perm.feed(**data)
+
+            self.dbsession.add(role_perm)
+            self.dbsession.flush()
+            return role_perm
+        except (NoResultFound, DatabaseError):
+            return False
+
+    def delete_permission(self, permission_id, resource_id):
         filters = sql.and_(
-            RolePermission.role == self.entity,
-            RolePermission.permission_id == perm_id,
-            RolePermission.policy_id == policy_id
+            ACL.permission_id == permission_id,
+            ACL.resource_id == resource_id
         )
 
-        query = self.dbsession.query(RolePermission)
+        query = self.query()
 
         try:
             role_perm = query.filter(filters).with_lockmode('update').one()
@@ -261,16 +379,15 @@ class RoleEntity(Resource):
 
         return role_perm
 
-    def update_permission_weight(self, permission_id, policy_id, new_weight):
+    def update_permission_weight(self, permission, resource, new_weight):
         """ Change the weight of a permission. """
 
         filters = sql.and_(
-            RolePermission.role == self.entity,
-            RolePermission.permission_id == permission_id,
-            RolePermission.policy_id == policy_id
+            ACL.permission == permission,
+            ACL.resource == resource
         )
 
-        query = self.dbsession.query(RolePermission)
+        query = self.query()
 
         try:
             obj = query.enable_eagerloads(False).filter(filters).\
@@ -290,16 +407,15 @@ class RoleEntity(Resource):
 
         # Select all the rows between the current weight and the new weight
         filters = sql.and_(
-            RolePermission.role == self.entity,
-            RolePermission.policy_id == policy_id,
-            RolePermission.weight.between(min_weight, max_weight)
+            ACL.resource == resource,
+            ACL.weight.between(min_weight, max_weight)
         )
 
         # Swap min_weight/max_weight, or increment/decrement by one depending
         # on whether one moves up or down
         new_weight = sql.case(
-            value=RolePermission.weight, whens=whens,
-            else_=operation(RolePermission.weight, 1)
+            value=ACL.weight, whens=whens,
+            else_=operation(ACL.weight, 1)
         )
 
         try:

@@ -15,7 +15,6 @@ from amnesia.modules.account import Account
 from amnesia.modules.account import Role
 from amnesia.modules.account import DatabaseAuthResource
 from amnesia.modules.account import RoleResource
-from amnesia.modules.account import RoleEntity
 from amnesia.modules.account.validation import BrowseAccountSchema
 from amnesia.modules.account.validation import BrowseRoleSchema
 
@@ -54,37 +53,5 @@ class AccountBrowserView(BaseView):
 
     @view_config(request_method='GET', name='', accept='text/html',
                  renderer='amnesia:templates/account/browse.pt')
-    def index(self):
-        return {}
-
-
-@view_defaults(context=RoleResource, permission='browse')
-class RoleBrowserView(BaseView):
-
-    @view_config(request_method='GET', name='browse', accept='application/xml',
-                 renderer='amnesia:templates/role/_browse.xml')
-    def browse_xml(self):
-        params = self.request.GET.mixed()
-        schema = BrowseRoleSchema(context={'request': self.request})
-
-        try:
-            data = schema.load(params)
-        except ValidationError as error:
-            raise HTTPBadRequest(error.messages)
-
-        query = self.context.query
-        count = query.count()
-        result = query.order_by(Role.locked.desc()).\
-            limit(data['limit']).offset(data['offset']).all()
-
-        return {
-            'roles': result,
-            'count': count,
-            'limit': data['limit'],
-            'offset': data['offset']
-        }
-
-    @view_config(request_method='GET', name='', accept='text/html',
-                 renderer='amnesia:templates/role/browse.pt')
     def index(self):
         return {}
