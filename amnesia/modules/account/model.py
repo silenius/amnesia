@@ -54,3 +54,16 @@ class ACL(Base):
         self.permission = permission
         self.resource = resource
         self.allow = allow
+
+
+class GlobalACL(ACL):
+
+    def __init__(self, *args, **kwargs):
+        super(GlobalACL).__init__(*args, **kwargs)
+
+
+class ContentACL(ACL):
+
+    def __init__(self, content, *args, **kwargs):
+        super.__init__(*args, **kwargs)
+        self.content = content

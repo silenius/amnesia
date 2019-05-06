@@ -5,6 +5,8 @@ from .model import Role
 from .model import Permission
 from .model import AccountRole
 from .model import ACL
+from .model import GlobalACL
+from .model import ContentACL
 from .model import ACLResource
 
 from .resources import AuthResource

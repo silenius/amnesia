@@ -10,6 +10,8 @@ from .model import AccountRole
 from .model import Permission
 from .model import ACLResource
 from .model import ACL
+from .model import GlobalACL
+from .model import ContentACL
 
 
 def includeme(config):
@@ -71,24 +73,40 @@ def includeme(config):
 
     # ACCESS CONTROL LIST
 
-    orm.mapper(ACL, tables['acl'], properties={
-        'role': orm.relationship(
-            Role, back_populates='acls'
-        ),
+    orm.mapper(
+        ACL, tables['acl'],
+        polymorphic_on=tables['acl'].c.resource_id,
+        properties={
+            'role': orm.relationship(
+                Role, back_populates='acls'
+            ),
 
-        'permission': orm.relationship(
-            Permission, back_populates='acls'
-        ),
+            'permission': orm.relationship(
+                Permission, back_populates='acls'
+            ),
 
-        'resource': orm.relationship(
-            ACLResource, back_populates='acls'
-        )
-    })
+            'resource': orm.relationship(
+                ACLResource, back_populates='acls'
+            )
+        })
+
+    orm.mapper(
+        GlobalACL, inherits=ACL, polymorphic_identity=1
+    )
+
+    orm.mapper(
+        ContentACL, inherits=ACL,
+        polymorphic_identity=2,
+        properties={
+            'content': orm.relationship(
+                Content, back_populates='acls'
+            )
+        }
+    )
 
 
-#@event.listens_for(orm.mapper, 'before_configured', once=True)
-#def _content_callback():
-#    orm.class_mapper(Content).add_property('permissions', orm.relationship(
-#        ACL, back_populates='content',
-#        order_by=ACL.weight
-#    ))
+@event.listens_for(orm.mapper, 'before_configured', once=True)
+def _content_callback():
+    orm.class_mapper(Content).add_property('acls', orm.relationship(
+        ContentACL, back_populates='content'
+    ))

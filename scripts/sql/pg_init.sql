@@ -169,14 +169,18 @@ create table account_role (
 ----------------
 
 create table permission (
-    id          serial      not null,
-    name        smalltext   not null,
-    created     timestamptz not null    default current_timestamp,
-    enabled     boolean     not null    default false,
-    description text,
+    id              serial      not null,
+    name            smalltext   not null,
+    created         timestamptz not null    default current_timestamp,
+    enabled         boolean     not null    default false,
+    description     text,
+    content_type_id smallint,
 
     constraint pk_permission
-        primary key(id)
+        primary key(id),
+
+    constraint fk_permission_content_type
+        foreign key(content_type_id) references content_type(id)
 );
 
 create unique index u_idx_permisison_name on permission(lower(name));
@@ -205,6 +209,7 @@ create table acl (
     role_id         integer     not null,
     permission_id   integer     not null,
     resource_id     integer     not null,
+    content_id      integer,
     allow           boolean     not null,
     weight          smallint    not null,
     created         timestamptz not null    default current_timestamp,
@@ -220,6 +225,9 @@ create table acl (
 
     constraint fk_resource
         foreign key (resource_id) references resource(id),
+
+    constraint fk_acl_content
+        foreign key (content_id) references content(id),
 
     constraint unique_role_resource_weight
         unique (role_id, resource_id, weight) deferrable initially deferred
