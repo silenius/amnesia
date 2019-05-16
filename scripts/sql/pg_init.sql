@@ -230,7 +230,10 @@ create table acl (
         foreign key (content_id) references content(id),
 
     constraint unique_role_resource_weight
-        unique (role_id, resource_id, weight) deferrable initially deferred
+        unique (role_id, resource_id, weight) deferrable initially deferred,
+
+    constraint unique_content_resource_weight
+        unique (content_id, resource_id, weight) deferrable initially deferred
 );
 
 create or replace function t_acl_weight() returns trigger as $weight$
@@ -241,12 +244,22 @@ create or replace function t_acl_weight() returns trigger as $weight$
                 AND resource_id = NEW.resource_id
             FOR UPDATE;
 
-        NEW.weight := (
-            SELECT coalesce(max(weight) + 1, 1)
-            FROM acl
-            WHERE role_id = NEW.role_id 
-                AND resource_id = NEW.resource_id
-        );
+        IF NEW.content_id IS NOT NULL THEN
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM acl
+                WHERE resource_id = NEW.resource_id
+                    AND content_id = NEW.content_id
+            );
+        ELSE
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM acl
+                WHERE role_id = NEW.role_id 
+                    AND resource_id = NEW.resource_id
+            );
+
+        END IF;
 
         RETURN NEW;
     END;
