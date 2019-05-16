@@ -14,13 +14,13 @@
     <components tal:define="components components | ('main')">
 
         <main tal:condition="'main' in components" xmlns="http://www.w3.org/1999/xhtml">
-            <tr tal:repeat="permission permissions" data-obj="${h.dump_obj(permission, 'json', include_columns=['role_id', 'permission_id', 'resource_id', 'weight'], include_relations=False)}">
-                <td>${permission.resource.name}</td>
-                <td tal:switch="permission.allow" class="text-center">
+            <tr tal:repeat="permission permissions" data-obj="${h.dump_obj(permission, 'json', include_columns=['role_id', 'permission_id', 'weight'], include_relations=False)}">
+                <td tal:switch="permission.allow">
                     <span tal:case="True" class="btn btn-success btn-sm">ALLOW</span>
                     <span tal:case="False" class="btn btn-danger btn-sm">DENY</span>
                 </td>
-                <td>${permission.permission.name}</td>
+                <td tal:condition="'role' in extra_cols">${permission.role.name}</td>
+                <td>${permission.permission.description} <strong>[${permission.permission.name}]</strong></td>
                 <td>
                     <a href="#" data-control="move" type="button" class="btn btn-primary btn-xs">
                         <i class="fas fa-arrows-alt"></i>

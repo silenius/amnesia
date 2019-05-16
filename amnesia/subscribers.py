@@ -18,7 +18,10 @@ def includeme(config):
 @subscriber(BeforeRender)
 def add_renderers_global(event):
     registry = event['request'].registry
-    layout = get_renderer('templates/layout.pt').implementation()
+    layout = registry.settings.get('amnesia.master_layout')
+
+    if layout:
+        layout = get_renderer(layout).implementation()
 
     event.update({
         'h': helpers,

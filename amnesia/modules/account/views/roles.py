@@ -156,12 +156,18 @@ class RoleMemberView(BaseView):
     def post(self):
         try:
             account_id = int(self.request.POST.getone('account_id'))
-            account = self.context.dbsession.query(Account).get(account_id)
-            if not account:
-                raise HTTPNotFound()
-            self.context.add_member(account)
         except (KeyError, ValueError) as e:
             raise HTTPInternalServerError()
+        else:
+            account = self.context.dbsession.query(Account).get(account_id)
+
+            if not account:
+                raise HTTPNotFound()
+
+            if self.context.add_member(account):
+                return HTTPCreated()
+            else:
+                raise HTTPInternalServerError()
 
     ##########
     # DELETE #

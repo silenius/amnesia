@@ -20,14 +20,13 @@ import json
                 </td>
                 <td class="bold">
                     ${content.name}
-                    <i class="fas fa-xs fa-lock" tal:condition="content.locked"></i>
+                </td>
+                <td>
+                    <i class="fas fa-lock" tal:condition="content.locked"></i>
+                    <i class="fas fa-user-astronaut" tal:condition="content.virtual"></i>
                 </td>
                 <td class="bold">
                     <small>${content.description}</small>
-                </td>
-                <td tal:switch="content.enabled">
-                    <span tal:case="True">yes</span>
-                    <span tal:case="False">no</span>
                 </td>
                 <td>
                     <div class="dropdown">
@@ -39,10 +38,10 @@ import json
                             <li>
                                 <a href="${request.resource_url(context, content.id, 'acls')}">Manage permissions</a>
                             </li>
-                            <li>
+                            <li tal:condition="not: content.virtual">
                                 <a href="${request.resource_url(context, content.id, 'members')}">Manage members</a>
                             </li>
-                            <li>
+                            <li tal:condition="not: content.locked">
                                 <a href="#" data-control="delete" type="button">Delete role</a>
                             </li>
                         </ul>

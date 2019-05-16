@@ -24,6 +24,6 @@ class AmnesiaAuthenticationPolicy(AuthTktAuthenticationPolicy):
             principals.append(str(request.user.id))
 
             for role in request.user.roles:
-                principals.append('role:{}'.format(role.role.name))
+                principals.append('role:{}'.format(role.name))
 
         return principals

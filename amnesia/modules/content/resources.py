@@ -5,6 +5,8 @@
 import logging
 import operator
 
+from itertools import chain
+
 from pyramid.security import Allow
 from pyramid.security import Deny
 
@@ -25,9 +27,36 @@ class Entity(Resource):
         self.entity = entity
         self.parent = parent
 
+    def __getitem__(self, path):
+        # FIXME: circular imports
+        from amnesia.modules.account import ContentACLEntity
+        if path == 'acl':
+            return ContentACLEntity(self.request, content=self.entity)
+
+        raise KeyError
+
     def __acl__(self):
         # FIXME
-        yield from super().__acl__()
+        from amnesia.modules.account.security import get_entity_acls
+        from amnesia.modules.account.security import get_global_acls
+
+        acls = chain(
+            get_entity_acls(self.request, self.entity),
+            get_global_acls(self.request)
+        )
+
+        for acl in acls:
+            perm = acl.permission.name
+            allow_deny = Allow if acl.allow else Deny
+
+            if acl.role.is_virtual():
+                role = acl.role.name
+            else:
+                role = 'role:{}'.format(acl.role.name)
+
+            yield from self._acl_adapter(allow_deny, role, perm)
+
+        #yield from super().__acl__()
 
     @property
     def __name__(self):
@@ -36,6 +65,19 @@ class Entity(Resource):
     @property
     def __parent__(self):
         return self.parent if self.parent else self.request.root
+
+    def _acl_adapter(self, allow_deny, role, permission):
+        _ops = ('read', 'update', 'delete', 'edit', 'manage_acl')
+
+        try:
+            _op, _ctx = permission.split('_', 1)
+        except ValueError:
+            pass
+        else:
+            if (_op in _ops and (_ctx == 'content' or (_ctx == 'own_content'
+                                                       and self.entity.owner is
+                                                       self.request.user))):
+                yield allow_deny, role, _op
 
     def update(self, data):
         """ Update an entity """

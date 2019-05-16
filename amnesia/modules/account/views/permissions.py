@@ -13,8 +13,10 @@ from amnesia.modules.account import Role
 from amnesia.modules.account import Permission
 from amnesia.modules.account import ACL
 from amnesia.modules.account import ACLEntity
+from amnesia.modules.account import ContentACLEntity
 from amnesia.modules.account import ACLResource
 from amnesia.modules.account.validation import ACLSchema
+from amnesia.modules.account.validation import ContentACLSchema
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +58,7 @@ class ACLView(BaseView):
         )
 
         return {
+            'extra_cols': (),
             'permissions': permissions
         }
 
@@ -76,9 +79,7 @@ class ACLView(BaseView):
             raise HTTPBadRequest('Validation error')
 
         permission = self.context.dbsession.query(Permission).get(data['permission_id'])
-        # FIXME
-        resource = self.context.dbsession.query(ACLResource).filter_by(name='GLOBAL').one()
-        self.context.create(permission, data['allow'], resource=resource)
+        self.context.create(permission, data['allow'])
 
         return data
 
@@ -99,10 +100,9 @@ class ACLView(BaseView):
             raise HTTPBadRequest('Validation error')
 
         permission = self.context.dbsession.query(Permission).get(data['permission_id'])
-        # FIXME
-        resource = self.context.dbsession.query(ACLResource).filter_by(name='GLOBAL').one()
 
-        self.context.update(permission, resource, **data)
+        self.context.update_permission_weight(permission, data['weight'])
+        #self.context.update(permission, **data)
 
         return data
 
@@ -124,3 +124,78 @@ class ACLView(BaseView):
         self.context.delete_permission(**data)
 
         return data
+
+
+@view_defaults(context=ContentACLEntity, name='', permission='manage_acl')
+class ContentACLView(BaseView):
+
+    #######
+    # GET #
+    #######
+
+    @view_config(request_method='GET', accept='text/html',
+                 renderer='amnesia:templates/content/permissions.pt')
+    def get_html(self):
+        content = self.context.content
+        all_permissions = self.context.dbsession.query(Permission).\
+            order_by(Permission.name)
+
+        return {
+            'content': content,
+            'permissions': all_permissions
+        }
+
+    @view_config(request_method='GET',
+                 accept='application/xml',
+                 renderer='amnesia:templates/permissions/_browse.xml')
+    def get_xml(self):
+        self.request.response.content_type='application/xml'
+
+        permissions = self.context.query().order_by(
+            ACL.weight.desc()
+        )
+
+        return {
+            'extra_cols': {'role'},
+            'permissions': permissions
+        }
+
+    ########
+    # POST #
+    ########
+
+    @view_config(request_method='POST', renderer='json')
+    def post(self):
+        form_data = self.request.POST.mixed()
+        schema = ContentACLSchema()
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as errors:
+            raise HTTPBadRequest('Validation error')
+
+        permission = self.context.dbsession.query(Permission).get(data['permission_id'])
+        role = self.context.dbsession.query(Role).get(data['role_id'])
+        self.context.create(role, permission, data['allow'])
+
+        return data
+
+    ##########
+    # DELETE #
+    ##########
+
+    @view_config(request_method='DELETE', renderer='json')
+    def delete(self):
+        form_data = self.request.POST.mixed()
+        schema = ContentACLSchema()
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as errors:
+            raise HTTPBadRequest('Validation error')
+
+        self.context.delete_permission(**data)
+
+        return data
+
+

@@ -17,8 +17,7 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr>
-                                <th>Resource</th>
-                                <th class="text-center">Allow / Deny</th>
+                                <th>Allow / Deny</th>
                                 <th>Permission</th>
                                 <th>Control</th>
                             </tr>
@@ -53,7 +52,7 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownperms" id="permissions">
-                            <li tal:repeat="p permissions"><a data-role_id="${role.id}" data-permission_id="${p.id}" href="#">${p.name}</a></li>
+                            <li tal:repeat="p permissions"><a data-role_id="${role.id}" data-permission_id="${p.id}" href="#">${p.description} <strong>[${p.name}]</strong></a></li>
                         </ul>
                     </div>
                 </div>

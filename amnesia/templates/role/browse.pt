@@ -16,8 +16,8 @@
                             <tr>
                                 <th></th>
                                 <th>Name</th>
+                                <th></th>
                                 <th>Description</th>
-                                <th>Enabled</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>

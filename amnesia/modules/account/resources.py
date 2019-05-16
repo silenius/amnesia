@@ -2,6 +2,7 @@
 
 # pylint: disable=E1101
 
+import logging
 import os
 import operator
 
@@ -25,10 +26,15 @@ from amnesia.modules.content import Entity
 from amnesia.modules.account import Account
 from amnesia.modules.account import Role
 from amnesia.modules.account import ACL
+from amnesia.modules.account import ACLResource
+from amnesia.modules.account import ContentACL
+from amnesia.modules.account import GlobalACL
 from amnesia.modules.account import AccountRole
 
 from .util import bcrypt_hash_password
 from .util import bcrypt_check_password
+
+log = logging.getLogger(__name__)
 
 
 class AuthResource(Resource):
@@ -219,25 +225,25 @@ class RoleEntity(Resource):
 
     __parent__ = RoleResource
 
-    def __init__(self, request, entity):
+    def __init__(self, request, role):
         super().__init__(request)
-        self.entity = entity
+        self.role = role
 
     @property
     def __name__(self):
-        return self.entity.id
+        return self.role.id
 
     def __getitem__(self, path):
         if path == 'acls':
-            return ACLEntity(self.request, role=self.entity)
-        if path == 'members':
-            return RoleMember(self.request, role=self.entity)
+            return ACLEntity(self.request, role=self.role)
+        if path == 'members' and not self.role.is_virtual():
+            return RoleMember(self.request, role=self.role)
 
         raise KeyError
 
     def delete(self):
         try:
-            self.dbsession.delete(self.entity)
+            self.dbsession.delete(self.role)
             self.dbsession.flush()
             return True
         except DatabaseError:
@@ -268,14 +274,15 @@ class RoleMember(Resource):
 
     def get_members(self):
         return self.dbsession.query(Account).filter(
-            Account.roles.any(role=self.role)
+            Account.account_roles.any(role=self.role)
         ).all()
 
     def add_member(self, account):
         try:
-            self.role.accounts.append(account)
+            account_role = AccountRole(role=self.role, account=account)
+            self.role.accounts.append(account_role)
             self.dbsession.flush()
-            return True
+            return account_role
         except DatabaseError:
             return False
 
@@ -311,6 +318,10 @@ class RoleMemberEntity(Resource):
             return False
 
 
+###############################################################################
+# ACCESS CONTROL LIST (ACL)                                                   #
+###############################################################################
+
 class ACLEntity(Resource):
     ''' Manage ACL for a role '''
 
@@ -322,33 +333,25 @@ class ACLEntity(Resource):
         self.role = role
 
     def query(self):
-        return self.dbsession.query(ACL).filter(
-            ACL.role == self.role
-        )
+        return self.dbsession.query(GlobalACL).filter_by(role=self.role)
 
-    def create(self, permission, allow, resource):
-        role_perm = ACL(role=self.role, permission=permission, allow=allow,
-                        resource=resource)
+    def create(self, permission, allow):
+        acl = GlobalACL(role=self.role, permission=permission, allow=allow)
 
         try:
-            self.dbsession.add(role_perm)
+            self.dbsession.add(acl)
             self.dbsession.flush()
-            return role_perm
+            return acl
         except DatabaseError:
             return False
 
-    def update(self, permission, resource, **data):
-        filters = sql.and_(ACL.permission == permission,
-                           ACL.resource == resource)
-
-        query = self.query()
+    # XXX: add patch= arg ?
+    def update(self, permission, weight, **data):
+        query = self.query().filter_by(permission=permission)
 
         try:
-            role_perm = query.filter(filters).with_lockmode('update').one()
-            if 'weight' in data:
-                self.update_permission_weight(
-                    permission, resource, data['weight']
-                )
+            role_perm = query.with_lockmode('update').one()
+            self.update_permission_weight(permission, weight)
 
             role_perm.feed(**data)
 
@@ -358,16 +361,12 @@ class ACLEntity(Resource):
         except (NoResultFound, DatabaseError):
             return False
 
-    def delete_permission(self, permission_id, resource_id):
-        filters = sql.and_(
-            ACL.permission_id == permission_id,
-            ACL.resource_id == resource_id
-        )
-
-        query = self.query()
+    def delete_permission(self, permission_id, **kwargs):
+        query = self.query().filter_by(permission_id=permission_id)
 
         try:
-            role_perm = query.filter(filters).with_lockmode('update').one()
+            # FIXME: .delete()
+            role_perm = query.with_lockmode('update').one()
         except NoResultFound:
             return False
 
@@ -379,26 +378,19 @@ class ACLEntity(Resource):
 
         return role_perm
 
-    def update_permission_weight(self, permission, resource, new_weight):
+    def update_permission_weight(self, permission, weight):
         """ Change the weight of a permission. """
-
-        filters = sql.and_(
-            ACL.permission == permission,
-            ACL.resource == resource
-        )
-
-        query = self.query()
+        query = self.query().filter_by(permission=permission)
 
         try:
-            obj = query.enable_eagerloads(False).filter(filters).\
-                with_lockmode('update').one()
+            obj = query.enable_eagerloads(False).with_lockmode('update').one()
         except NoResultFound:
             return False
 
-        (min_weight, max_weight) = sorted((new_weight, obj.weight))
+        (min_weight, max_weight) = sorted((weight, obj.weight))
 
         # Do we move downwards or upwards ?
-        if new_weight - obj.weight > 0:
+        if weight - obj.weight > 0:
             operation = operator.sub
             whens = {min_weight: max_weight}
         else:
@@ -406,23 +398,141 @@ class ACLEntity(Resource):
             whens = {max_weight: min_weight}
 
         # Select all the rows between the current weight and the new weight
+
+        # Note: The polymorphic identity WHERE criteria is not included for
+        # single- or joined- table updates - this must be added manually, even
+        # for single table inheritance.
+
+        # See Caveats section at
+        # https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.update
+        global_resource = self.dbsession.query(ACLResource.id).filter_by(
+            name='GLOBAL').subquery()
+
         filters = sql.and_(
-            ACL.resource == resource,
-            ACL.weight.between(min_weight, max_weight)
+            GlobalACL.weight.between(min_weight, max_weight),
+            GlobalACL.resource_id == global_resource.c.id
         )
 
         # Swap min_weight/max_weight, or increment/decrement by one depending
         # on whether one moves up or down
-        new_weight = sql.case(
-            value=ACL.weight, whens=whens,
-            else_=operation(ACL.weight, 1)
+        weight = sql.case(
+            value=GlobalACL.weight, whens=whens,
+            else_=operation(GlobalACL.weight, 1)
         )
+
+        bulk_update = self.dbsession.query(GlobalACL).filter(filters)
 
         try:
             # The UPDATE statement
-            updated = query.enable_eagerloads(False).filter(filters).\
-                update({'weight': new_weight}, synchronize_session=False)
+            updated = bulk_update.update({'weight': weight},
+                                         synchronize_session=False)
             self.dbsession.flush()
             return updated
         except DatabaseError:
             return None
+
+
+class ContentACLEntity(Resource):
+    ''' Manage ACL for a Content based entity '''
+
+    __name__ = 'acl'
+    __parent__ = Entity
+
+    def __init__(self, request, content):
+        super().__init__(request)
+        self.content = content
+
+    def query(self):
+        return self.dbsession.query(ContentACL).filter_by(content=self.content)
+
+    def create(self, role, permission, allow):
+        acl = ContentACL(content=self.content, role=role, permission=permission,
+                         allow=allow)
+        try:
+            self.dbsession.add(acl)
+            self.dbsession.flush()
+            return acl
+        except DatabaseError:
+            return False
+
+    def delete_permission(self, role_id, permission_id, **kwargs):
+        filters = sql.and_(ContentACL.permission_id == permission_id,
+                           ContentACL.role_id == role_id)
+
+        query = self.query().filter(filters)
+
+        try:
+            # FIXME: .delete()
+            role_perm = query.with_lockmode('update').one()
+        except NoResultFound:
+            return False
+
+        try:
+            self.dbsession.delete(role_perm)
+            self.dbsession.flush()
+        except DatabaseError:
+            return False
+
+        return role_perm
+
+    def update_permission_weight(self, role, permission, weight):
+        """ Change the weight of a permission. """
+        filters = sql.and_(
+            ContentACL.permission == permission,
+            ContentACL.role == role
+        )
+
+        query = self.query().filter(filters)
+
+        try:
+            obj = query.enable_eagerloads(False).with_lockmode('update').one()
+        except NoResultFound:
+            return False
+
+        (min_weight, max_weight) = sorted((weight, obj.weight))
+
+        # Do we move downwards or upwards ?
+        if weight - obj.weight > 0:
+            operation = operator.sub
+            whens = {min_weight: max_weight}
+        else:
+            operation = operator.add
+            whens = {max_weight: min_weight}
+
+        # Select all the rows between the current weight and the new weight
+
+        # Note: The polymorphic identity WHERE criteria is not included for
+        # single- or joined- table updates - this must be added manually, even
+        # for single table inheritance.
+
+        # See Caveats section at
+        # https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.update
+        content_resource = self.dbsession.query(ACLResource.id).filter_by(
+            name='CONTENT').subquery()
+
+        filters = sql.and_(
+            ContentACL.content == self.content,
+            ContentACL.role == role,
+            ContentACL.resource_id == content_resource.c.id,
+            ContentACL.weight.between(min_weight, max_weight),
+        )
+
+        # Swap min_weight/max_weight, or increment/decrement by one depending
+        # on whether one moves up or down
+        weight = sql.case(
+            value=ContentACL.weight, whens=whens,
+            else_=operation(ContentACL.weight, 1)
+        )
+
+        bulk_update = self.dbsession.query(ContentACL).filter(filters)
+
+        try:
+            # The UPDATE statement
+            updated = bulk_update.update({'weight': weight},
+                                         synchronize_session=False)
+            self.dbsession.flush()
+            return updated
+        except DatabaseError:
+            return None
+
+

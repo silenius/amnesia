@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+
 # pylint: disable=no-member,singleton-comparison
 
 import logging
 
 from sqlalchemy import sql
+from sqlalchemy import orm
 
 from amnesia.modules.account import ACL
 from amnesia.modules.account import ContentACL
@@ -20,7 +22,6 @@ def get_principals(userid, request):
             yield 'role:{}'.format(role.role.name)
 
     return None
-
 
 def get_global_acls(request):
     user = request.user
@@ -39,7 +40,7 @@ def get_global_acls(request):
     acl = acl_query.join(GlobalACL.role).filter(virtual)
 
     if user:
-        user_roles = request.dbsession.query(AccountRole.role_id).filter_by(
+        user_roles = dbsession.query(AccountRole.role_id).filter_by(
             account_id=user.id)
 
         acl = acl.union(
@@ -67,7 +68,7 @@ def get_entity_acls(request, entity):
 
     if user:
         # Roles for user
-        user_roles = request.dbsession.query(AccountRole.role_id).filter_by(
+        user_roles = dbsession.query(AccountRole.role_id).filter_by(
             account_id=user.id)
 
         # If user, then add user's roles local ACL too

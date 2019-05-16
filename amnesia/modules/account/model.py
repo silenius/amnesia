@@ -26,6 +26,9 @@ class Role(Base):
         self.name = name
         self.description = description
 
+    def is_virtual(self):
+        return self.virtual and self.name.startswith('system.')
+
 
 class AccountRole(Base):
 
@@ -49,21 +52,20 @@ class ACLResource(Base):
 
 class ACL(Base):
 
-    def __init__(self, role, permission, allow, resource):
+    def __init__(self, role, permission, allow):
         self.role = role
         self.permission = permission
-        self.resource = resource
         self.allow = allow
 
 
 class GlobalACL(ACL):
 
     def __init__(self, *args, **kwargs):
-        super(GlobalACL).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class ContentACL(ACL):
 
     def __init__(self, content, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.content = content

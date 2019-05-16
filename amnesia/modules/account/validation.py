@@ -77,7 +77,15 @@ class BrowseRoleSchema(Schema):
 
 
 class ACLSchema(Schema):
-    resource_id = Integer(validate=Range(min=1))
+    permission_id = Integer(validate=Range(min=1))
+    weight = Integer(validation=Range(min=1))
+    allow = Boolean()
+
+    class Meta:
+        unknown = EXCLUDE
+
+class ContentACLSchema(Schema):
+    role_id = Integer(validate=Range(min=1))
     permission_id = Integer(validate=Range(min=1))
     weight = Integer(validation=Range(min=1))
     allow = Boolean()
