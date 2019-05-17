@@ -40,15 +40,9 @@ class Entity(Resource):
 
     def __acl__(self):
         # FIXME
-        from amnesia.modules.account.security import get_entity_acls
-        from amnesia.modules.account.security import get_global_acls
+        from amnesia.modules.account.security import get_entity_acl
 
-        acls = chain(
-            get_entity_acls(self.request, self.entity),
-            get_global_acls(self.request)
-        )
-
-        for acl in acls:
+        for acl in get_entity_acl(self.request, self.entity):
             perm = acl.permission.name
             allow_deny = Allow if acl.allow else Deny
 
@@ -67,7 +61,13 @@ class Entity(Resource):
 
     @property
     def __parent__(self):
-        return self.parent if self.parent else self.request.root
+        if self.parent:
+            return self.parent
+        elif self.entity.parent:
+            _res = self.request.cms_get_resource(self.entity.parent)
+            return _res(self.request, self.entity.parent)
+        else:
+            return self.request.root
 
     def _acl_adapter(self, allow_deny, role, permission):
         _ops = ('read', 'update', 'delete', 'edit', 'manage_acl')
