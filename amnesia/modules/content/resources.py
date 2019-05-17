@@ -27,6 +27,9 @@ class Entity(Resource):
         self.entity = entity
         self.parent = parent
 
+    def __resource_url__(self, request, info):
+        return info['app_url'] + '/' + str(self.entity.id) + '/'
+
     def __getitem__(self, path):
         # FIXME: circular imports
         from amnesia.modules.account import ContentACLEntity
