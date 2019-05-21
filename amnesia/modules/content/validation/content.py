@@ -52,6 +52,8 @@ class ContentSchema(Schema, PyramidContextMixin):
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
 
+    inherits_parent_acl = Boolean(missing=True)
+
     props = Function(lambda obj: json.dumps(obj.props),
                      lambda obj: json.loads(obj), required=False)
 

@@ -236,7 +236,7 @@ class RoleEntity(Resource):
     def __getitem__(self, path):
         if path == 'acls':
             return ACLEntity(self.request, role=self.role)
-        if path == 'members' and not self.role.is_virtual():
+        if path == 'members' and not self.role.virtual:
             return RoleMember(self.request, role=self.role)
 
         raise KeyError
@@ -455,25 +455,13 @@ class ContentACLEntity(Resource):
         except DatabaseError:
             return False
 
-    def delete_permission(self, role_id, permission_id, **kwargs):
-        filters = sql.and_(ContentACL.permission_id == permission_id,
-                           ContentACL.role_id == role_id)
-
-        query = self.query().filter(filters)
-
+    def delete_permission(self, acl_id):
         try:
-            # FIXME: .delete()
-            role_perm = query.with_lockmode('update').one()
-        except NoResultFound:
-            return False
-
-        try:
-            self.dbsession.delete(role_perm)
+            deleted = self.query().filter_by(id=acl_id).delete()
             self.dbsession.flush()
+            return deleted
         except DatabaseError:
             return False
-
-        return role_perm
 
     def update_permission_weight(self, role, permission, weight):
         """ Change the weight of a permission. """

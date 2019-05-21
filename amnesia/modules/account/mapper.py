@@ -3,8 +3,10 @@
 from sqlalchemy import event
 from sqlalchemy import orm
 from sqlalchemy import sql
+from sqlalchemy import Boolean
 from sqlalchemy.ext.associationproxy import association_proxy
 
+from amnesia.db.ext import pg_json_property
 from amnesia.modules.content import Content
 
 from .model import Account
@@ -45,6 +47,12 @@ def includeme(config):
 
         'acls': orm.relationship(
             ACL, back_populates="role", cascade='all, delete-orphan'
+        ),
+
+        'virtual': orm.column_property(
+            sql.func.starts_with(
+                tables['role'].c.name, 'system.'
+            )
         )
     })
 
@@ -113,16 +121,18 @@ def includeme(config):
 
 @event.listens_for(orm.mapper, 'before_configured', once=True)
 def _content_callback():
-    orm.class_mapper(Content).add_property('acls', orm.relationship(
-        ContentACL, back_populates='content'
-    ))
+    orm.class_mapper(Content).add_properties({
+        'acls': orm.relationship(ContentACL, back_populates='content'),
+    })
 
+    setattr(Content, 'inherits_parent_acl', pg_json_property(
+        'props', 'inherits_parent_acl', Boolean, default=True
+    ))
 
 @event.listens_for(Account, 'mapper_configured')
 def _account_callback(mapper, class_):
-    class_.roles = association_proxy('account_roles', 'role')
-
+    setattr(class_, 'roles', association_proxy('account_roles', 'role'))
 
 @event.listens_for(Role, 'mapper_configured')
 def _role_callback(mapper, class_):
-    class_.permissions = association_proxy('acls', 'permission')
+    setattr(class_, 'permissions', association_proxy('acls', 'permission'))

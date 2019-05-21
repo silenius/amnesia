@@ -194,8 +194,6 @@ class ContentACLView(BaseView):
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        self.context.delete_permission(**data)
+        deleted = self.context.delete_permission(data['id'])
 
-        return data
-
-
+        return deleted

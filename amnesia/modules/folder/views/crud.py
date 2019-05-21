@@ -62,7 +62,7 @@ class FolderCRUD(ContentCRUD):
                  request_method='GET',
                  name='edit',
                  renderer='amnesia:templates/folder/edit.pt',
-                 permission='update')
+                 permission='edit')
     def edit(self):
         data = self.schema.dump(self.entity)
         return self.edit_form(data)
@@ -133,7 +133,7 @@ class FolderCRUD(ContentCRUD):
     @view_config(request_method='POST',
                  renderer='amnesia:templates/folder/edit.pt',
                  context=FolderEntity,
-                 permission='update')
+                 permission='edit')
     def update(self):
         form_data = self.request.POST.mixed()
 

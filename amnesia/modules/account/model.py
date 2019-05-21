@@ -26,9 +26,6 @@ class Role(Base):
         self.name = name
         self.description = description
 
-    def is_virtual(self):
-        return self.virtual and self.name.startswith('system.')
-
 
 class AccountRole(Base):
 

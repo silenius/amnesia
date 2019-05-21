@@ -20,6 +20,7 @@ from amnesia.modules.content import EntityManager
 from amnesia.modules.content.validation import IdListSchema
 from amnesia.modules.account import Permission
 from amnesia.modules.account import Role
+from amnesia.modules.account.security import get_parent_acl
 from amnesia.modules.tag import Tag
 from amnesia.utils.forms import render_form
 from amnesia.views import BaseView
@@ -56,6 +57,9 @@ class ContentCRUD(BaseView):
         if 'permissions' not in data:
             data['permissions'] = self.dbsession.query(Permission).order_by(
                 Permission.name)
+
+        if 'parent_acl' not in data:
+            data['parent_acl'] = get_parent_acl(self.context)
 
         if 'roles' not in data:
             data['roles'] = self.dbsession.query(Role).order_by(Role.virtual.desc())

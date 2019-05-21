@@ -4,6 +4,8 @@
 
 import logging
 
+from pyramid.traversal import lineage
+
 from sqlalchemy import sql
 from sqlalchemy import orm
 
@@ -23,12 +25,18 @@ def get_principals(userid, request):
 
     return None
 
-def get_global_acls(request):
-    user = request.user
+# FIXME: add orm.contains_eager
+
+def get_global_acl(request, strict=False):
     dbsession = request.dbsession
-    principals = request.effective_principals
 
     acl_query = dbsession.query(GlobalACL)
+
+    if not strict:
+        return acl_query.order_by(GlobalACL.weight.desc()).all()
+
+    user = request.user
+    principals = request.effective_principals
 
     # Virtual roles which are in principals
     virtual = sql.and_(
@@ -37,7 +45,8 @@ def get_global_acls(request):
     )
 
     # Select ACL for those virtual roles
-    acl = acl_query.join(GlobalACL.role).filter(virtual)
+    acl = acl_query.join(GlobalACL.role).options(
+        orm.contains_eager(GlobalACL.role)).filter(virtual)
 
     if user:
         user_roles = dbsession.query(AccountRole.role_id).filter_by(
@@ -49,13 +58,17 @@ def get_global_acls(request):
 
     return acl.order_by(GlobalACL.weight.desc()).all()
 
-def get_entity_acls(request, entity):
-    user = request.user
+def get_entity_acl(request, entity, strict=False):
     dbsession = request.dbsession
-    principals = request.effective_principals
 
     # ACL for specific entity ("local" ACL)
     acl_query = dbsession.query(ContentACL).filter_by(content=entity)
+
+    if not strict:
+        return acl_query.order_by(ContentACL.weight.desc()).all()
+
+    user = request.user
+    principals = request.effective_principals
 
     # Virtual roles which are in principals
     virtual = sql.and_(
@@ -64,7 +77,8 @@ def get_entity_acls(request, entity):
     )
 
     # Select ACL for those virtual roles
-    acl = acl_query.join(ContentACL.role).filter(virtual)
+    acl = acl_query.join(ContentACL.role).options(
+        orm.contains_eager(ContentACL.role)).filter(virtual)
 
     if user:
         # Roles for user
@@ -77,3 +91,12 @@ def get_entity_acls(request, entity):
         )
 
     return acl.order_by(ContentACL.weight.desc()).all()
+
+def get_parent_acl(resource):
+    parent_acl = []
+
+    for f in lineage(resource):
+        for ace in f.__acl__():
+            parent_acl.append((f, ace))
+
+    return parent_acl

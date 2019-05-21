@@ -9,6 +9,8 @@ from itertools import chain
 
 from pyramid.security import Allow
 from pyramid.security import Deny
+from pyramid.security import DENY_ALL
+from pyramid.security import ALL_PERMISSIONS
 
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
@@ -30,15 +32,23 @@ class Entity(Resource):
     def __resource_url__(self, request, info):
         return info['app_url'] + '/' + str(self.entity.id) + '/'
 
+    def __str__(self):
+        return self.__class__.__name__ + str(self.entity)
+
     def __getitem__(self, path):
         # FIXME: circular imports
-        from amnesia.modules.account import ContentACLEntity
+        from amnesia.modules.account.resources import ContentACLEntity
         if path == 'acl':
             return ContentACLEntity(self.request, content=self.entity)
 
         raise KeyError
 
     def __acl__(self):
+        yield Allow, 'role:Manager', ALL_PERMISSIONS
+
+        if self.entity.owner is self.request.user:
+            yield Allow, str(self.request.user.id), ALL_PERMISSIONS
+
         # FIXME
         from amnesia.modules.account.security import get_entity_acl
 
@@ -46,14 +56,15 @@ class Entity(Resource):
             perm = acl.permission.name
             allow_deny = Allow if acl.allow else Deny
 
-            if acl.role.is_virtual():
+            if acl.role.virtual:
                 role = acl.role.name
             else:
                 role = 'role:{}'.format(acl.role.name)
 
-            yield from self._acl_adapter(allow_deny, role, perm)
+            yield from self.__acl_adapter__(allow_deny, role, perm)
 
-        #yield from super().__acl__()
+        if not self.entity.inherits_parent_acl:
+            yield DENY_ALL
 
     @property
     def __name__(self):
@@ -69,18 +80,17 @@ class Entity(Resource):
         else:
             return self.request.root
 
-    def _acl_adapter(self, allow_deny, role, permission):
-        _ops = ('read', 'update', 'delete', 'edit', 'manage_acl')
-
+    def __acl_adapter__(self, allow_deny, role, permission):
         try:
             _op, _ctx = permission.split('_', 1)
         except ValueError:
             pass
         else:
-            if (_op in _ops and (_ctx == 'content' or (_ctx == 'own_content'
-                                                       and self.entity.owner is
-                                                       self.request.user))):
+            if (_ctx == 'content' or (_ctx == 'own_content' and
+                                      self.entity.owner is self.request.user)):
                 yield allow_deny, role, _op
+
+        yield allow_deny, role, permission
 
     def update(self, data):
         """ Update an entity """

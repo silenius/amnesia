@@ -39,14 +39,17 @@ def cms_add_entity_resource(config, entity, resource, add_url_adapter=True):
         registry.cms_entity_resources = OrderedDict()
 
     def register():
+
+        class _adapter(ResourceURL):
+
+            def __init__(self, _resource, _request):
+                super().__init__(resource(_request, _resource), _request)
+
         log.info('===>>> Mapping {} to resource {}'.format(entity, resource))
         registry.cms_entity_resources[entity] = resource
 
         if add_url_adapter:
-            config.add_resource_url_adapter(
-                lambda resource2, request:
-                ResourceURL(resource(request, resource2), request),
-                entity)
+            config.add_resource_url_adapter(_adapter, entity)
 
     config.action('amnesiacms_entity_resource={}'.format(entity), register)
 

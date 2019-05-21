@@ -28,10 +28,7 @@ def includeme(config):
 #        t_content.c.container_id == t_folder.c.content_id
 #    ).lateral('children')
 
-    orm.mapper(
-        Folder,
-        t_folder,
-        inherits=Content,
+    orm.mapper(Folder, t_folder, inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=t_folder.c.content_id == t_content.c.id,
         properties={

@@ -27,7 +27,7 @@ class Resource:
             perm = acl.permission.name
             allow_deny = Allow if acl.allow else Deny
 
-            if acl.role.is_virtual():
+            if acl.role.virtual:
                 role = acl.role.name
             else:
                 role = 'role:{}'.format(acl.role.name)

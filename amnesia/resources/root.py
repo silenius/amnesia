@@ -44,6 +44,9 @@ class Root(Resource):
     __name__ = ''
     __parent__ = None
 
+    def __str__(self):
+        return self.__class__.__name__
+
     def __getitem__(self, path):
         # Access to a specific resource through it's id, ex: /123
         if path.isdigit():

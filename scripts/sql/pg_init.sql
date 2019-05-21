@@ -124,7 +124,6 @@ create table role (
     created     timestamptz not null    default current_timestamp,
     enabled     boolean     not null    default false,
     locked      boolean     not null    default false,
-    virtual     boolean     not null    default false,
     description text,
 
     constraint pk_role
@@ -133,13 +132,13 @@ create table role (
 
 create unique index u_idx_role_name on role(lower(name));
 
-insert into role(name, enabled, locked, virtual, description)
+insert into role(name, enabled, locked, description)
 values ('system.Everyone', true, true, true, 'This principal id is granted to all requests');
 
-insert into role(name, enabled, locked, virtual, description)
+insert into role(name, enabled, locked, description)
 values ('system.Authenticated', true, true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
 
-insert into role(name, enabled, locked, virtual, description)
+insert into role(name, enabled, locked, description)
 values ('Owner', true, true, true, 'The Owner role is automatically granted to the creator of a content');
 
 insert into role(name, enabled, locked, description)
@@ -206,6 +205,7 @@ insert into resource(name) values ('GLOBAL');
 ---------
 
 create table acl (
+    id              serial      not null,
     role_id         integer     not null,
     permission_id   integer     not null,
     resource_id     integer     not null,
@@ -215,7 +215,7 @@ create table acl (
     created         timestamptz not null    default current_timestamp,
 
     constraint pk_acl
-        primary key (role_id, permission_id, resource_id),
+        primary key (id),
 
     constraint fk_role
         foreign key(role_id) references role(id),
