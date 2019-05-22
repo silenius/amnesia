@@ -24,20 +24,12 @@ class Resource:
         from amnesia.modules.account.security import get_global_acl
 
         for acl in get_global_acl(self.request):
-            perm = acl.permission.name
-            allow_deny = Allow if acl.allow else Deny
-
-            if acl.role.virtual:
-                role = acl.role.name
-            else:
-                role = 'role:{}'.format(acl.role.name)
-
-            yield from self.__acl_adapter__(allow_deny, role, perm)
+            yield from self.__acl_adapter__(acl.to_pyramid_acl())
 
         yield DENY_ALL
 
-    def __acl_adapter__(self, allow_deny, role, perm):
-        yield allow_deny, role, perm
+    def __acl_adapter__(self, acl):
+        yield acl
 
     @property
     def dbsession(self):

@@ -32,9 +32,6 @@ class Entity(Resource):
     def __resource_url__(self, request, info):
         return info['app_url'] + '/' + str(self.entity.id) + '/'
 
-    def __str__(self):
-        return self.__class__.__name__ + str(self.entity)
-
     def __getitem__(self, path):
         # FIXME: circular imports
         from amnesia.modules.account.resources import ContentACLEntity
@@ -53,15 +50,7 @@ class Entity(Resource):
         from amnesia.modules.account.security import get_entity_acl
 
         for acl in get_entity_acl(self.request, self.entity):
-            perm = acl.permission.name
-            allow_deny = Allow if acl.allow else Deny
-
-            if acl.role.virtual:
-                role = acl.role.name
-            else:
-                role = 'role:{}'.format(acl.role.name)
-
-            yield from self.__acl_adapter__(allow_deny, role, perm)
+            yield from self.__acl_adapter__(acl.to_pyramid_acl())
 
         if not self.entity.inherits_parent_acl:
             yield DENY_ALL
@@ -80,7 +69,9 @@ class Entity(Resource):
         else:
             return self.request.root
 
-    def __acl_adapter__(self, allow_deny, role, permission):
+    def __acl_adapter__(self, ace):
+        (allow_deny, principal, permission) = ace
+
         try:
             _op, _ctx = permission.split('_', 1)
         except ValueError:
@@ -88,9 +79,9 @@ class Entity(Resource):
         else:
             if (_ctx == 'content' or (_ctx == 'own_content' and
                                       self.entity.owner is self.request.user)):
-                yield allow_deny, role, _op
+                yield allow_deny, principal, _op
 
-        yield allow_deny, role, permission
+        yield allow_deny, principal, permission
 
     def update(self, data):
         """ Update an entity """

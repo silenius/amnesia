@@ -5,6 +5,7 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .util import bcrypt_hash_password
+from amnesia.modules.account.util import to_pyramid_acl
 
 from .. import Base
 
@@ -53,6 +54,9 @@ class ACL(Base):
         self.role = role
         self.permission = permission
         self.allow = allow
+
+    def to_pyramid_acl(self):
+        return to_pyramid_acl(self)
 
 
 class GlobalACL(ACL):

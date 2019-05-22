@@ -32,10 +32,6 @@ class FolderEntity(Entity):
     def get_validation_schema(self):
         return FolderSchema(context={'request': self.request})
 
-        if self.entity.parent:
-            return FolderEntity(self.request, self.entity.parent)
-        return self.request.root
-
 
 class FolderResource(EntityManager):
 
