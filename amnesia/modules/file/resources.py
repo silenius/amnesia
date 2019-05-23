@@ -17,9 +17,6 @@ from amnesia.modules.folder import Folder
 class FileEntity(Entity):
     """ File """
 
-    def get_validation_schema(self):
-        return FileSchema(context={'request': self.request})
-
     def serve(self, files_dir=None):
         if files_dir is None:
             files_dir = self.request.registry.settings.get('file_storage_dir')
@@ -50,9 +47,6 @@ class FileResource(EntityManager):
 
     def query(self):
         return self.dbsession.query(File)
-
-    def get_validation_schema(self):
-        return FileSchema(context={'request': self.request})
 
     def create(self, data):
         state = self.dbsession.query(State).filter_by(name='published').one()

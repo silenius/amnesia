@@ -25,7 +25,9 @@ from marshmallow.validate import Range
 
 from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
+from amnesia.modules.folder import Folder
 from amnesia.modules.tag import Tag
+from amnesia.modules.state import State
 from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
 
@@ -42,17 +44,17 @@ class ContentSchema(Schema, PyramidContextMixin):
     expiration = DateTime()
     exclude_nav = Boolean(missing=False)
     is_fts = Boolean(missing=False)
-    weight = Integer()
+    weight = Integer(dump_only=True)
     content_type_id = Integer(dump_only=True)
     type = Nested(ContentTypeSchema, dump_only=True)
-    container_id = Integer(required=False, missing=None)
+    container_id = Integer()
     owner_id = Integer(dump_only=True)
     state_id = Integer(dump_only=True)
 
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
 
-    inherits_parent_acl = Boolean(missing=True)
+    inherits_parent_acl = Boolean(dump_only=True, missing=True)
 
     props = Function(lambda obj: json.dumps(obj.props),
                      lambda obj: json.loads(obj), required=False)
@@ -79,7 +81,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     ########
 
     @pre_load
-    def pre_process(self, data):
+    def pre_load_process(self, data):
         _data = {k: None if v == '' else v for k, v in data.items()}
 
         # Starts / Ends
@@ -103,11 +105,20 @@ class ContentSchema(Schema, PyramidContextMixin):
         return _data
 
     @post_load
-    def load_tags(self, item):
+    def post_load_process(self, item):
         if 'tags_id' in item:
-            filters = Tag.id.in_(item['tags_id'])
+            filters = Tag.id.in_(item.pop('tags_id'))
             item['tags'] = self.dbsession.query(Tag).filter(filters).all()
+
+        if 'container_id' in item:
+            item['parent'] = self.dbsession.query(Folder).get(
+                item.pop('container_id'))
+
+        item['state'] = self.dbsession.query(State).filter_by(
+            name='published').one()
+
         return item
+
 
     ########
     # DUMP #

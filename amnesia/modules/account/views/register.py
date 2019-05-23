@@ -41,7 +41,9 @@ class Register(BaseView):
             return {'form': self.form(form_data, error.messages)}
 
         if self.context.find_login(result['login']):
-            errors = {'login': 'Login already exist'}
+            errors = {'login': 'Login already exists'}
+        elif self.context.find_email(result['email']):
+            errors = {'email': 'Email already exists'}
         elif not recaptcha.verify(self.request, result['captcha_token']):
             errors = {'captcha': 'Captcha validation failed'}
         else:

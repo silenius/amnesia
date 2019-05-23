@@ -17,10 +17,6 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class DocumentEntity(Entity):
     """ Document entity """
 
-    def get_validation_schema(self):
-        return DocumentSchema(context={'request': self.request})
-
-
 class DocumentResource(EntityManager):
 
     __name__ = 'document'
@@ -30,25 +26,15 @@ class DocumentResource(EntityManager):
             entity = self.dbsession.query(Document).get(path)
             if entity:
                 return DocumentEntity(self.request, entity)
-        raise KeyError
 
-    def get_validation_schema(self):
-        return DocumentSchema(context={'request': self.request})
+        raise KeyError
 
     def query(self):
         return self.dbsession.query(Document)
 
     def create(self, data):
-        state = self.dbsession.query(State).filter_by(name='published').one()
-        container = self.dbsession.query(Folder).enable_eagerloads(False).\
-            get(data['container_id'])
-
-        new_entity = Document(
-            owner=self.request.user,
-            state=state,
-            container=container,
-            **data
-        )
+        owner = self.request.user
+        new_entity = Document(owner=owner, **data)
 
         try:
             self.dbsession.add(new_entity)

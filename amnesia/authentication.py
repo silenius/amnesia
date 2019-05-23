@@ -4,11 +4,10 @@ import logging
 
 from pyramid.authentication import AuthTktAuthenticationPolicy
 
-log = logging.getLogger(__name__)
-
 from pyramid.security import Authenticated
 from pyramid.security import Everyone
 
+log = logging.getLogger(__name__)
 
 class AmnesiaAuthenticationPolicy(AuthTktAuthenticationPolicy):
 
@@ -17,13 +16,16 @@ class AmnesiaAuthenticationPolicy(AuthTktAuthenticationPolicy):
             return request.user.id
 
     def effective_principals(self, request):
-        principals = [Everyone]
+        principals = {Everyone}
 
         if hasattr(request, 'user') and request.user:
-            principals.append(Authenticated)
-            principals.append(str(request.user.id))
+            principals.add(Authenticated)
+            principals.add(str(request.user.id))
 
             for role in request.user.roles:
-                principals.append('role:{}'.format(role.name))
+                if role.virtual:
+                    principals.add(role.name)
+                else:
+                    principals.add('role:{}'.format(role.name))
 
         return principals

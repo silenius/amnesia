@@ -17,6 +17,7 @@ from amnesia import order
 
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderResource
+from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.content_type import ContentType
 
@@ -31,10 +32,6 @@ class FolderCRUD(ContentCRUD):
     """ Folder CRUD """
 
     form_tmpl = 'amnesia:templates/folder/_form.pt'
-
-    @property
-    def schema(self):
-        return self.context.get_validation_schema()
 
     def edit_form(self, form_data, errors=None):
         if errors is None:
@@ -58,13 +55,11 @@ class FolderCRUD(ContentCRUD):
 
         return super().form(data, errors)
 
-    @view_config(context=FolderEntity,
-                 request_method='GET',
-                 name='edit',
-                 renderer='amnesia:templates/folder/edit.pt',
-                 permission='edit')
+    @view_config(context=FolderEntity, request_method='GET', name='edit',
+                 renderer='amnesia:templates/folder/edit.pt', permission='edit')
     def edit(self):
-        data = self.schema.dump(self.entity)
+        schema = FolderSchema(context={'request': self.request})
+        data = schema.dump(self.entity)
         return self.edit_form(data)
 
     @view_config(request_method='GET', name='new',
@@ -83,9 +78,10 @@ class FolderCRUD(ContentCRUD):
                  context=FolderResource, permission='create')
     def create(self):
         form_data = self.request.POST.mixed()
+        schema = FolderSchema(context={'request': self.request})
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 
@@ -136,9 +132,13 @@ class FolderCRUD(ContentCRUD):
                  permission='edit')
     def update(self):
         form_data = self.request.POST.mixed()
+        schema = FolderSchema(
+            context={'request': self.request},
+            exclude=('container_id', )
+        )
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 

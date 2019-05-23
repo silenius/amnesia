@@ -9,6 +9,7 @@ from pyramid.httpexceptions import HTTPFound
 
 from amnesia.modules.document import DocumentEntity
 from amnesia.modules.document import DocumentResource
+from amnesia.modules.document.validation import DocumentSchema
 
 from ...content.views import ContentCRUD
 
@@ -25,10 +26,6 @@ class DocumentCRUD(ContentCRUD):
 
     form_tmpl = 'amnesia:templates/document/_form.pt'
 
-    @property
-    def schema(self):
-        return self.context.get_validation_schema()
-
     def edit_form(self, form_data, errors=None):
         if errors is None:
             errors = {}
@@ -43,7 +40,7 @@ class DocumentCRUD(ContentCRUD):
                  context=DocumentEntity,
                  permission='update')
     def edit(self):
-        data = self.schema.dump(self.entity)
+        data = DocumentSchema().dump(self.entity)
         return self.edit_form(data)
 
     @view_config(request_method='GET', name='new',
@@ -62,7 +59,10 @@ class DocumentCRUD(ContentCRUD):
                  accept='application/json', permission='read',
                  context=DocumentEntity)
     def read_json(self):
-        schema = self.context.get_validation_schema()
+        schema = DocumentSchema(context={
+            'request': self.request
+        })
+
         return schema.dump(self.context.entity, many=False)
 
     @view_config(request_method='GET',
@@ -82,10 +82,14 @@ class DocumentCRUD(ContentCRUD):
                  permission='create')
     def create(self):
         ''' Create a new Document '''
+
         form_data = self.request.POST.mixed()
+        schema = DocumentSchema(context={
+            'request': self.request
+        })
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 
@@ -106,9 +110,12 @@ class DocumentCRUD(ContentCRUD):
                  permission='update')
     def update(self):
         form_data = self.request.POST.mixed()
+        schema = DocumentSchema(context={
+            'request': self.request
+        }, exclude=('container_id', ))
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 

@@ -19,6 +19,7 @@ from webob.compat import cgi_FieldStorage
 from amnesia.modules.mime import Mime
 from amnesia.modules.file import FileEntity
 from amnesia.modules.file import FileResource
+from amnesia.modules.file.validation import FileSchema
 from amnesia.modules.content.views import ContentCRUD
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -106,10 +107,6 @@ class FileCRUD(ContentCRUD):
 
     form_tmpl = 'amnesia:templates/file/_form.pt'
 
-    @property
-    def schema(self):
-        return self.context.get_validation_schema()
-
     def edit_form(self, form_data, errors=None):
         if errors is None:
             errors = {}
@@ -122,7 +119,8 @@ class FileCRUD(ContentCRUD):
     @view_config(context=FileEntity, request_method='GET', name='edit',
                  renderer='amnesia:templates/file/edit.pt')
     def edit(self):
-        data = self.schema.dump(self.entity)
+        schema = FileSchema(context={'request': self.request})
+        data = schema.dump(self.entity)
         return self.edit_form(data)
 
     @view_config(request_method='GET', name='new',
@@ -140,7 +138,7 @@ class FileCRUD(ContentCRUD):
                  accept='application/json', permission='read',
                  context=FileEntity)
     def read_json(self):
-        schema = self.context.get_validation_schema()
+        schema = FileSchema(context={'request': self.request})
         return schema.dump(self.context.entity, many=False)
 
     @view_config(request_method='GET',
@@ -159,9 +157,10 @@ class FileCRUD(ContentCRUD):
                  context=FileResource)
     def create(self):
         form_data = self.request.POST.mixed()
+        schema = FileSchema(context={'request': self.request})
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 
@@ -185,9 +184,13 @@ class FileCRUD(ContentCRUD):
                  context=FileEntity)
     def update(self):
         form_data = self.request.POST.mixed()
+        schema = FileSchema(
+            context={'request': self.request},
+            exclude=('container_id', )
+        )
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 

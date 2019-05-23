@@ -10,6 +10,7 @@ from pyramid.httpexceptions import HTTPFound
 from amnesia.modules.country import Country
 from amnesia.modules.event import EventEntity
 from amnesia.modules.event import EventResource
+from amnesia.modules.event.validation import EventSchema
 from amnesia.modules.content.views import ContentCRUD
 
 log = logging.getLogger(__name__)
@@ -24,10 +25,6 @@ class EventCRUD(ContentCRUD):
     """ Event CRUD """
 
     form_tmpl = 'amnesia:templates/event/_form.pt'
-
-    @property
-    def schema(self):
-        return self.context.get_validation_schema()
 
     def form(self, data, errors=None):
         if 'countries' not in data:
@@ -50,7 +47,8 @@ class EventCRUD(ContentCRUD):
                  context=EventEntity,
                  permission='update')
     def edit(self):
-        data = self.schema.dump(self.entity)
+        schema = EventSchema(context={'request': self.request})
+        data = schema.dump(self.entity)
         return self.edit_form(data)
 
     @view_config(request_method='GET', name='new',
@@ -71,9 +69,10 @@ class EventCRUD(ContentCRUD):
                  permission='create')
     def create(self):
         form_data = self.request.POST.mixed()
+        schema = EventSchema(context={'request': self.request})
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 
@@ -85,6 +84,24 @@ class EventCRUD(ContentCRUD):
         return self.edit_form(form_data)
 
     #########################################################################
+    # READ                                                                  #
+    #########################################################################
+
+    @view_config(request_method='GET', renderer='json',
+                 accept='application/json', permission='read',
+                 context=EventEntity)
+    def read_json(self):
+        schema = EventSchema(context={'request': self.request})
+        return schema.dump(self.context.entity, many=False)
+
+    @view_config(request_method='GET',
+                 renderer='amnesia:templates/event/show.pt',
+                 accept='text/html', permission='read',
+                 context=EventEntity)
+    def read_html(self):
+        return super().read()
+
+    #########################################################################
     # UPDATE                                                                #
     #########################################################################
 
@@ -94,9 +111,13 @@ class EventCRUD(ContentCRUD):
                  permission='update')
     def update(self):
         form_data = self.request.POST.mixed()
+        schema = EventSchema(
+            context={'request': self.request},
+            exclude=('container_id', )
+        )
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 

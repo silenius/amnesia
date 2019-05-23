@@ -46,7 +46,6 @@ class AuthResource(Resource):
         self.__parent__ = parent
 
     def __acl__(self):
-        yield Allow, 'role:Manager', ALL_PERMISSIONS
         yield Allow, Everyone, 'login'
         yield Allow, Everyone, 'logout'
         yield Allow, Everyone, 'lost'
@@ -80,7 +79,7 @@ class DatabaseAuthResource(AuthResource):
 
     def find_login(self, login, **kwargs):
         try:
-            return self.query.filter_by(login=login, **kwargs).one()
+            return self.query.filter_by(login=login).one()
         except (NoResultFound, MultipleResultsFound):
             return None
 
@@ -115,7 +114,7 @@ class DatabaseAuthResource(AuthResource):
             self.dbsession.add(new_account)
             self.dbsession.flush()
             return new_account
-        except DatabaseError:
+        except ValueError:
             return False
 
     def send_token(self, principal):
@@ -199,9 +198,6 @@ class RoleResource(Resource):
         super().__init__(request)
         self.__parent__ = parent
 
-    def query(self):
-        return self.dbsession.query(Role)
-
     def __getitem__(self, path):
         if path.isdigit():
             entity = self.dbsession.query(Role).get(path)
@@ -210,8 +206,11 @@ class RoleResource(Resource):
 
         raise KeyError
 
+    def query(self):
+        return self.dbsession.query(Role)
+
     def create(self, name, description):
-        role = Role(name=name, description=description)
+        role = Role(name=name, description=description, enabled=True)
 
         try:
             self.dbsession.add(role)
@@ -235,9 +234,10 @@ class RoleEntity(Resource):
 
     def __getitem__(self, path):
         if path == 'acls':
-            return ACLEntity(self.request, role=self.role)
+            return ACLEntity(self.request, role=self.role, parent=self)
+
         if path == 'members' and not self.role.virtual:
-            return RoleMember(self.request, role=self.role)
+            return RoleMember(self.request, role=self.role, parent=self)
 
         raise KeyError
 
@@ -252,12 +252,13 @@ class RoleEntity(Resource):
 
 class RoleMember(Resource):
 
-    __parent__ = RoleEntity
     __name__ = 'members'
+    __acl__ = ()
 
-    def __init__(self, request, role):
+    def __init__(self, request, role, parent):
         super().__init__(request)
         self.role = role
+        self.__parent__ = parent
 
     def __getitem__(self, path):
         if path.isdigit():
@@ -326,11 +327,12 @@ class ACLEntity(Resource):
     ''' Manage ACL for a role '''
 
     __name__ = 'acls'
-    __parent__ = RoleEntity
+    __acl__ = ()
 
-    def __init__(self, request, role):
+    def __init__(self, request, role, parent):
         super().__init__(request)
         self.role = role
+        self.__parent__ = parent
 
     def query(self):
         return self.dbsession.query(GlobalACL).filter_by(role=self.role)
@@ -436,11 +438,12 @@ class ContentACLEntity(Resource):
     ''' Manage ACL for a Content based entity '''
 
     __name__ = 'acl'
-    __parent__ = Entity
+    __acl__ = ()
 
-    def __init__(self, request, content):
+    def __init__(self, request, content, parent):
         super().__init__(request)
         self.content = content
+        self.__parent__ = parent
 
     def query(self):
         return self.dbsession.query(ContentACL).filter_by(content=self.content)

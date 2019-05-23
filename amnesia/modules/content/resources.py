@@ -29,15 +29,30 @@ class Entity(Resource):
         self.entity = entity
         self.parent = parent
 
+    @property
+    def __name__(self):
+        return self.entity.id
+
+    @property
+    def __parent__(self):
+        if self.parent:
+            return self.parent
+        elif self.entity.parent:
+            _res = self.request.cms_get_resource(self.entity.parent)
+            return _res(self.request, self.entity.parent)
+        else:
+            return self.request.root
+
     def __resource_url__(self, request, info):
         return info['app_url'] + '/' + str(self.entity.id) + '/'
 
     def __getitem__(self, path):
         # FIXME: circular imports
         from amnesia.modules.account.resources import ContentACLEntity
-        if path == 'acl':
-            return ContentACLEntity(self.request, content=self.entity)
 
+        if path == 'acl':
+            return ContentACLEntity(self.request, content=self.entity,
+                                    parent=self)
         raise KeyError
 
     def __acl__(self):
@@ -55,20 +70,6 @@ class Entity(Resource):
         if not self.entity.inherits_parent_acl:
             yield DENY_ALL
 
-    @property
-    def __name__(self):
-        return self.entity.id
-
-    @property
-    def __parent__(self):
-        if self.parent:
-            return self.parent
-        elif self.entity.parent:
-            _res = self.request.cms_get_resource(self.entity.parent)
-            return _res(self.request, self.entity.parent)
-        else:
-            return self.request.root
-
     def __acl_adapter__(self, ace):
         (allow_deny, principal, permission) = ace
 
@@ -80,6 +81,8 @@ class Entity(Resource):
             if (_ctx == 'content' or (_ctx == 'own_content' and
                                       self.entity.owner is self.request.user)):
                 yield allow_deny, principal, _op
+
+        log.info('********* ' + permission + ' ***********')
 
         yield allow_deny, principal, permission
 

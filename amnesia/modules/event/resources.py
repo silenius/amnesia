@@ -15,10 +15,6 @@ from amnesia.modules.folder import Folder
 class EventEntity(Entity):
     """ Event """
 
-    def get_validation_schema(self):
-        return EventSchema(context={'request': self.request})
-
-
 class EventResource(EntityManager):
 
     __name__ = 'event'
@@ -33,20 +29,9 @@ class EventResource(EntityManager):
     def query(self):
         return self.dbsession.query(Event)
 
-    def get_validation_schema(self):
-        return EventSchema(context={'request': self.request})
-
     def create(self, data):
-        state = self.dbsession.query(State).filter_by(name='published').one()
-        container = self.dbsession.query(Folder).enable_eagerloads(False).\
-            get(data['container_id'])
-
-        new_entity = Event(
-            owner=self.request.user,
-            state=state,
-            container=container,
-            **data
-        )
+        owner = self.request.user
+        new_entity = Event(owner=owner, **data)
 
         try:
             self.dbsession.add(new_entity)
