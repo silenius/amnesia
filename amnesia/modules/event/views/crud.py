@@ -8,6 +8,8 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from amnesia.modules.country import Country
+from amnesia.modules.folder import FolderEntity
+from amnesia.modules.event import Event
 from amnesia.modules.event import EventEntity
 from amnesia.modules.event import EventResource
 from amnesia.modules.event.validation import EventSchema
@@ -33,15 +35,6 @@ class EventCRUD(ContentCRUD):
             data['countries'] = q_country.order_by(Country.name).all()
         return super().form(data, errors)
 
-    def edit_form(self, form_data, errors=None):
-        if errors is None:
-            errors = {}
-
-        return {
-            'form': self.form(form_data, errors),
-            'form_action': self.request.resource_path(self.context)
-        }
-
     @view_config(request_method='GET', name='edit',
                  renderer='amnesia:templates/event/edit.pt',
                  context=EventEntity,
@@ -51,13 +44,13 @@ class EventCRUD(ContentCRUD):
         data = schema.dump(self.entity)
         return self.edit_form(data)
 
-    @view_config(request_method='GET', name='new',
+    @view_config(request_method='GET', name='add_event',
                  renderer='amnesia:templates/event/edit.pt',
-                 context=EventResource,
+                 context=FolderEntity,
                  permission='create')
     def new(self):
         form_data = self.request.GET.mixed()
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_event')
 
     #########################################################################
     # CREATE                                                                #
@@ -65,7 +58,8 @@ class EventCRUD(ContentCRUD):
 
     @view_config(request_method='POST',
                  renderer='amnesia:templates/event/edit.pt',
-                 context=EventResource,
+                 context=FolderEntity,
+                 name='add_event',
                  permission='create')
     def create(self):
         form_data = self.request.POST.mixed()
@@ -74,14 +68,14 @@ class EventCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            return self.edit_form(form_data, error.messages, view='@@add_event')
 
-        new_entity = self.context.create(data)
+        new_entity = self.context.create(Event, data)
 
         if new_entity:
             return HTTPFound(location=self.request.resource_url(new_entity))
 
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_event')
 
     #########################################################################
     # READ                                                                  #

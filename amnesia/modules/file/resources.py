@@ -47,25 +47,3 @@ class FileResource(EntityManager):
 
     def query(self):
         return self.dbsession.query(File)
-
-    def create(self, data):
-        state = self.dbsession.query(State).filter_by(name='published').one()
-        container = self.dbsession.query(Folder).enable_eagerloads(False).\
-            get(data['container_id'])
-
-        new_entity = File(
-            owner=self.request.user,
-            state=state,
-            container=container,
-            file_size=0,
-            mime_id=-1,
-            original_name='',
-            **data
-        )
-
-        try:
-            self.dbsession.add(new_entity)
-            self.dbsession.flush()
-            return new_entity
-        except DatabaseError:
-            return False

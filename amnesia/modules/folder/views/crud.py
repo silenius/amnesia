@@ -15,6 +15,7 @@ from sqlalchemy import orm
 
 from amnesia import order
 
+from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderResource
 from amnesia.modules.folder.validation import FolderSchema
@@ -32,15 +33,6 @@ class FolderCRUD(ContentCRUD):
     """ Folder CRUD """
 
     form_tmpl = 'amnesia:templates/folder/_form.pt'
-
-    def edit_form(self, form_data, errors=None):
-        if errors is None:
-            errors = {}
-
-        return {
-            'form': self.form(form_data, errors),
-            'form_action': self.request.resource_path(self.context)
-        }
 
     def form(self, data=None, errors=None):
         if data is None:
@@ -62,12 +54,12 @@ class FolderCRUD(ContentCRUD):
         data = schema.dump(self.entity)
         return self.edit_form(data)
 
-    @view_config(request_method='GET', name='new',
+    @view_config(request_method='GET', name='add_folder',
                  renderer='amnesia:templates/folder/edit.pt',
-                 context=FolderResource, permission='create')
+                 context=FolderEntity, permission='create')
     def new(self):
         form_data = self.request.GET.mixed()
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_folder')
 
     #########################################################################
     # CREATE                                                                #
@@ -75,7 +67,9 @@ class FolderCRUD(ContentCRUD):
 
     @view_config(request_method='POST',
                  renderer='amnesia:templates/folder/edit.pt',
-                 context=FolderResource, permission='create')
+                 context=FolderEntity,
+                 name='add_folder',
+                 permission='create')
     def create(self):
         form_data = self.request.POST.mixed()
         schema = FolderSchema(context={'request': self.request})
@@ -83,14 +77,15 @@ class FolderCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            return self.edit_form(form_data, error.messages,
+                                  view='@@add_folder')
 
-        new_entity = self.context.create(data)
+        new_entity = self.context.create(Folder, data)
 
         if new_entity:
             return HTTPFound(location=self.request.resource_url(new_entity))
 
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_folder')
 
     #########################################################################
     # READ                                                                  #

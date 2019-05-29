@@ -109,6 +109,19 @@ def new(context, request):
 @view_defaults(context=RoleEntity, name='')
 class RoleEntityCRUD(BaseView):
 
+    #######
+    # GET #
+    #######
+
+    @view_config(request_method='GET', permission='read', accept='text/html',
+                 renderer='amnesia:templates/role/show.pt')
+    def get(self):
+        role = self.context.role
+
+        return {
+            'role': role
+        }
+
     ##########
     # DELETE #
     ##########
@@ -166,8 +179,8 @@ class RoleMemberView(BaseView):
 
             if self.context.add_member(account):
                 return HTTPCreated()
-            else:
-                raise HTTPInternalServerError()
+
+            raise HTTPInternalServerError()
 
     ##########
     # DELETE #

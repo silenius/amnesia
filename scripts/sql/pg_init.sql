@@ -133,13 +133,10 @@ create table role (
 create unique index u_idx_role_name on role(lower(name));
 
 insert into role(name, enabled, locked, description)
-values ('system.Everyone', true, true, true, 'This principal id is granted to all requests');
+values ('system.Everyone', true, true, 'This principal id is granted to all requests');
 
 insert into role(name, enabled, locked, description)
-values ('system.Authenticated', true, true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
-
-insert into role(name, enabled, locked, description)
-values ('Owner', true, true, true, 'The Owner role is automatically granted to the creator of a content');
+values ('system.Authenticated', true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
 
 insert into role(name, enabled, locked, description)
 values ('Manager', true, true, 'The Manager role is the role that can do everything.');
@@ -199,6 +196,7 @@ create table resource (
 create unique index u_idx_resource_name on resource(lower(name));
 
 insert into resource(name) values ('GLOBAL');
+insert into resource(name) values ('CONTENT');
 
 ---------
 -- acl --
@@ -233,7 +231,10 @@ create table acl (
         unique (role_id, resource_id, weight) deferrable initially deferred,
 
     constraint unique_content_resource_weight
-        unique (content_id, resource_id, weight) deferrable initially deferred
+        unique (content_id, resource_id, weight) deferrable initially deferred,
+
+    constraint unique_role_permission_resource
+        unique(role_id, permission_id, resource_id)
 );
 
 create or replace function t_acl_weight() returns trigger as $weight$

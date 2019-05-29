@@ -4,6 +4,7 @@ import bcrypt
 
 from pyramid.security import Deny
 from pyramid.security import Allow
+from pyramid.security import ALL_PERMISSIONS
 
 
 def bcrypt_hash_password(pw):
@@ -24,5 +25,8 @@ def to_pyramid_acl(acl):
         role = acl.role.name
     else:
         role = 'role:{}'.format(acl.role.name)
+
+    if permission == 'ALL_PERMISSIONS':
+        permission = ALL_PERMISSIONS
 
     return (allow_or_deny, role, permission)

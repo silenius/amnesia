@@ -5,6 +5,7 @@ import logging
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import HTTPUnauthorized
 
 from marshmallow import ValidationError
 
@@ -67,7 +68,7 @@ class ACLView(BaseView):
     ########
 
     @view_config(request_method='POST',
-                 permission='manage_permission',
+                 permission='manage_acl',
                  renderer='json')
     def post(self):
         form_data = self.request.POST.mixed()
@@ -88,7 +89,7 @@ class ACLView(BaseView):
     #########
 
     @view_config(request_method='PATCH',
-                 permission='manage_permission',
+                 permission='manage_acl',
                  renderer='json')
     def patch(self):
         form_data = self.request.POST.mixed()
@@ -111,7 +112,7 @@ class ACLView(BaseView):
     ##########
 
     @view_config(request_method='DELETE',
-                 permission='manage_permission', renderer='json')
+                 permission='manage_acl', renderer='json')
     def delete(self):
         form_data = self.request.POST.mixed()
         schema = ACLSchema()
@@ -179,6 +180,25 @@ class ContentACLView(BaseView):
         self.context.create(role, permission, data['allow'])
 
         return data
+
+    #########
+    # PATCH #
+    #########
+
+    @view_config(request_method='PATCH',
+                 renderer='json')
+    def patch(self):
+        data = self.request.POST.mixed()
+
+        inherits_parent_acl = data.get('inherits_parent_acl')
+        if inherits_parent_acl:
+            if self.request.has_permission('manage_acl'):
+                self.context.set_inherits_parent_acl(inherits_parent_acl)
+            else:
+                raise HTTPUnauthorized()
+            return True
+        return False
+
 
     ##########
     # DELETE #

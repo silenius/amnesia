@@ -31,14 +31,3 @@ class DocumentResource(EntityManager):
 
     def query(self):
         return self.dbsession.query(Document)
-
-    def create(self, data):
-        owner = self.request.user
-        new_entity = Document(owner=owner, **data)
-
-        try:
-            self.dbsession.add(new_entity)
-            self.dbsession.flush()
-            return new_entity
-        except DatabaseError:
-            return False

@@ -12,8 +12,6 @@ from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.folder.exc import PasteError
 
 
-from pyramid.security import Allow, ALL_PERMISSIONS
-
 class FolderEntity(Entity):
     """ Folder """
 
@@ -31,6 +29,21 @@ class FolderEntity(Entity):
         except InternalError as e:
             raise PasteError(self.entity)
 
+    def create(self, cls, data):
+        owner = self.request.user
+        new_entity = cls(
+            owner=owner,
+            parent=self.entity,
+            **data
+        )
+
+        try:
+            self.dbsession.add(new_entity)
+            self.dbsession.flush()
+            return new_entity
+        except DatabaseError:
+            return False
+
 
 class FolderResource(EntityManager):
 
@@ -46,14 +59,3 @@ class FolderResource(EntityManager):
 
     def query(self):
         return self.dbsession.query(Folder)
-
-    def create(self, data):
-        owner = self.request.user
-        new_entity = Folder(owner=owner, **data)
-
-        try:
-            self.dbsession.add(new_entity)
-            self.dbsession.flush()
-            return new_entity
-        except DatabaseError:
-            return False

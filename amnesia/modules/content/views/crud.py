@@ -43,6 +43,20 @@ class ContentCRUD(BaseView):
     def dbsession(self):
         return self.request.dbsession
 
+    def edit_form(self, form_data, errors=None, view=None):
+        if errors is None:
+            errors = {}
+
+        if view:
+            action = self.request.resource_path(self.context, view)
+        else:
+            action = self.request.resource_path(self.context)
+
+        return {
+            'form': self.form(form_data, errors),
+            'form_action': action
+        }
+
     def form(self, data=None, errors=None):
         if data is None:
             data = {}

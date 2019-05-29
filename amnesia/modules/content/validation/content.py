@@ -47,7 +47,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     weight = Integer(dump_only=True)
     content_type_id = Integer(dump_only=True)
     type = Nested(ContentTypeSchema, dump_only=True)
-    container_id = Integer()
+    container_id = Integer(dump_only=True)
     owner_id = Integer(dump_only=True)
     state_id = Integer(dump_only=True)
 

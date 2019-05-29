@@ -4,6 +4,10 @@
 <div id="main" data-role_id="${role.id}" data-members-url="${'{}/roles/{}/members'.format(request.script_name, role.id)}">
     <section class="members">
         <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="${request.resource_path(context, '..', '..')}">Roles</a></li>
+                <li><a href="${request.resource_path(context, '..')}">${role.name}</a></li>
+            </ol>
             <div class="row">
                 <div class="col-md-12">
                     <h3>Manage members of ${role.name}</h3>

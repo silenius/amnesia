@@ -114,7 +114,7 @@ class DatabaseAuthResource(AuthResource):
             self.dbsession.add(new_account)
             self.dbsession.flush()
             return new_account
-        except ValueError:
+        except DatabaseError:
             return False
 
     def send_token(self, principal):
@@ -196,21 +196,36 @@ class RoleResource(Resource):
 
     def __init__(self, request, parent):
         super().__init__(request)
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def __getitem__(self, path):
         if path.isdigit():
             entity = self.dbsession.query(Role).get(path)
             if entity:
-                return RoleEntity(self.request, entity)
+                return RoleEntity(self.request, entity, self)
 
         raise KeyError
+
+    def __acl_adapter__(self, ace):
+        (allow_deny, principal, permission) = ace
+
+        try:
+            _op, _ctx = permission.split('_', 1)
+        except (AttributeError, ValueError):
+            yield allow_deny, principal, permission
+        else:
+            if _ctx == 'role':
+                yield allow_deny, principal, _op
 
     def query(self):
         return self.dbsession.query(Role)
 
     def create(self, name, description):
-        role = Role(name=name, description=description, enabled=True)
+        role = Role(name=name, description=description)
 
         try:
             self.dbsession.add(role)
@@ -222,20 +237,24 @@ class RoleResource(Resource):
 
 class RoleEntity(Resource):
 
-    __parent__ = RoleResource
+    __acl__ = ()
 
-    def __init__(self, request, role):
+    def __init__(self, request, role, parent):
         super().__init__(request)
         self.role = role
+        self.parent = parent
 
     @property
     def __name__(self):
         return self.role.id
 
+    @property
+    def __parent__(self):
+        return self.parent
+
     def __getitem__(self, path):
         if path == 'acls':
             return ACLEntity(self.request, role=self.role, parent=self)
-
         if path == 'members' and not self.role.virtual:
             return RoleMember(self.request, role=self.role, parent=self)
 
@@ -258,7 +277,11 @@ class RoleMember(Resource):
     def __init__(self, request, role, parent):
         super().__init__(request)
         self.role = role
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def __getitem__(self, path):
         if path.isdigit():
@@ -332,7 +355,11 @@ class ACLEntity(Resource):
     def __init__(self, request, role, parent):
         super().__init__(request)
         self.role = role
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def query(self):
         return self.dbsession.query(GlobalACL).filter_by(role=self.role)
@@ -443,7 +470,11 @@ class ContentACLEntity(Resource):
     def __init__(self, request, content, parent):
         super().__init__(request)
         self.content = content
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def query(self):
         return self.dbsession.query(ContentACL).filter_by(content=self.content)
@@ -464,6 +495,16 @@ class ContentACLEntity(Resource):
             self.dbsession.flush()
             return deleted
         except DatabaseError:
+            return False
+
+    def set_inherits_parent_acl(self, value):
+        self.content.inherits_parent_acl = value
+
+        try:
+            self.dbsession.add(self.content)
+            self.dbsession.flush()
+            return True
+        except DatabaError:
             return False
 
     def update_permission_weight(self, role, permission, weight):

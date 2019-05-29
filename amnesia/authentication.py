@@ -16,16 +16,16 @@ class AmnesiaAuthenticationPolicy(AuthTktAuthenticationPolicy):
             return request.user.id
 
     def effective_principals(self, request):
-        principals = {Everyone}
+        principals = [Everyone]
 
         if hasattr(request, 'user') and request.user:
-            principals.add(Authenticated)
-            principals.add(str(request.user.id))
+            principals.append(Authenticated)
+            principals.append(str(request.user.id))
 
             for role in request.user.roles:
                 if role.virtual:
-                    principals.add(role.name)
+                    principals.append(role.name)
                 else:
-                    principals.add('role:{}'.format(role.name))
+                    principals.append('role:{}'.format(role.name))
 
         return principals

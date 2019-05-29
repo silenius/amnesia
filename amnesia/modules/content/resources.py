@@ -29,6 +29,18 @@ class Entity(Resource):
         self.entity = entity
         self.parent = parent
 
+    def __getitem__(self, path):
+        # FIXME: circular imports
+        from amnesia.modules.account.resources import ContentACLEntity
+
+        if path == 'acl':
+            return ContentACLEntity(self.request, content=self.entity,
+                                    parent=self)
+        raise KeyError
+
+    def __str__(self):
+        return "{} <{}:{}>".format(self.__class__.__name__,
+                                   self.entity.id, self.entity.title)
     @property
     def __name__(self):
         return self.entity.id
@@ -45,15 +57,6 @@ class Entity(Resource):
 
     def __resource_url__(self, request, info):
         return info['app_url'] + '/' + str(self.entity.id) + '/'
-
-    def __getitem__(self, path):
-        # FIXME: circular imports
-        from amnesia.modules.account.resources import ContentACLEntity
-
-        if path == 'acl':
-            return ContentACLEntity(self.request, content=self.entity,
-                                    parent=self)
-        raise KeyError
 
     def __acl__(self):
         yield Allow, 'role:Manager', ALL_PERMISSIONS
@@ -75,16 +78,15 @@ class Entity(Resource):
 
         try:
             _op, _ctx = permission.split('_', 1)
-        except ValueError:
-            pass
+        except (AttributeError, ValueError):
+            yield allow_deny, principal, permission
         else:
             if (_ctx == 'content' or (_ctx == 'own_content' and
                                       self.entity.owner is self.request.user)):
                 yield allow_deny, principal, _op
+            else:
+                yield allow_deny, principal, permission
 
-        log.info('********* ' + permission + ' ***********')
-
-        yield allow_deny, principal, permission
 
     def update(self, data):
         """ Update an entity """
@@ -154,7 +156,11 @@ class EntityManager(Resource):
 
     def __init__(self, request, parent):
         super().__init__(request)
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def query(self):
         return self.dbsession.query(Content)

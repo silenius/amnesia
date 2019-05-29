@@ -28,8 +28,8 @@ class Resource:
 
         yield DENY_ALL
 
-    def __acl_adapter__(self, acl):
-        yield acl
+    def __acl_adapter__(self, ace):
+        yield ace
 
     @property
     def dbsession(self):

@@ -17,6 +17,8 @@ from pyramid.httpexceptions import HTTPNotFound
 from webob.compat import cgi_FieldStorage
 
 from amnesia.modules.mime import Mime
+from amnesia.modules.folder import FolderEntity
+from amnesia.modules.file import File
 from amnesia.modules.file import FileEntity
 from amnesia.modules.file import FileResource
 from amnesia.modules.file.validation import FileSchema
@@ -30,7 +32,8 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_config(context=FileEntity, name='download', request_method='GET')
+@view_config(context=FileEntity, name='download', request_method='GET',
+             permission='read')
 def download(context, request):
     file_response = context.serve()
 
@@ -107,15 +110,6 @@ class FileCRUD(ContentCRUD):
 
     form_tmpl = 'amnesia:templates/file/_form.pt'
 
-    def edit_form(self, form_data, errors=None):
-        if errors is None:
-            errors = {}
-
-        return {
-            'form': self.form(form_data, errors),
-            'form_action': self.request.resource_path(self.context)
-        }
-
     @view_config(context=FileEntity, request_method='GET', name='edit',
                  renderer='amnesia:templates/file/edit.pt')
     def edit(self):
@@ -123,12 +117,12 @@ class FileCRUD(ContentCRUD):
         data = schema.dump(self.entity)
         return self.edit_form(data)
 
-    @view_config(request_method='GET', name='new',
+    @view_config(request_method='GET', name='add_file',
                  renderer='amnesia:templates/file/edit.pt',
-                 context=FileResource)
+                 context=FolderEntity, permission='create')
     def new(self):
         form_data = self.request.GET.mixed()
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_file')
 
     #########################################################################
     # READ                                                                  #
@@ -154,7 +148,9 @@ class FileCRUD(ContentCRUD):
 
     @view_config(request_method='POST',
                  renderer='amnesia:templates/file/edit.pt',
-                 context=FileResource)
+                 context=FolderEntity,
+                 name='add_file',
+                 permission='create')
     def create(self):
         form_data = self.request.POST.mixed()
         schema = FileSchema(context={'request': self.request})
@@ -162,18 +158,26 @@ class FileCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            return self.edit_form(form_data, error.messages, view='@@add_file')
+
+        data.update({
+            'file_size': 0,
+            'mime_id': -1,
+            'original_name': ''
+        })
 
         # The primary key of file_obj will be used for the filename (so that it
         # ensures uniqueness). If it's a new file_obj (so no id yet) we have to
         # insert it first in the database (to get a new id), so the idea if to
         # flush but don't COMMIT until the file is saved on disk.
         # NOTE: the "fk_mime" constraint is marked DEFERRABLE INITIALLY DEFERRED
-        new_entity = self.context.create(data)
+        new_entity = self.context.create(File, data)
 
         if new_entity:
             save_file(self.request, new_entity, data)
             return HTTPFound(location=self.request.resource_url(new_entity))
+
+        return self.edit_form(form_data, view='@@add_file')
 
     #########################################################################
     # UPDATE                                                                #
