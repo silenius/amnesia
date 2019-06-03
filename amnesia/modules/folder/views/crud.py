@@ -6,21 +6,23 @@ import logging
 
 from marshmallow import ValidationError
 
-from pyramid.view import view_config
-from pyramid.renderers import render_to_response
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.renderers import render_to_response
+from pyramid.security import Authenticated
+from pyramid.view import view_config
 
 from sqlalchemy import orm
 
 from amnesia import order
 
+from amnesia.modules.content_type import ContentType
+from amnesia.modules.content.validation import IdListSchema
+from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderResource
 from amnesia.modules.folder.validation import FolderSchema
-from amnesia.modules.content.views import ContentCRUD
-from amnesia.modules.content_type import ContentType
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -141,3 +143,32 @@ class FolderCRUD(ContentCRUD):
 
         if updated_entity:
             return HTTPFound(location=self.request.resource_url(updated_entity))
+
+
+# Bulk delete
+
+@view_config(request_method='POST', context=FolderEntity, name='bulk_delete',
+             renderer='json', effective_principals=Authenticated)
+def delete(context, request):
+    bulk_delete = request.has_permission('bulk_delete')
+    bulk_delete_own = request.has_permission('bulk_delete_own')
+
+    if not any((bulk_delete, bulk_delete_own)):
+        raise HTTPUnauthorized()
+
+    params = request.POST.mixed()
+    schema = IdListSchema()
+
+    try:
+        results = schema.load(params)
+    except ValidationError as error:
+        raise HTTPBadRequest(error.messages)
+
+    ids = results['ids']
+
+    if bulk_delete:
+        return context.bulk_delete(ids)
+    elif bulk_delete_own:
+        return context.bulk_delete(ids=ids, owner=request.user)
+
+    raise HTTPUnauthorized()

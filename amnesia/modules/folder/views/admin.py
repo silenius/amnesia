@@ -22,10 +22,8 @@ def admin(context, request):
             content = content.parent
     except AttributeError:
         content = request.registry['root_folder']
-        #request.dbsession.add(content)
 
-    session = request.session
-    copy_oids = json.dumps(session.get('copy_oids', []))
+    copy_oids = json.dumps(request.session.get('copy_oids', []))
     content_types = request.dbsession.query(ContentType).all()
 
     return {

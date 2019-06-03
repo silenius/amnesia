@@ -148,13 +148,13 @@ class ContentSchema(Schema, PyramidContextMixin):
 
 
 class IdListSchema(Schema):
-    oid = List(Integer(validate=Range(min=1)), required=True)
+    ids = List(Integer(validate=Range(min=1)), required=True)
 
     @pre_load
     def ensure_list(self, data):
         try:
-            data['oid'] = as_list(data['oid'])
+            data['ids'] = as_list(data['ids'])
         except KeyError:
-            data['oid'] = []
+            data['ids'] = []
 
         return data

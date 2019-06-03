@@ -87,7 +87,6 @@ class Entity(Resource):
             else:
                 yield allow_deny, principal, permission
 
-
     def update(self, data):
         """ Update an entity """
 
