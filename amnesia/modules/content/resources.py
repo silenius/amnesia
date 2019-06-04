@@ -5,10 +5,7 @@
 import logging
 import operator
 
-from itertools import chain
-
 from pyramid.security import Allow
-from pyramid.security import Deny
 from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
 
@@ -41,6 +38,7 @@ class Entity(Resource):
     def __str__(self):
         return "{} <{}:{}>".format(self.__class__.__name__,
                                    self.entity.id, self.entity.title)
+
     @property
     def __name__(self):
         return self.entity.id

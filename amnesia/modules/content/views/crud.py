@@ -4,19 +4,15 @@
 
 import logging
 
-from marshmallow import ValidationError
-
-from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPNoContent
+from pyramid.httpexceptions import HTTPInternalServerError
+
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 
-from sqlalchemy.exc import DatabaseError
-
-from amnesia.modules.content import Content
 from amnesia.modules.content import Entity
-from amnesia.modules.content import EntityManager
 from amnesia.modules.account import Permission
 from amnesia.modules.account import Role
 from amnesia.modules.account.security import get_parent_acl

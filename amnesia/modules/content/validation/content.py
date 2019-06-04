@@ -2,7 +2,7 @@
 
 # pylint: disable=E1101
 
-import json
+import logging
 
 from datetime import date
 from datetime import datetime
@@ -12,6 +12,7 @@ from marshmallow import EXCLUDE
 from marshmallow import post_dump
 from marshmallow import post_load
 from marshmallow import pre_load
+from marshmallow import ValidationError
 
 from marshmallow.fields import Boolean
 from marshmallow.fields import DateTime
@@ -19,17 +20,19 @@ from marshmallow.fields import Integer
 from marshmallow.fields import String
 from marshmallow.fields import Nested
 from marshmallow.fields import List
-from marshmallow.fields import Function
 
 from marshmallow.validate import Range
 
 from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
+from amnesia.utils.validation.fields import JSON
 from amnesia.modules.folder import Folder
 from amnesia.modules.tag import Tag
 from amnesia.modules.state import State
 from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
+
+log = logging.getLogger(__name__)
 
 
 class ContentSchema(Schema, PyramidContextMixin):
@@ -56,8 +59,7 @@ class ContentSchema(Schema, PyramidContextMixin):
 
     inherits_parent_acl = Boolean(dump_only=True, missing=True)
 
-    props = Function(lambda obj: json.dumps(obj.props),
-                     lambda obj: json.loads(obj), required=False)
+    props = JSON(required=False)
 
     # XXX: remvoe this and use ISO format
     effective_year = Integer(load_only=True, required=False, allow_none=True)
@@ -117,20 +119,27 @@ class ContentSchema(Schema, PyramidContextMixin):
         item['state'] = self.dbsession.query(State).filter_by(
             name='published').one()
 
-        return item
+        entity = self.context.get('entity')
+        has_permission = self.context['request'].has_permission
+        if not has_permission('manage_acl'):
+            # Update
+            if entity:
+                if (item['props'].get('inherits_parent_acl') !=
+                        entity.props.get('inherits_parent_acl')):
+                    raise ValidationError('Inherits ACL: permission denied')
+            # Create
+            else:
+                if 'inherits_parent_acl' in item['props']:
+                    raise ValidationError('Inherits ACL: permission denied')
 
+        return item
 
     ########
     # DUMP #
     ########
 
-    @post_dump
-    def post_dump_adapt_tags(self, data):
-        data['tags_id'] = [i['id'] for i in data['tags']]
-        return data
-
     @post_dump(pass_original=True)
-    def post_dump_adapt_dates(self, data, orig):
+    def post_dump_process(self, data, orig):
         # Effective / Expiration dates
         date_col = ('year', 'month', 'day')
         datetime_col = ('year', 'month', 'day', 'hour', 'minute')
@@ -143,6 +152,8 @@ class ContentSchema(Schema, PyramidContextMixin):
             elif isinstance(value, date):
                 for i in date_col:
                     data['{}_{}'.format(col, i)] = getattr(value, i)
+
+        data['tags_id'] = [i['id'] for i in data['tags']]
 
         return data
 

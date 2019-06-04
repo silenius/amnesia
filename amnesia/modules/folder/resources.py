@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=no-member
+
 from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError

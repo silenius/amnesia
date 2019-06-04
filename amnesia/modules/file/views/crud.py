@@ -185,7 +185,8 @@ class FileCRUD(ContentCRUD):
 
     @view_config(request_method='POST',
                  renderer='amnesia:templates/document/edit.pt',
-                 context=FileEntity)
+                 context=FileEntity,
+                 permission='edit')
     def update(self):
         form_data = self.request.POST.mixed()
         schema = FileSchema(

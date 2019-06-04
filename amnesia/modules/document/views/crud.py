@@ -31,7 +31,7 @@ class DocumentCRUD(ContentCRUD):
     @view_config(request_method='GET', name='edit',
                  renderer='amnesia:templates/document/edit.pt',
                  context=DocumentEntity,
-                 permission='update')
+                 permission='edit')
     def edit(self):
         data = DocumentSchema().dump(self.entity)
         return self.edit_form(data)
@@ -102,7 +102,7 @@ class DocumentCRUD(ContentCRUD):
     @view_config(request_method='POST',
                  renderer='amnesia:templates/document/edit.pt',
                  context=DocumentEntity,
-                 permission='update')
+                 permission='edit')
     def update(self):
         form_data = self.request.POST.mixed()
         schema = DocumentSchema(context={

@@ -6,8 +6,10 @@ import logging
 
 from marshmallow import ValidationError
 
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPForbidden
 from pyramid.renderers import render_to_response
 from pyramid.security import Authenticated
 from pyramid.view import view_config
@@ -50,7 +52,8 @@ class FolderCRUD(ContentCRUD):
         return super().form(data, errors)
 
     @view_config(context=FolderEntity, request_method='GET', name='edit',
-                 renderer='amnesia:templates/folder/edit.pt', permission='edit')
+                 renderer='amnesia:templates/folder/edit.pt',
+                 permission='edit')
     def edit(self):
         schema = FolderSchema(context={'request': self.request})
         data = schema.dump(self.entity)
@@ -130,7 +133,7 @@ class FolderCRUD(ContentCRUD):
     def update(self):
         form_data = self.request.POST.mixed()
         schema = FolderSchema(
-            context={'request': self.request},
+            context={'request': self.request, 'entity': self.context.entity},
             exclude=('container_id', )
         )
 
@@ -142,7 +145,8 @@ class FolderCRUD(ContentCRUD):
         updated_entity = self.context.update(data)
 
         if updated_entity:
-            return HTTPFound(location=self.request.resource_url(updated_entity))
+            location = self.request.resource_url(updated_entity)
+            return HTTPFound(location=location)
 
 
 # Bulk delete
@@ -150,11 +154,11 @@ class FolderCRUD(ContentCRUD):
 @view_config(request_method='POST', context=FolderEntity, name='bulk_delete',
              renderer='json', effective_principals=Authenticated)
 def delete(context, request):
-    bulk_delete = request.has_permission('bulk_delete')
-    bulk_delete_own = request.has_permission('bulk_delete_own')
+    can_bulk_delete = request.has_permission('bulk_delete')
+    can_bulk_delete_own = request.has_permission('bulk_delete_own')
 
-    if not any((bulk_delete, bulk_delete_own)):
-        raise HTTPUnauthorized()
+    if not any((can_bulk_delete, can_bulk_delete_own)):
+        raise HTTPForbidden()
 
     params = request.POST.mixed()
     schema = IdListSchema()
@@ -166,9 +170,10 @@ def delete(context, request):
 
     ids = results['ids']
 
-    if bulk_delete:
+    if can_bulk_delete:
         return context.bulk_delete(ids)
-    elif bulk_delete_own:
+
+    if can_bulk_delete_own:
         return context.bulk_delete(ids=ids, owner=request.user)
 
-    raise HTTPUnauthorized()
+    raise HTTPForbidden()

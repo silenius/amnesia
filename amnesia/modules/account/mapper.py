@@ -129,9 +129,11 @@ def _content_callback():
         'props', 'inherits_parent_acl', Boolean, default=True
     ))
 
+
 @event.listens_for(Account, 'mapper_configured')
 def _account_callback(mapper, class_):
     setattr(class_, 'roles', association_proxy('account_roles', 'role'))
+
 
 @event.listens_for(Role, 'mapper_configured')
 def _role_callback(mapper, class_):

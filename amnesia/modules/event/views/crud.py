@@ -38,7 +38,7 @@ class EventCRUD(ContentCRUD):
     @view_config(request_method='GET', name='edit',
                  renderer='amnesia:templates/event/edit.pt',
                  context=EventEntity,
-                 permission='update')
+                 permission='edit')
     def edit(self):
         schema = EventSchema(context={'request': self.request})
         data = schema.dump(self.entity)
@@ -102,7 +102,7 @@ class EventCRUD(ContentCRUD):
     @view_config(request_method='POST',
                  renderer='amnesia:templates/event/edit.pt',
                  context=EventEntity,
-                 permission='update')
+                 permission='edit')
     def update(self):
         form_data = self.request.POST.mixed()
         schema = EventSchema(
