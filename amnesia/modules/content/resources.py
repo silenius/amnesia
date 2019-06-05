@@ -36,8 +36,11 @@ class Entity(Resource):
         raise KeyError
 
     def __str__(self):
-        return "{} <{}:{}>".format(self.__class__.__name__,
-                                   self.entity.id, self.entity.title)
+        try:
+            return "{} <{}:{}>".format(self.__class__.__name__, self.entity.id,
+                                       self.entity.title)
+        except:
+            return self.__class__.__name__
 
     @property
     def __name__(self):
