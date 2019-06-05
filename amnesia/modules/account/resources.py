@@ -12,7 +12,6 @@ from pyramid.security import DENY_ALL
 from pyramid.security import Everyone
 from pyramid.security import Allow
 from pyramid.settings import asbool
-from pyramid.security import ALL_PERMISSIONS
 
 from pyramid_mailer.message import Message
 
@@ -504,7 +503,7 @@ class ContentACLEntity(Resource):
             self.dbsession.add(self.content)
             self.dbsession.flush()
             return True
-        except DatabaError:
+        except DatabaseError:
             return False
 
     def update_permission_weight(self, role, permission, weight):
