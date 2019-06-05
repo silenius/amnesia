@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# pylint: disable=E1101
+# pylint: disable=invalid-name,no-member
 
 import logging
 
@@ -23,7 +23,6 @@ from amnesia.modules.content.validation import IdListSchema
 from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
-from amnesia.modules.folder import FolderResource
 from amnesia.modules.folder.validation import FolderSchema
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103

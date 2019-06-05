@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# pylint: disable=E1101
+# pylint: disable=invalid-name,no-member
 
 import logging
 
