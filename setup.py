@@ -32,7 +32,7 @@ install_requires = [
     'marshmallow>=3.0.0b13',
     'bcrypt',
     'file-magic',
-#    'saexts'
+    'saexts'
 ]
 
 extra_requires = {
