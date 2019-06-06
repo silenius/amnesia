@@ -4,14 +4,11 @@ import logging
 
 from pkg_resources import iter_entry_points
 from pyramid.config import Configurator
-from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 
 from amnesia.resources import get_root
 from amnesia.authentication import AmnesiaAuthenticationPolicy
-from amnesia.modules.account import Account
-from amnesia.modules.account import AccountEntity
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
