@@ -18,13 +18,14 @@ class Resource:
     def __acl__(self):
         yield Allow, 'role:Manager', ALL_PERMISSIONS
 
-        # Note: if there's no explicit permission, the default is to DENY so in
-        # theory there is no need for a yield DENY_ALL (but keep it just to be
-        # sure)
         from amnesia.modules.account.security import get_global_acl
 
         for acl in get_global_acl(self.request):
             yield from self.__acl_adapter__(acl.to_pyramid_acl())
+
+        # Note: if there's no explicit permission, the default is to DENY so in
+        # theory there is no need for a yield DENY_ALL (but keep it just to be
+        # sure)
 
         yield DENY_ALL
 
