@@ -50,11 +50,12 @@ class Entity(Resource):
     def __parent__(self):
         if self.parent:
             return self.parent
-        elif self.entity.parent:
+
+        if self.entity.parent:
             _res = self.request.cms_get_resource(self.entity.parent)
             return _res(self.request, self.entity.parent)
-        else:
-            return self.request.root
+
+        return self.request.root
 
     def __resource_url__(self, request, info):
         return info['app_url'] + '/' + str(self.entity.id) + '/'
