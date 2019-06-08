@@ -41,7 +41,7 @@ class ContentResourceURL(object):
     VH_ROOT_KEY = VH_ROOT_KEY
 
     def __init__(self, resource, request):
-        #physical_path_tuple = resource_path_tuple(resource)
+        # physical_path_tuple = resource_path_tuple(resource)
         physical_path_tuple = ('', str(resource.id))
         physical_path = _join_path_tuple(physical_path_tuple)
 
@@ -63,14 +63,14 @@ class ContentResourceURL(object):
                 vroot_path_tuple = tuple(vroot_path.split('/'))
                 numels = len(vroot_path_tuple)
                 virtual_path_tuple = ('',) + physical_path_tuple[numels:]
-                virtual_path = physical_path[len(vroot_path) :]
+                virtual_path = physical_path[len(vroot_path):]
 
         self.virtual_path = virtual_path  # IResourceURL attr
         self.physical_path = physical_path  # IResourceURL attr
         self.virtual_path_tuple = virtual_path_tuple  # IResourceURL attr (1.5)
         self.physical_path_tuple = (
             physical_path_tuple
-        ) # IResourceURL attr (1.5)
+        )  # IResourceURL attr (1.5)
 
 
 def cms_add_entity_resource(config, entity, resource, add_url_adapter=True):
