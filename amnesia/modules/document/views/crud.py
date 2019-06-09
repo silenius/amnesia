@@ -117,4 +117,5 @@ class DocumentCRUD(ContentCRUD):
         updated_entity = self.context.update(data)
 
         if updated_entity:
-            return HTTPFound(location=self.request.resource_url(updated_entity))
+            location = self.request.resource_url(updated_entity)
+            return HTTPFound(location=location)
