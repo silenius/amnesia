@@ -18,7 +18,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/
 lib64/
 parts/
 sdist/
@@ -63,3 +63,4 @@ development.ini
 production.ini
 
 tmp/
+node_modules/

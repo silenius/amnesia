@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+__version__ = '0.1.7.dev2+auth'
 
 import os
 
@@ -14,10 +15,12 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 install_requires = [
-    'pyramid~=1.9',
-    'Chameleon>3.0',
+    'plaster_pastedeploy',
+    'pyramid',
+    'Chameleon',
     'pyramid_chameleon',
     'pyramid_beaker',
+    'alembic',
     'pyramid_tm',
     'pyramid_mailer',
     'SQLAlchemy~=1.2',
@@ -26,10 +29,10 @@ install_requires = [
     'psycopg2',
     'pytz',
     'rutter',
-    'marshmallow>=3.0.0b7',
+    'marshmallow>=3.0.0b13',
     'bcrypt',
     'file-magic',
-#    'saexts'
+    'saexts'
 ]
 
 extra_requires = {
@@ -39,12 +42,17 @@ extra_requires = {
     'development': [
         'pyramid_debugtoolbar',
         'waitress',
+    ],
+    'testing': [
+        'WebTest >= 1.3.1',  # py3 compat
+        'pytest >= 3.7.4',
+        'pytest-cov',
     ]
 }
 
 setup(
     name='amnesiacms',
-    version='0.1.4',
+    version=__version__,
     description='amnesia CMS',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
@@ -60,7 +68,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    test_suite='amnesia',
     install_requires=install_requires,
     extras_require=extra_requires,
     entry_points={
@@ -70,6 +77,7 @@ setup(
         'console_scripts': [
             'initialize_amnesia_db = amnesia.scripts.initializedb:main',
             'initialize_amnesia_mime = amnesia.scripts.initializemime:main',
+            'build_statics = amnesia.scripts.build_statics:main',
         ]
     }
 )

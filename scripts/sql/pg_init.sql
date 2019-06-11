@@ -125,6 +125,7 @@ create table role (
     name        smalltext   not null,
     created     timestamptz not null    default current_timestamp,
     enabled     boolean     not null    default false,
+    locked      boolean     not null    default false,
     description text,
 
     constraint pk_role
@@ -132,6 +133,15 @@ create table role (
 );
 
 create unique index u_idx_role_name on role(lower(name));
+
+insert into role(name, enabled, locked, description)
+values ('system.Everyone', true, true, 'This principal id is granted to all requests');
+
+insert into role(name, enabled, locked, description)
+values ('system.Authenticated', true, true, 'Any user with credentials as determined by the current security policy. You might think of it as any user that is "logged in".');
+
+insert into role(name, enabled, locked, description)
+values ('Manager', true, true, 'The Manager role is the role that can do everything.');
 
 ------------------
 -- account_role --
@@ -151,6 +161,115 @@ create table account_role (
     constraint fk_role
         foreign key(role_id) references role(id)
 );
+
+----------------
+-- permission --
+----------------
+
+create table permission (
+    id              serial      not null,
+    name            smalltext   not null,
+    created         timestamptz not null    default current_timestamp,
+    enabled         boolean     not null    default false,
+    description     text,
+    content_type_id smallint,
+
+    constraint pk_permission
+        primary key(id),
+
+    constraint fk_permission_content_type
+        foreign key(content_type_id) references content_type(id)
+);
+
+create unique index u_idx_permisison_name on permission(lower(name));
+
+---------------
+-- resources --
+---------------
+
+create table resource (
+    id      serial  not null,
+    name    text    not null,
+
+    constraint pk_resource
+        primary key (id)
+);
+
+create unique index u_idx_resource_name on resource(lower(name));
+
+insert into resource(name) values ('GLOBAL');
+insert into resource(name) values ('CONTENT');
+
+---------
+-- acl --
+---------
+
+create table acl (
+    id              serial      not null,
+    role_id         integer     not null,
+    permission_id   integer     not null,
+    resource_id     integer     not null,
+    content_id      integer,
+    allow           boolean     not null,
+    weight          smallint    not null,
+    created         timestamptz not null    default current_timestamp,
+
+    constraint pk_acl
+        primary key (id),
+
+    constraint fk_role
+        foreign key(role_id) references role(id),
+
+    constraint fk_permission
+        foreign key (permission_id) references permission(id),
+
+    constraint fk_resource
+        foreign key (resource_id) references resource(id),
+
+    constraint fk_acl_content
+        foreign key (content_id) references content(id),
+
+    constraint unique_role_resource_weight
+        unique (role_id, resource_id, weight) deferrable initially deferred,
+
+    constraint unique_content_resource_weight
+        unique (content_id, resource_id, weight) deferrable initially deferred,
+
+    constraint unique_role_permission_resource
+        unique(role_id, permission_id, resource_id)
+);
+
+create or replace function t_acl_weight() returns trigger as $weight$
+    BEGIN
+        PERFORM 1
+            FROM acl
+            WHERE role_id = NEW.role_id 
+                AND resource_id = NEW.resource_id
+            FOR UPDATE;
+
+        IF NEW.content_id IS NOT NULL THEN
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM acl
+                WHERE resource_id = NEW.resource_id
+                    AND content_id = NEW.content_id
+            );
+        ELSE
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM acl
+                WHERE role_id = NEW.role_id 
+                    AND resource_id = NEW.resource_id
+            );
+
+        END IF;
+
+        RETURN NEW;
+    END;
+$weight$ language plpgsql;
+
+create trigger t_acl_weight before insert on acl
+    for each row execute procedure t_acl_weight();
 
 ----------------
 -- mime_major --
@@ -283,31 +402,93 @@ values (
     1
 );
 
-create or replace function compute_weight() returns trigger as $weight$
+create or replace function t_container_id() returns trigger as $weight$
+    declare
+        container_id_changed CONSTANT boolean := TG_OP = 'UPDATE' AND NEW.container_id IS DISTINCT FROM OLD.container_id;
+        compute_new_weight CONSTANT boolean := TG_OP = 'INSERT' OR container_id_changed;
     begin
-        if (TG_OP = 'INSERT' or (TG_OP = 'UPDATE' and NEW.container_id is distinct from OLD.container_id)) then
-            
-            PERFORM 1 
+        if container_id_changed then
+            -- Prevent concurrent modifications.
+            PERFORM 1
             FROM folder
-            WHERE content_id = NEW.container_id 
+            WHERE content_id = NEW.container_id
             FOR UPDATE;
-            
+
+            PERFORM 1
+            FROM folder
+            WHERE content_id = NEW.id
+            FOR UPDATE;
+
+            IF FOUND THEN
+
+                /*
+                    Imagine we have the following:
+
+                           A
+                          / \
+                        B     C
+                       / \   /
+                      D   F G
+                     /     \
+                    E       H
+                           / \
+                          I   J
+               
+                    We must ensure that the NEW.container_id is not part of it's 
+                    lower hierarchy. 
+
+                    For example an error must be raised if:
+                    - we update B and NEW.container_id equals to the id 
+                      of any D,F,E,H,I,J
+                    - we update F and NEW.container_id equals to the id 
+                      of any H,I,J
+                    - ...
+
+                    The query below checks that if we update B.container_id the 
+                    NEW.container_id is not a child of B.
+                */
+
+                IF EXISTS (
+                    WITH RECURSIVE children AS (
+                            SELECT c1.id
+                            FROM content c1
+                            JOIN folder f1 ON c1.id = f1.content_id 
+                            WHERE c1.container_id = NEW.id
+                        UNION ALL 
+                            SELECT c2.id
+                            FROM content c2 
+                            JOIN folder f2 ON c2.id = f2.content_id 
+                            JOIN children ch ON ch.id = c2.container_id
+                    ) 
+
+                    SELECT * FROM children WHERE id = NEW.container_id
+                ) 
+                THEN
+                    RAISE EXCEPTION '% is a child of %', NEW.container_id, 
+                        NEW.id;
+                END IF;
+                
+            END IF;  -- FOUND
+
+        END IF;  -- container_id_changed
+
+        IF compute_new_weight THEN
             NEW.weight := (
-                select
-                    coalesce(max(weight) + 1, 1)
-                from
-                    content
-                where
-                    container_id = NEW.container_id
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM content
+                WHERE container_id = NEW.container_id
             );
-        end if;
+
+            RAISE NOTICE 'weight of % within container % set to %', NEW.id, 
+                NEW.container_id, NEW.weight;
+        END IF;  -- compute_new_weight
 
         return NEW;
     end;
 $weight$ language plpgsql;
 
-create trigger compute_weight before insert or update on content
-    for each row execute procedure compute_weight();
+create trigger t_container_id before insert or update on content
+    for each row execute procedure t_container_id();
 
 -------------------------
 -- content translation --
@@ -473,8 +654,8 @@ create unique index u_idx_country_name
 -----------
 
 create table event (
-    starts              timestamptz not null,
-    ends                timestamptz not null,
+    starts              timestamp   not null,
+    ends                timestamp   not null,
     location            text,
     address             text,
     address_latitude    float,

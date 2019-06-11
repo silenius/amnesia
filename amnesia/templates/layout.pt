@@ -36,7 +36,7 @@
         </ul>
 
 
-        <!--ç!
+        <!--!
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
@@ -141,17 +141,19 @@
 
     <script src="${request.static_url('amnesia:static/js/custom.js')}"></script>
     <!-- BBPF -->
-    <script src="${request.static_url('amnesia:static/js/bbpf.js')}"></script>
+    <script src="${request.static_url('amnesia:static/js/dist/bbpf.bundle.js')}"></script>
     <script src="${request.static_url('amnesia:static/js/yeti/core.js')}"></script>
     <script src="${request.static_url('amnesia:static/js/yeti/ui.js')}"></script>
     <script tal:condition="js_tinymce | nothing" src="${request.static_url('amnesia:static/js/tinymce/tinymce.min.js')}"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!--
     <script>
         Bbpf.config.urls = {
             host : "${request.host_url}",
             prefix : "${request.script_name}"
         }
     </script>
+    -->
 
     <metal:block define-slot="body-bottom" />
   </body>

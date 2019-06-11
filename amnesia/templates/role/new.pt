@@ -1,0 +1,41 @@
+<metal:block use-macro="layout.macros['layout']">
+<metal:block fill-slot="title_more">: new</metal:block>
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="browse">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="${request.resource_path(context)}">Roles</a></li>
+            </ol>
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Add a new Role</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <form method="POST" id="add_role_form" action="${request.resource_path(request.context)}">
+                      <div class="form-group">
+                        <label for="role">Name</label>
+                        <input type="text" class="form-control" name="role" id="role" placeholder="Role name">
+                      </div>
+                      <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                      </div>
+ 
+                      <button type="submit" class="btn btn-default">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</metal:block>
+
+<metal:block fill-slot="head-bottom">
+    <script src="${request.static_url('amnesia:static/dist/role_new.bundle.js')}"></script>
+    <link href="${request.static_url('amnesia:static/dist/styles/role_new.css')}" rel="stylesheet">
+</metal:block>
+
+</metal:block>

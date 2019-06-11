@@ -4,6 +4,7 @@ import logging
 
 from pyramid.events import BeforeRender
 from pyramid.events import subscriber
+from pyramid.renderers import get_renderer
 
 from amnesia import helpers
 
@@ -17,6 +18,13 @@ def includeme(config):
 @subscriber(BeforeRender)
 def add_renderers_global(event):
     registry = event['request'].registry
+    layout = registry.settings.get('amnesia.master_layout')
 
-    event['h'] = helpers
-    event['widgets'] = registry['widgets']
+    if layout:
+        layout = get_renderer(layout).implementation()
+
+    event.update({
+        'h': helpers,
+        'widgets': registry['widgets'],
+        'layout': layout
+    })

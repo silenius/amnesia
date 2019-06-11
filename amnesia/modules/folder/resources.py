@@ -1,20 +1,68 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=no-member
+
+from sqlalchemy import orm
+from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.exc import InternalError
 
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.state import State
+from amnesia.modules.content import Content
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder.validation import FolderSchema
-from amnesia.modules.folder import FolderCreatedEvent
+from amnesia.modules.folder.exc import PasteError
 
 
 class FolderEntity(Entity):
     """ Folder """
 
-    def get_validation_schema(self):
-        return FolderSchema(context={'request': self.request})
+    def paste(self, content_ids):
+        _cls = orm.class_mapper(Folder).base_mapper.class_
+
+        try:
+            self.dbsession.query(_cls).enable_eagerloads(False).filter(
+                _cls.id.in_(content_ids)
+            ).update({
+                _cls.container_id: self.entity.id
+            }, synchronize_session=False)
+
+            self.dbsession.flush()
+        except InternalError as e:
+            raise PasteError(self.entity)
+
+    def create(self, cls, data):
+        owner = self.request.user
+        new_entity = cls(owner=owner, parent=self.entity, **data)
+
+        try:
+            self.dbsession.add(new_entity)
+            self.dbsession.flush()
+            return new_entity
+        except DatabaseError:
+            return False
+
+    def bulk_delete(self, ids, owner=None):
+        filters = sql.and_(
+            Content.id.in_(ids),
+            Content.parent == self.entity
+        )
+
+        if owner:
+            filters.append(Content.owner == owner)
+
+        items = self.dbsession.query(Content).filter(filters)
+
+        for item in items:
+            self.dbsession.delete(item)
+
+        try:
+            self.dbsession.flush()
+            return True
+        except DatabaseError:
+            return False
 
 
 class FolderResource(EntityManager):
@@ -29,29 +77,5 @@ class FolderResource(EntityManager):
 
         raise KeyError
 
-    def get_validation_schema(self):
-        return FolderSchema(context={'request': self.request})
-
     def query(self):
         return self.dbsession.query(Folder)
-
-    def create(self, data):
-        state = self.dbsession.query(State).filter_by(name='published').one()
-        container = self.dbsession.query(Folder).enable_eagerloads(False).\
-            get(data['container_id'])
-
-        new_entity = Folder(
-            owner=self.request.user,
-            state=state,
-            container=container,
-            **data
-        )
-
-        try:
-            self.dbsession.add(new_entity)
-            self.dbsession.flush()
-            event = FolderCreatedEvent(self.request, new_entity)
-            self.request.registry.notify(event)
-            return new_entity
-        except DatabaseError:
-            return False

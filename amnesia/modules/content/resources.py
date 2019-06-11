@@ -6,14 +6,13 @@ import logging
 import operator
 
 from pyramid.security import Allow
-from pyramid.security import Everyone
+from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
 
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
-from amnesia.modules.content import ContentDeletedEvent
 from amnesia.resources import Resource
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -27,10 +26,21 @@ class Entity(Resource):
         self.entity = entity
         self.parent = parent
 
-    def __acl__(self):
-        yield Allow, Everyone, 'read'
-        yield Allow, self.entity.owner.id, ALL_PERMISSIONS
-        yield from super().__acl__()
+    def __getitem__(self, path):
+        # FIXME: circular imports
+        from amnesia.modules.account.resources import ContentACLEntity
+
+        if path == 'acl':
+            return ContentACLEntity(self.request, content=self.entity,
+                                    parent=self)
+        raise KeyError
+
+    def __str__(self):
+        try:
+            return "{} <{}:{}>".format(self.__class__.__name__, self.entity.id,
+                                       self.entity.title)
+        except:
+            return self.__class__.__name__
 
     @property
     def __name__(self):
@@ -38,7 +48,46 @@ class Entity(Resource):
 
     @property
     def __parent__(self):
-        return self.parent if self.parent else self.request.root
+        if self.parent:
+            return self.parent
+
+        if self.entity.parent:
+            _res = self.request.cms_get_resource(self.entity.parent)
+            return _res(self.request, self.entity.parent)
+
+        return self.request.root
+
+    def __resource_url__(self, request, info):
+        return info['app_url'] + '/' + str(self.entity.id) + '/'
+
+    def __acl__(self):
+        yield Allow, 'role:Manager', ALL_PERMISSIONS
+
+        if self.entity.owner is self.request.user:
+            yield Allow, str(self.request.user.id), ALL_PERMISSIONS
+
+        # FIXME
+        from amnesia.modules.account.security import get_entity_acl
+
+        for acl in get_entity_acl(self.request, self.entity):
+            yield from self.__acl_adapter__(acl.to_pyramid_acl())
+
+        if not self.entity.inherits_parent_acl:
+            yield DENY_ALL
+
+    def __acl_adapter__(self, ace):
+        (allow_deny, principal, permission) = ace
+
+        try:
+            _op, _ctx = permission.split('_', 1)
+        except (AttributeError, ValueError):
+            yield allow_deny, principal, permission
+        else:
+            if (_ctx == 'content' or (_ctx == 'own_content' and
+                                      self.entity.owner is self.request.user)):
+                yield allow_deny, principal, _op
+            else:
+                yield allow_deny, principal, permission
 
     def update(self, data):
         """ Update an entity """
@@ -58,8 +107,6 @@ class Entity(Resource):
         try:
             self.dbsession.delete(self.entity)
             self.dbsession.flush()
-            event = ContentDeletedEvent(self.request, self.entity)
-            self.request.registry.notify(event)
             return True
         except DatabaseError:
             return False
@@ -110,7 +157,11 @@ class EntityManager(Resource):
 
     def __init__(self, request, parent):
         super().__init__(request)
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def query(self):
         return self.dbsession.query(Content)

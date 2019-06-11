@@ -16,5 +16,6 @@
 
 <input type="hidden" name="container_id" />
 <input type="hidden" id="object_id" name="id" />
+<input type="hidden" name="csrf_token" />
 
 <!-- END: content/_form -->

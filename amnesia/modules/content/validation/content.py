@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# pylint: disable=E1101
+# pylint: disable=invalid-name,no-member
 
-import json
+import logging
 
 from datetime import date
 from datetime import datetime
 
 from marshmallow import Schema
+from marshmallow import EXCLUDE
 from marshmallow import post_dump
 from marshmallow import post_load
 from marshmallow import pre_load
+from marshmallow import ValidationError
 
 from marshmallow.fields import Boolean
 from marshmallow.fields import DateTime
@@ -18,15 +20,19 @@ from marshmallow.fields import Integer
 from marshmallow.fields import String
 from marshmallow.fields import Nested
 from marshmallow.fields import List
-from marshmallow.fields import Function
 
 from marshmallow.validate import Range
 
 from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
+from amnesia.utils.validation.fields import JSON
+from amnesia.modules.folder import Folder
 from amnesia.modules.tag import Tag
+from amnesia.modules.state import State
 from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
+
+log = logging.getLogger(__name__)
 
 
 class ContentSchema(Schema, PyramidContextMixin):
@@ -41,18 +47,19 @@ class ContentSchema(Schema, PyramidContextMixin):
     expiration = DateTime()
     exclude_nav = Boolean(missing=False)
     is_fts = Boolean(missing=False)
-    weight = Integer()
+    weight = Integer(dump_only=True)
     content_type_id = Integer(dump_only=True)
     type = Nested(ContentTypeSchema, dump_only=True)
-    container_id = Integer(required=False, missing=None)
+    container_id = Integer(dump_only=True)
     owner_id = Integer(dump_only=True)
     state_id = Integer(dump_only=True)
 
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
 
-    props = Function(lambda obj: json.dumps(obj.props),
-                     lambda obj: json.loads(obj), required=False)
+    inherits_parent_acl = Boolean(dump_only=True, missing=True)
+
+    props = JSON(required=False)
 
     # XXX: remvoe this and use ISO format
     effective_year = Integer(load_only=True, required=False, allow_none=True)
@@ -68,12 +75,15 @@ class ContentSchema(Schema, PyramidContextMixin):
     expiration_hour = Integer(load_only=True, required=False, allow_none=True)
     expiration_minute = Integer(load_only=True, required=False, allow_none=True)
 
+    class Meta:
+        unknown = EXCLUDE
+
     ########
     # LOAD #
     ########
 
     @pre_load
-    def pre_process(self, data):
+    def pre_load_process(self, data):
         _data = {k: None if v == '' else v for k, v in data.items()}
 
         # Starts / Ends
@@ -97,23 +107,39 @@ class ContentSchema(Schema, PyramidContextMixin):
         return _data
 
     @post_load
-    def load_tags(self, item):
+    def post_load_process(self, item):
         if 'tags_id' in item:
-            filters = Tag.id.in_(item['tags_id'])
+            filters = Tag.id.in_(item.pop('tags_id'))
             item['tags'] = self.dbsession.query(Tag).filter(filters).all()
+
+        if 'container_id' in item:
+            item['parent'] = self.dbsession.query(Folder).get(
+                item.pop('container_id'))
+
+        item['state'] = self.dbsession.query(State).filter_by(
+            name='published').one()
+
+        entity = self.context.get('entity')
+        has_permission = self.context['request'].has_permission
+        if not has_permission('manage_acl'):
+            # Update
+            if entity:
+                if (item['props'].get('inherits_parent_acl') !=
+                        entity.props.get('inherits_parent_acl')):
+                    raise ValidationError('Inherits ACL: permission denied')
+            # Create
+            else:
+                if 'inherits_parent_acl' in item['props']:
+                    raise ValidationError('Inherits ACL: permission denied')
+
         return item
 
     ########
     # DUMP #
     ########
 
-    @post_dump
-    def post_dump_adapt_tags(self, data):
-        data['tags_id'] = [i['id'] for i in data['tags']]
-        return data
-
     @post_dump(pass_original=True)
-    def post_dump_adapt_dates(self, data, orig):
+    def post_dump_process(self, data, orig):
         # Effective / Expiration dates
         date_col = ('year', 'month', 'day')
         datetime_col = ('year', 'month', 'day', 'hour', 'minute')
@@ -127,17 +153,19 @@ class ContentSchema(Schema, PyramidContextMixin):
                 for i in date_col:
                     data['{}_{}'.format(col, i)] = getattr(value, i)
 
+        data['tags_id'] = [i['id'] for i in data['tags']]
+
         return data
 
 
 class IdListSchema(Schema):
-    oid = List(Integer(validate=Range(min=1)), required=True)
+    ids = List(Integer(validate=Range(min=1)), required=True)
 
     @pre_load
     def ensure_list(self, data):
         try:
-            data['oid'] = as_list(data['oid'])
+            data['ids'] = as_list(data['ids'])
         except KeyError:
-            data['oid'] = []
+            data['ids'] = []
 
         return data

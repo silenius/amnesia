@@ -5,7 +5,6 @@ def includeme(config):
     config.include('.haproxy')
     config.include('.index')
     config.include('.contact')
-    config.include('.newsletter')
 
 
 class BaseView(object):

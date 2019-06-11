@@ -1,0 +1,37 @@
+<metal:block use-macro="layout.macros['layout']">
+<metal:block fill-slot="title_more">: members</metal:block>
+<metal:block fill-slot="content">
+<div id="main">
+    <section class="members">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="${request.resource_path(context, '..')}">Roles</a></li>
+            </ol>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Role ${role.name}</h3>
+                </div>
+            </div>
+            <p>
+                ${role.description}
+            </p>
+            <div class="row">
+                <div class="col-md-1">
+                    <a class="btn btn-primary btn-lg" href="${request.resource_url(context, 'acls')}">ACL</a>
+                </div>
+                <div class="col-md-1">
+                    <a class="btn btn-primary btn-lg" href="${request.resource_url(context, 'members')}">Members</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</metal:block>
+
+<metal:block fill-slot="head-bottom">
+    <script src="${request.static_url('amnesia:static/dist/layout.bundle.js')}"></script>
+    <link href="${request.static_url('amnesia:static/dist/styles/layout.css')}" rel="stylesheet">
+</metal:block>
+
+</metal:block>

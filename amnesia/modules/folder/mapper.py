@@ -21,8 +21,17 @@ def includeme(config):
 
     tables = config.registry['metadata'].tables
 
-    orm.mapper(
-        Folder, tables['folder'], inherits=Content,
+    t_content = tables['content']
+    t_folder = tables['folder']
+    t_document = tables['document']
+
+#    q_count_children = sql.select([
+#        sql.func.count('*').label('cpt')
+#    ]).where(
+#        t_content.c.container_id == t_folder.c.content_id
+#    ).lateral('children')
+
+    orm.mapper(Folder, t_folder, inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=tables['folder'].c.content_id ==
         tables['content'].c.id,

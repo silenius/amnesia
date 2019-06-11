@@ -6,6 +6,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 from pyramid_mailer.message import Message
 
 from marshmallow import Schema
+from marshmallow import EXCLUDE
 from marshmallow import ValidationError
 from marshmallow.fields import String
 from marshmallow.fields import Email
@@ -28,9 +29,12 @@ class MessageValidation(Schema):
     message = String()
     oid = Integer()
     captcha_token = String(
-        required=True, load_from='g-recaptcha-response',
+        required=True, data_key='g-recaptcha-response',
         validate=[Length(min=1, error='captcha missing')]
     )
+
+    class Meta:
+        unknown = EXCLUDE
 
 
 @view_config(name='contact', request_method='POST',

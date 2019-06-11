@@ -8,8 +8,11 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from amnesia.modules.country import Country
+from amnesia.modules.folder import FolderEntity
+from amnesia.modules.event import Event
 from amnesia.modules.event import EventEntity
 from amnesia.modules.event import EventResource
+from amnesia.modules.event.validation import EventSchema
 from amnesia.modules.content.views import ContentCRUD
 
 log = logging.getLogger(__name__)
@@ -25,10 +28,6 @@ class EventCRUD(ContentCRUD):
 
     form_tmpl = 'amnesia:templates/event/_form.pt'
 
-    @property
-    def schema(self):
-        return self.context.get_validation_schema()
-
     def form(self, data, errors=None):
         if 'countries' not in data:
             # pylint: disable=E1101
@@ -36,30 +35,22 @@ class EventCRUD(ContentCRUD):
             data['countries'] = q_country.order_by(Country.name).all()
         return super().form(data, errors)
 
-    def edit_form(self, form_data, errors=None):
-        if errors is None:
-            errors = {}
-
-        return {
-            'form': self.form(form_data, errors),
-            'form_action': self.request.resource_path(self.context)
-        }
-
     @view_config(request_method='GET', name='edit',
                  renderer='amnesia:templates/event/edit.pt',
                  context=EventEntity,
-                 permission='update')
+                 permission='edit')
     def edit(self):
-        data = self.schema.dump(self.entity)
+        schema = EventSchema(context={'request': self.request})
+        data = schema.dump(self.entity)
         return self.edit_form(data)
 
-    @view_config(request_method='GET', name='new',
+    @view_config(request_method='GET', name='add_event',
                  renderer='amnesia:templates/event/edit.pt',
-                 context=EventResource,
+                 context=FolderEntity,
                  permission='create')
     def new(self):
         form_data = self.request.GET.mixed()
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_event')
 
     #########################################################################
     # CREATE                                                                #
@@ -67,22 +58,42 @@ class EventCRUD(ContentCRUD):
 
     @view_config(request_method='POST',
                  renderer='amnesia:templates/event/edit.pt',
-                 context=EventResource,
+                 context=FolderEntity,
+                 name='add_event',
                  permission='create')
     def create(self):
         form_data = self.request.POST.mixed()
+        schema = EventSchema(context={'request': self.request})
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            return self.edit_form(form_data, error.messages, view='@@add_event')
 
-        new_entity = self.context.create(data)
+        new_entity = self.context.create(Event, data)
 
         if new_entity:
             return HTTPFound(location=self.request.resource_url(new_entity))
 
-        return self.edit_form(form_data)
+        return self.edit_form(form_data, view='@@add_event')
+
+    #########################################################################
+    # READ                                                                  #
+    #########################################################################
+
+    @view_config(request_method='GET', renderer='json',
+                 accept='application/json', permission='read',
+                 context=EventEntity)
+    def read_json(self):
+        schema = EventSchema(context={'request': self.request})
+        return schema.dump(self.context.entity, many=False)
+
+    @view_config(request_method='GET',
+                 renderer='amnesia:templates/event/show.pt',
+                 accept='text/html', permission='read',
+                 context=EventEntity)
+    def read_html(self):
+        return super().read()
 
     #########################################################################
     # UPDATE                                                                #
@@ -91,12 +102,16 @@ class EventCRUD(ContentCRUD):
     @view_config(request_method='POST',
                  renderer='amnesia:templates/event/edit.pt',
                  context=EventEntity,
-                 permission='update')
+                 permission='edit')
     def update(self):
         form_data = self.request.POST.mixed()
+        schema = EventSchema(
+            context={'request': self.request},
+            exclude=('container_id', )
+        )
 
         try:
-            data = self.schema.load(form_data)
+            data = schema.load(form_data)
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 
