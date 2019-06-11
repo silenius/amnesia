@@ -10,7 +10,6 @@ from pyramid.httpexceptions import HTTPFound
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
 from amnesia.modules.document import DocumentEntity
-from amnesia.modules.document import DocumentResource
 from amnesia.modules.document.validation import DocumentSchema
 
 from ...content.views import ContentCRUD
