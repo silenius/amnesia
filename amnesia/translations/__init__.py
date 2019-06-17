@@ -2,7 +2,9 @@
 
 import logging
 
+from pyramid.i18n import default_locale_negotiator
 from pyramid.threadlocal import get_current_registry
+from pyramid.threadlocal import get_current_request
 
 from sqlalchemy import orm
 from sqlalchemy import sql
@@ -16,12 +18,12 @@ from amnesia.modules.content import Content
 log = logging.getLogger(__name__)
 
 
-def _localizer():
-    return 'en'
+def _localizer(request=None):
+    if not request:
+        request = get_current_request()
 
-#from types import MappingProxyType
-#default_config = {'a': 1}
-#DEFAULTS = MappingProxyType(default_config)
+    return request.locale_name
+
 
 def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
     '''Helper to setup translations'''
@@ -48,7 +50,7 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
                     type_=String()
                 )
             ),
-            lazy='joined',
+            #lazy='joined',
             uselist=False,
             innerjoin=True,
             viewonly=True,
@@ -59,7 +61,7 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
         'translations': orm.relationship(
             lambda: translation_cls,
             cascade='all, delete-orphan',
-            #lazy='subquery',
+            lazy='subquery',
             innerjoin=True,
             back_populates='content',
             collection_class=attribute_mapped_collection('language_id')
@@ -76,15 +78,25 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
     })
 
 
-def make_hybrid(name):
+def make_hybrid(cls, name, translation_cls):
 
     @hybrid_property
     def _column(self):
-        return getattr(self.current_translation, name)
+        locale_name = _localizer()
+        try:
+            return getattr(self.translations[locale_name], name)
+        except KeyError:
+            return getattr(self.translations['en'], name)
 
     @_column.setter
     def _column(self, value):
-        setattr(self.current_translation, name, value)
+        locale_name = _localizer()
+
+        trans = self.translations.setdefault(
+            locale_name, translation_cls(language_id=locale_name)
+        )
+
+        setattr(trans, name, value)
 
     #@_column.expression
     #def _column(cls):
@@ -113,9 +125,10 @@ def _setup_translation():
 
     if 'attrs' in _cfg:
         for cls, cols in _cfg['attrs'].items():
+            translation_cls = _cfg['mappings'][cls]
             for col in cols:
                 log.debug('Adding hybrid attribute: %s.%s', cls, col)
-                setattr(cls, col, make_hybrid(col))
+                setattr(cls, col, make_hybrid(cls, col, translation_cls))
 
 
 def set_translatable_attrs(config, cls, cols):
@@ -134,8 +147,14 @@ def set_translatable_mapping(config, cls, trans_cls):
     _mappings[cls] = trans_cls
 
 
+def my_locale_negotiator(request):
+    return default_locale_negotiator(request)
+
+
 def includeme(config):
     event.listen(orm.mapper, 'after_configured', _setup_translation)
     config.add_directive('set_translatable_attrs', set_translatable_attrs)
     config.add_directive('set_translatable_mapping', set_translatable_mapping)
+    config.set_locale_negotiator(my_locale_negotiator)
     config.add_translation_dirs('amnesia:locale/')
+    config.add_tween('amnesia.translations.tweens.path_info_lang_tween')
