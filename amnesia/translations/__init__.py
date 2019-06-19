@@ -37,31 +37,49 @@ def setup_translation(content_cls, translation_cls, localizer=None, **kwargs):
     content_mapper = orm.class_mapper(content_cls)
     translation_mapper = orm.class_mapper(translation_cls)
 
+    partition = sql.select([
+        translation_cls,
+        sql.func.row_number().over(
+            order_by=[
+                sql.desc(translation_cls.language_id == sql.bindparam(
+                    None, callable_=lambda: localizer(), type_=String()
+                )),
+                sql.desc(translation_cls.language_id == 'en')
+            ],
+            partition_by=translation_cls.content_id
+        ).label('index')
+    ], use_labels=True).where(
+        sql.and_(
+            translation_cls.language_id.in_((
+                sql.bindparam(
+                    None, callable_=lambda: localizer(), type_=String()
+                ),
+                'en'
+            ))
+        )
+    ).alias()
+
+    partition_alias = orm.aliased(translation_cls, partition)
+
     content_mapper.add_properties({
         'current_translation': orm.relationship(
-            lambda: translation_cls,
-            primaryjoin=lambda: sql.and_(
-                # XXX: use base_mapper.class_
-                # pylint: disable=no-member
-                orm.foreign(translation_cls.content_id) == Content.id,
-                translation_cls.language_id == sql.bindparam(
-                    None,
-                    callable_=lambda: localizer(),
-                    type_=String()
-                )
+            partition_alias,
+            primaryjoin=sql.and_(
+                orm.foreign(partition_alias.content_id) == content_cls.id,
+                partition.c.index == 1,
             ),
-            #lazy='joined',
+            lazy='joined',
             uselist=False,
             innerjoin=True,
             viewonly=True,
             bake_queries=False,
-            back_populates='content'
+            #back_populates='content'
         ),
 
         'translations': orm.relationship(
             lambda: translation_cls,
             cascade='all, delete-orphan',
-            lazy='subquery',
+            #lazy='subquery',
             innerjoin=True,
             back_populates='content',
             collection_class=attribute_mapped_collection('language_id')
@@ -82,11 +100,7 @@ def make_hybrid(cls, name, translation_cls):
 
     @hybrid_property
     def _column(self):
-        locale_name = _localizer()
-        try:
-            return getattr(self.translations[locale_name], name)
-        except KeyError:
-            return getattr(self.translations['en'], name)
+        return getattr(self.current_translation, name, 'NONE')
 
     @_column.setter
     def _column(self, value):
