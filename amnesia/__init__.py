@@ -7,6 +7,7 @@ from pyramid.config import Configurator
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 
+from amnesia.traversal import AmnesiaResourceURL
 from amnesia.resources import get_root
 from amnesia.authentication import AmnesiaAuthenticationPolicy
 from amnesia.modules.folder import Folder
@@ -94,6 +95,10 @@ def include_cms_modules(config):
     config.include('amnesia.modules.content.views')
 
 
+def include_multilingual(config):
+    config.include('amnesia.translations')
+
+
 def include_entity_resource_mapping(config):
     config.cms_add_entity_resource(Folder, FolderEntity)
     config.cms_add_entity_resource(Document, DocumentEntity)
@@ -107,7 +112,7 @@ def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
-    config.include('amnesia.translations')
+    config.include(include_multilingual)
     #config.include(include_security)
 
     config.include('amnesia.subscribers')
@@ -119,6 +124,8 @@ def include_amnesia(config):
 
     config.include('amnesia.views')
     config.include('amnesia.widgets')
+
+    config.add_resource_url_adapter(AmnesiaResourceURL)
 
     config.include(include_entry_points)
 

@@ -9,3 +9,4 @@ def includeme(config):
     config.include('.mapper')
 
     config.set_translatable_mapping(Folder, FolderTranslation)
+    config.set_translatable_attrs(Folder, ('title', 'description'))

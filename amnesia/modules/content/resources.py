@@ -5,6 +5,7 @@
 import logging
 import operator
 
+from pyramid.decorator import reify
 from pyramid.security import Allow
 from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
@@ -56,9 +57,6 @@ class Entity(Resource):
             return _res(self.request, self.entity.parent)
 
         return self.request.root
-
-    def __resource_url__(self, request, info):
-        return info['app_url'] + '/' + str(self.entity.id) + '/'
 
     def __acl__(self):
         yield Allow, 'role:Manager', ALL_PERMISSIONS

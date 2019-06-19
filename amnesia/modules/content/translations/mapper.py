@@ -3,7 +3,6 @@
 from sqlalchemy import orm
 from sqlalchemy import sql
 
-from amnesia.translations import setup_translation
 from amnesia.modules.content import Content
 from amnesia.modules.language import Language
 from amnesia.modules.content.translations import ContentTranslation

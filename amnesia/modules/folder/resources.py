@@ -30,7 +30,7 @@ class FolderEntity(Entity):
             }, synchronize_session=False)
 
             self.dbsession.flush()
-        except InternalError as e:
+        except InternalError:
             raise PasteError(self.entity)
 
     def create(self, cls, data):

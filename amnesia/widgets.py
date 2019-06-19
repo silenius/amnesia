@@ -144,6 +144,14 @@ class RecentPosts(Widget):
 
         self.posts = posts.all()
 
+@widget_config('language_selector')
+class LanguageSelector(Widget):
+
+    template = 'amnesia:templates/widgets/language_selector.pt'
+
+    def __init__(self, request):
+        super().__init__(request)
+
 
 @widget_config('archives')
 class Archives(Widget):
