@@ -5,11 +5,6 @@ from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from amnesia.modules.content import Content
-from amnesia.modules.content.translations import ContentTranslation
-
-
-class EventTranslation(ContentTranslation):
-    ''' Holds translations '''
 
 
 # pylint: disable=no-member
@@ -30,14 +25,6 @@ class Event(Content):
     def georeferenced(self):
         return self.address_latitude != None and \
                self.address_longitude != None
-
-    @hybrid_property
-    def body(self):
-        return self.current_translation.body
-
-    @body.setter
-    def body(self, value):
-        self.current_translation.body = value
 
     ###########
     # FILTERS #

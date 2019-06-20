@@ -81,22 +81,14 @@ def include_request_methods(config):
 
 def include_cms_modules(config):
     config.include('amnesia.modules.folder')
-    config.include('amnesia.modules.folder.translations')
     config.include('amnesia.modules.document')
-    config.include('amnesia.modules.document.translations')
     config.include('amnesia.modules.event')
-    config.include('amnesia.modules.event.translations')
     config.include('amnesia.modules.file')
-    config.include('amnesia.modules.file.translations')
     config.include('amnesia.modules.account')
     config.include('amnesia.modules.tag')
     config.include('amnesia.modules.state')
     config.include('amnesia.modules.search')
     config.include('amnesia.modules.content.views')
-
-
-def include_multilingual(config):
-    config.include('amnesia.translations')
 
 
 def include_entity_resource_mapping(config):
@@ -112,7 +104,6 @@ def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
-    config.include(include_multilingual)
     #config.include(include_security)
 
     config.include('amnesia.subscribers')
