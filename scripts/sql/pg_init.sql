@@ -27,6 +27,20 @@ create domain mediumtext as text
 -- TABLES --
 ------------
 
+--------------
+-- language --
+--------------
+
+create table language (
+    id      char(2)     not null,
+    name    smalltext   not null,
+
+    constraint pk_language
+        primary key(id)
+);
+
+insert into language(id, name) values ('en', 'English');
+
 ------------------
 -- content_type --
 ------------------
@@ -48,20 +62,6 @@ insert into content_type(name, icons) values('folder', '{"fa": "fa-folder"}');
 insert into content_type(name, icons) values('document', '{"fa": "fa-file-text-o"}');
 insert into content_type(name, icons) values('event', '{"fa": "fa-calendar"}');
 insert into content_type(name, icons) values('file', '{"fa": "fa-file-o"}');
-
---------------
--- language --
---------------
-
-create table language (
-    id      char(2)     not null,
-    name    smalltext   not null,
-
-    constraint pk_language
-        primary key(id)
-);
-
-insert into language(id, name) values ('en', 'English');
 
 -----------
 -- state --
@@ -334,6 +334,9 @@ create unique index u_idx_tag_name
 
 create table content (
     id                  serial      not null,
+    title               mediumtext  not null,
+    description         text,
+    fts                 tsvector,
     added               timestamptz not null    default current_timestamp,
     updated             timestamptz,
     effective           timestamptz,
@@ -394,12 +397,17 @@ create index idx_content_weight
 create index idx_content_coalesce_updated_added 
     on content(COALESCE(updated, added));
 
-insert into content (content_type_id, owner_id, state_id, weight) 
+create index idx_content_fts
+    on content using gin(fts);
+
+insert into content (content_type_id, owner_id, state_id, weight, title, description) 
 values (
     (select id from content_type where name='folder'), 
     (select id from account where login='admin'), 
     (select id from state where name='published'), 
-    1
+    1,
+    'Home',
+    'Root'
 );
 
 create or replace function t_container_id() returns trigger as $weight$
@@ -490,32 +498,6 @@ $weight$ language plpgsql;
 create trigger t_container_id before insert or update on content
     for each row execute procedure t_container_id();
 
--------------------------
--- content translation --
--------------------------
-
-create table content_translation (
-    language_id     char(2)     not null,
-    content_id      integer     not null,
-    title           mediumtext  not null,
-    description     text,
-    fts             tsvector,
-
-    constraint pk_content_translation
-        primary key(language_id, content_id),
-
-    constraint fk_content_translation_language
-        foreign key(language_id) references language(id),
-
-    constraint fk_content_translation_content
-        foreign key(content_id) references content(id),
-);
-
-create index idx_content_translation_fts
-    on content_translation using gin(fts);
-
-insert into content_translation(language_id, content_id, title, description)
-values ('en', 1, 'Home', 'Website''s root');
 
 -----------------
 -- content tag --
@@ -541,32 +523,13 @@ create table content_tag (
 
 create table document (
     content_id  integer not null,
+    body        text    not null,
 
     constraint pk_document
         primary key(content_id),
 
     constraint fk_content
         foreign key(content_id) references content(id)
-);
-
---------------------------
--- document_translation --
---------------------------
-
-create table document_translation (
-    language_id char(2) not null,
-    content_id  integer not null,
-    body        text    not null,
-
-    constraint pk_document_translation
-        primary key(language_id, content_id),
-
-    constraint fk_document_translation_content_translation
-        foreign key(language_id, content_id) 
-        references content_translation(language_id, content_id),
-
-    constraint fk_document_translation_document
-        foreign key(content_id) references document(content_id)
 );
 
 ------------
@@ -654,6 +617,7 @@ create unique index u_idx_country_name
 -----------
 
 create table event (
+    body                text        not null,
     starts              timestamp   not null,
     ends                timestamp   not null,
     location            text,
@@ -692,23 +656,3 @@ create index idx_event_starts
 
 create index idx_event_country_iso
     on event(country_iso);
-
---------------------------
--- event_translation --
---------------------------
-
-create table event_translation (
-    language_id char(2) not null,
-    content_id  integer not null,
-    body        text    not null,
-
-    constraint pk_event_translation
-        primary key(language_id, content_id),
-
-    constraint fk_event_translation_content_translation
-        foreign key(language_id, content_id) 
-        references content_translation(language_id, content_id),
-
-    constraint fk_event_translation_event
-        foreign key(content_id) references event(content_id)
-);
