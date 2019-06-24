@@ -9,6 +9,7 @@ from datetime import date
 from itertools import groupby
 
 from pyramid.renderers import render
+from pyramid.settings import aslist
 
 from sqlalchemy import orm
 from sqlalchemy import sql
@@ -19,6 +20,7 @@ from amnesia.modules.content import Content
 from amnesia.modules.document import Document
 from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
+from amnesia.modules.language import Language
 
 from amnesia.utils.widgets import widget_config
 
@@ -35,7 +37,14 @@ class Widget(object):
 
     def __init__(self, request):
         self.request = request
-        self.dbsession = request.dbsession
+
+    @property
+    def dbsession(self):
+        return self.request.dbsession
+
+    @property
+    def settings(self):
+        return self.request.registry.settings
 
     def __str__(self):
         return render(self.template, {'widget': self}, request=self.request)
@@ -144,6 +153,7 @@ class RecentPosts(Widget):
 
         self.posts = posts.all()
 
+
 @widget_config('language_selector')
 class LanguageSelector(Widget):
 
@@ -151,7 +161,9 @@ class LanguageSelector(Widget):
 
     def __init__(self, request):
         super().__init__(request)
-
+        langs = aslist(self.settings.get('available_languages', ''))
+        self.available_languages = self.dbsession.query(Language).filter(
+            Language.id.in_(langs)).order_by(Language.name)
 
 @widget_config('archives')
 class Archives(Widget):

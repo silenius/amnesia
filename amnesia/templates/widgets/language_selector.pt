@@ -2,8 +2,10 @@
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Language <span class="caret"></span></a>
         <ul class="dropdown-menu">
-            <li><a href="${request.resource_url(request.root, '..', 'en')}">English</a></li>
-            <li><a href="${request.resource_url(request.root, '..', 'fr')}">Français</a></li>
+            <li tal:repeat="lang widget.available_languages" tal:switch="request.root == '/'">
+                <a tal:case="True" href="${request.resource_url(request.root, ${lang.id})}">${lang.name}</a>
+                <a tal:case="False" href="${request.resource_url(request.root, '..', ${lang.id})}">${lang.name}</a>
+            </li>
         </ul>
     </li>
 </ul>

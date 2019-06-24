@@ -29,7 +29,7 @@ install_requires = [
     'psycopg2',
     'pytz',
     'rutter',
-    'marshmallow>=3.0.0b13',
+    'marshmallow',
     'bcrypt',
     'file-magic',
     'saexts'
