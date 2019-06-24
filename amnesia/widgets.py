@@ -167,7 +167,7 @@ class LanguageSelector(Widget):
 
     def url(self, lang):
         try:
-            (quote, root, lang, *_) = self.request.script_name.split('/', 3)
+            (quote, root, _lang, *_) = self.request.script_name.split('/', 3)
             return self.request.resource_url(self.request.root, '..', lang)
         except ValueError:
             return self.request.resource_url(self.request.root, lang)
