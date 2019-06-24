@@ -165,6 +165,14 @@ class LanguageSelector(Widget):
         self.available_languages = self.dbsession.query(Language).filter(
             Language.id.in_(langs)).order_by(Language.name)
 
+    def url(self, lang):
+        try:
+            (quote, root, lang, *_) = self.request.script_name.split('/', 3)
+            return self.request.resource_url(self.request.root, '..', lang)
+        except ValueError:
+            return self.request.resource_url(self.request.root, lang)
+
+
 @widget_config('archives')
 class Archives(Widget):
 
