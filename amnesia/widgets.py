@@ -13,10 +13,12 @@ from pyramid.settings import aslist
 
 from sqlalchemy import orm
 from sqlalchemy import sql
+from sqlalchemy.types import Integer
 
 from amnesia.utils import itermonths
 from amnesia.utils import polymorphic_ids
 from amnesia.modules.content import Content
+from amnesia.modules.folder import Folder
 from amnesia.modules.document import Document
 from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
@@ -89,40 +91,37 @@ class Tabs(Widget):
     def __init__(self, request, root_id=None, **kwargs):
         super().__init__(request)
 
-        stmt = sql.text('''
-            WITH RECURSIVE parents AS (
-                SELECT
-                    c.*, 1 AS level
-                FROM
-                    folder f
-                JOIN
-                    content c ON c.id = f.content_id
-                WHERE
-                    c.exclude_nav = FALSE
-                    AND c.container_id = :container_id
-                UNION ALL
-                SELECT
-                    c.*, level+1
-                FROM
-                    content c
-                JOIN
-                    folder f ON c.id = f.content_id
-                JOIN
-                    parents p ON p.id = c.container_id
-                WHERE
-                    c.container_id IS NOT NULL
-                    AND c.exclude_nav=FALSE
+        root = self.dbsession.query(
+            Folder, sql.literal(1, type_=Integer).label('level')
+        ).filter(
+            sql.and_(
+                Folder.exclude_nav == False,
+                Folder.container_id == root_id
             )
-            SELECT *
-            FROM parents
-            ORDER BY container_id, level DESC, weight DESC ''')
+        ).cte(
+            name='parents', recursive=True
+        )
+
+        root = root.union_all(
+            self.dbsession.query(Folder, root.c.level + 1).join(
+                root, root.c.id == Folder.container_id
+            ).filter(
+                sql.and_(
+                    Folder.exclude_nav == False,
+                    Folder.container_id != None
+                )
+            )
+        )
+
+        self.tabs = self.dbsession.query(
+            Folder
+        ).join(root, root.c.id == Folder.id).order_by(
+            root.c.container_id, root.c.level.desc(), root.c.weight.desc()
+        )
 
         self.kwargs = kwargs
         if 'template' in kwargs:
             self.template = kwargs['template']
-
-        self.tabs = self.dbsession.query(Content).from_statement(stmt).\
-            params(container_id=root_id).all()
 
         self.root_id = root_id
 
