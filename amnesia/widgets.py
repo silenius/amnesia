@@ -72,21 +72,21 @@ class Navigation(Widget):
     @property
     def parents(self):
         root = self.dbsession.query(
-            Content, sql.literal(1, type_=Integer).label('level')
+            Folder, sql.literal(1, type_=Integer).label('level')
         ).filter(
-            Content.id == self.content.id
+            Folder.id == self.content.id
         ).cte(
             name='parents', recursive=True
         )
 
         root = root.union_all(
-            self.dbsession.query(Content, root.c.level + 1).join(
+            self.dbsession.query(Folder, root.c.level + 1).join(
                 root, root.c.container_id == Content.id
             )
         )
 
-        return self.dbsession.query(Content).join(
-            root, root.c.id == Content.id
+        return self.dbsession.query(Folder).join(
+            root, root.c.id == Folder.id
         ).order_by(
             root.c.level.desc()
         )
