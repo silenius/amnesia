@@ -4,14 +4,9 @@ import os.path
 
 from pyramid.response import FileResponse
 
-from sqlalchemy.exc import DatabaseError
-
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.file import File
-from amnesia.modules.file.validation import FileSchema
-from amnesia.modules.state import State
-from amnesia.modules.folder import Folder
 
 
 class FileEntity(Entity):
