@@ -74,7 +74,7 @@ class Navigation(Widget):
         root = self.dbsession.query(
             Folder, sql.literal(1, type_=Integer).label('level')
         ).filter(
-            Folder.id == self.content.id
+            Folder.id == self.content.container_id
         ).cte(
             name='parents', recursive=True
         )
@@ -85,11 +85,13 @@ class Navigation(Widget):
             )
         )
 
-        return self.dbsession.query(Folder).join(
+        yield from self.dbsession.query(Folder).join(
             root, root.c.id == Folder.id
         ).order_by(
             root.c.level.desc()
         )
+
+        yield self.content
 
 
 @widget_config('tabs')
