@@ -71,16 +71,25 @@ class Navigation(Widget):
 
     @property
     def parents(self):
-        hierarchy = sql.text('''WITH RECURSIVE parents AS (
-            SELECT c.*, 1 as level FROM content c WHERE c.id=:content_id
-                UNION ALL
-            SELECT c.*, level+1 FROM content c
-                                JOIN parents p ON p.container_id=c.id
+        root = self.dbsession.query(
+            Content, sql.literal(1, type_=Integer).label('level')
+        ).filter(
+            Content.id == self.content.id
+        ).cte(
+            name='parents', recursive=True
         )
-        SELECT * FROM parents ORDER BY level DESC''')
 
-        return self.dbsession.query(Content).from_statement(hierarchy).\
-            params(content_id=self.content.id)
+        root = root.union_all(
+            self.dbsession.query(Content, root.c.level + 1).join(
+                root, root.c.container_id == Content.id
+            )
+        )
+
+        return self.dbsession.query(Content).join(
+            root, root.c.id == Content.id
+        ).order_by(
+            root.c.level.desc()
+        )
 
 
 @widget_config('tabs')
