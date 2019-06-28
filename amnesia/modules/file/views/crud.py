@@ -20,7 +20,6 @@ from amnesia.modules.mime import Mime
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.file import File
 from amnesia.modules.file import FileEntity
-from amnesia.modules.file import FileResource
 from amnesia.modules.file.validation import FileSchema
 from amnesia.modules.content.views import ContentCRUD
 
