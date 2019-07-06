@@ -78,6 +78,7 @@ setup(
             'initialize_amnesia_db = amnesia.scripts.initializedb:main',
             'initialize_amnesia_mime = amnesia.scripts.initializemime:main',
             'build_statics = amnesia.scripts.build_statics:main',
+            'fix_files = amnesia.scripts.fix_file_paths:main',
         ]
     }
 )

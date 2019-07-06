@@ -229,14 +229,11 @@ create table acl (
     constraint fk_acl_content
         foreign key (content_id) references content(id),
 
-    constraint unique_role_resource_weight
-        unique (role_id, resource_id, weight) deferrable initially deferred,
-
     constraint unique_content_resource_weight
         unique (content_id, resource_id, weight) deferrable initially deferred,
 
     constraint unique_role_permission_resource
-        unique(role_id, permission_id, resource_id)
+        unique(role_id, permission_id, resource_id, content_id)
 );
 
 create or replace function t_acl_weight() returns trigger as $weight$
@@ -586,6 +583,7 @@ create table data (
     mime_id         integer not null,
     original_name   text    not null,
     file_size       real    not null,
+    path_name       serial  not null,
 
     constraint pk_data
         primary key(content_id),
