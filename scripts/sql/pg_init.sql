@@ -200,77 +200,6 @@ create unique index u_idx_resource_name on resource(lower(name));
 insert into resource(name) values ('GLOBAL');
 insert into resource(name) values ('CONTENT');
 
----------
--- acl --
----------
-
-create table acl (
-    id              serial      not null,
-    role_id         integer     not null,
-    permission_id   integer     not null,
-    resource_id     integer     not null,
-    content_id      integer,
-    allow           boolean     not null,
-    weight          smallint    not null,
-    created         timestamptz not null    default current_timestamp,
-
-    constraint pk_acl
-        primary key (id),
-
-    constraint fk_role
-        foreign key(role_id) references role(id),
-
-    constraint fk_permission
-        foreign key (permission_id) references permission(id),
-
-    constraint fk_resource
-        foreign key (resource_id) references resource(id),
-
-    constraint fk_acl_content
-        foreign key (content_id) references content(id),
-
-    constraint unique_role_resource_weight
-        unique (role_id, resource_id, weight) deferrable initially deferred,
-
-    constraint unique_content_resource_weight
-        unique (content_id, resource_id, weight) deferrable initially deferred,
-
-    constraint unique_role_permission_resource
-        unique(role_id, permission_id, resource_id)
-);
-
-create or replace function t_acl_weight() returns trigger as $weight$
-    BEGIN
-        PERFORM 1
-            FROM acl
-            WHERE role_id = NEW.role_id 
-                AND resource_id = NEW.resource_id
-            FOR UPDATE;
-
-        IF NEW.content_id IS NOT NULL THEN
-            NEW.weight := (
-                SELECT coalesce(max(weight) + 1, 1)
-                FROM acl
-                WHERE resource_id = NEW.resource_id
-                    AND content_id = NEW.content_id
-            );
-        ELSE
-            NEW.weight := (
-                SELECT coalesce(max(weight) + 1, 1)
-                FROM acl
-                WHERE role_id = NEW.role_id 
-                    AND resource_id = NEW.resource_id
-            );
-
-        END IF;
-
-        RETURN NEW;
-    END;
-$weight$ language plpgsql;
-
-create trigger t_acl_weight before insert on acl
-    for each row execute procedure t_acl_weight();
-
 ----------------
 -- mime_major --
 ----------------
@@ -498,6 +427,74 @@ $weight$ language plpgsql;
 create trigger t_container_id before insert or update on content
     for each row execute procedure t_container_id();
 
+---------
+-- acl --
+---------
+
+create table acl (
+    id              serial      not null,
+    role_id         integer     not null,
+    permission_id   integer     not null,
+    resource_id     integer     not null,
+    content_id      integer,
+    allow           boolean     not null,
+    weight          smallint    not null,
+    created         timestamptz not null    default current_timestamp,
+
+    constraint pk_acl
+        primary key (id),
+
+    constraint fk_role
+        foreign key(role_id) references role(id),
+
+    constraint fk_permission
+        foreign key (permission_id) references permission(id),
+
+    constraint fk_resource
+        foreign key (resource_id) references resource(id),
+
+    constraint fk_acl_content
+        foreign key (content_id) references content(id),
+
+    constraint unique_content_resource_weight
+        unique (content_id, resource_id, weight)
+        deferrable initially deferred,
+
+    constraint unique_role_permission_resource
+        unique (role_id, permission_id, resource_id, content_id)
+);
+
+create or replace function t_acl_weight() returns trigger as $weight$
+    BEGIN
+        PERFORM 1
+            FROM acl
+            WHERE role_id = NEW.role_id 
+                AND resource_id = NEW.resource_id
+            FOR UPDATE;
+
+        IF NEW.content_id IS NOT NULL THEN
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM acl
+                WHERE resource_id = NEW.resource_id
+                    AND content_id = NEW.content_id
+            );
+        ELSE
+            NEW.weight := (
+                SELECT coalesce(max(weight) + 1, 1)
+                FROM acl
+                WHERE role_id = NEW.role_id 
+                    AND resource_id = NEW.resource_id
+            );
+
+        END IF;
+
+        RETURN NEW;
+    END;
+$weight$ language plpgsql;
+
+create trigger t_acl_weight before insert on acl
+    for each row execute procedure t_acl_weight();
 
 -----------------
 -- content tag --
