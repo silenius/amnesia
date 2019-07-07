@@ -162,6 +162,12 @@ create table account_role (
         foreign key(role_id) references role(id)
 );
 
+insert into account_role(account_id, role_id)
+values (
+    (select id from account where login='admin'),
+    (select id from role where name='Manager')
+);
+
 ----------------
 -- permission --
 ----------------
@@ -182,6 +188,9 @@ create table permission (
 );
 
 create unique index u_idx_permisison_name on permission(lower(name));
+
+insert into permission(name, description)
+values ('ALL_PERMISSIONS', 'All permissions');
 
 ---------------
 -- resources --
@@ -459,17 +468,20 @@ create table acl (
     constraint unique_content_resource_weight
         unique (content_id, resource_id, weight)
         deferrable initially deferred,
-
-    constraint unique_role_permission_resource
-        unique (role_id, permission_id, resource_id, content_id)
 );
+
+create unique index u_idx_acl on acl (role_id, permission_id, resource_id, coalesce(content_id, -1));
+
+-- FIXME
+-- create unique index u_idx_acl_weight on acl (resource_id, weight, coalesce(content_id, -1));
 
 create or replace function t_acl_weight() returns trigger as $weight$
     BEGIN
+        -- TODO
+        -- less strict locking?
         PERFORM 1
             FROM acl
-            WHERE role_id = NEW.role_id 
-                AND resource_id = NEW.resource_id
+            WHERE resource_id = NEW.resource_id
             FOR UPDATE;
 
         IF NEW.content_id IS NOT NULL THEN
@@ -483,8 +495,8 @@ create or replace function t_acl_weight() returns trigger as $weight$
             NEW.weight := (
                 SELECT coalesce(max(weight) + 1, 1)
                 FROM acl
-                WHERE role_id = NEW.role_id 
-                    AND resource_id = NEW.resource_id
+                WHERE resource_id = NEW.resource_id
+                    AND content_id IS NULL
             );
 
         END IF;
@@ -495,6 +507,14 @@ $weight$ language plpgsql;
 
 create trigger t_acl_weight before insert on acl
     for each row execute procedure t_acl_weight();
+
+insert into acl(role_id, permission_id, resource_id, allow)
+values(
+    (select id from role where name='Manager'),
+    (select id from permission where name='ALL_PERMISSIONS'),
+    (select id from resource where name='GLOBAL'),
+    true
+);
 
 -----------------
 -- content tag --
