@@ -498,7 +498,6 @@ create or replace function t_acl_weight() returns trigger as $weight$
                 WHERE resource_id = NEW.resource_id
                     AND content_id IS NULL
             );
-
         END IF;
 
         RETURN NEW;
