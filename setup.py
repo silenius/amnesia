@@ -32,7 +32,8 @@ install_requires = [
     'marshmallow',
     'bcrypt',
     'file-magic',
-    'saexts'
+    'saexts',
+    'hashids',
 ]
 
 extra_requires = {
