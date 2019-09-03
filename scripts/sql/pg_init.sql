@@ -602,6 +602,7 @@ create table data (
     mime_id         integer not null,
     original_name   text    not null,
     file_size       real    not null,
+    path_name       serial  not null,
 
     constraint pk_data
         primary key(content_id),

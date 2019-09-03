@@ -3,10 +3,13 @@
 import logging
 import os
 import os.path
+import pathlib
 import shutil
-import unicodedata
 
 import magic
+
+
+from hashids import Hashids
 
 from marshmallow import ValidationError
 
@@ -20,7 +23,6 @@ from amnesia.modules.mime import Mime
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.file import File
 from amnesia.modules.file import FileEntity
-from amnesia.modules.file import FileResource
 from amnesia.modules.file.validation import FileSchema
 from amnesia.modules.content.views import ContentCRUD
 
@@ -40,43 +42,36 @@ def download(context, request):
     if not file_response:
         return HTTPNotFound()
 
-    file_name, file_ext = os.path.splitext(context.entity.original_name)
-    file_name = ''.join(s for s in file_name if s.isalnum()) + file_ext
-    # Important: HTTP headers should (must) be ASCII!
-    file_name = unicodedata.normalize('NFKD', file_name).\
-        encode('ascii', 'ignore').decode('ascii')
-    disposition = '{0}; filename="{1}"'.format('attachment', file_name)
-    file_response.headers.add('Content-Disposition', disposition)
-
     return file_response
 
 
 def save_file(request, entity, data):
+    settings = request.registry.settings
+
     input_file = data['content'].file
     input_file_name = data['content'].filename
     entity.original_name = input_file_name
 
-    storage_dir = request.registry.settings.get('file_storage_dir')
+    dirname = settings['file_storage_dir']
+    salt = settings['amnesia.hashid_file_salt']
+
     if entity.id and input_file:
-        # To avoid thousands of files in the same directory (which is bad),
-        # we take the first three digits of the primary key separately (or
-        # zero filled if < 100), each digit will be a directory, for
-        # example (where "->" means "will be stored"):
-        # - content_id == 5     -> 0/0/5/5.ext
-        # - content_id == 24    -> 0/2/4/24.ext
-        # - content_id == 153   -> 1/5/3/153.ext
-        # - content_id == 1536  -> 1/5/3/1536.ext
-        # - ...
-        file_directory = os.path.join(storage_dir, entity.subpath)
+        hashid = Hashids(salt=salt, min_length=8)
+        hid = hashid.encode(entity.path_name)
 
-        if not os.path.exists(file_directory):
-            os.makedirs(file_directory)
+        file_name = pathlib.Path(
+            dirname,
+            *(hid[:4]),
+            hid + entity.extension
+        )
 
-        full_file_name = os.path.join(file_directory, entity.filename)
+        if not file_name.parent.exists():
+            file_name.parent.mkdir(parents=True)
 
-        # Copy the uploaded file to it's final destination
+        # Ensure that the current file position of the input file is 0 (= we
+        # are at the begining of the file)
         input_file.seek(0)
-        with open(full_file_name, 'wb') as output_file:
+        with open(file_name, 'wb') as output_file:
             shutil.copyfileobj(input_file, output_file)
 
             # Close both files, to ensure buffers are flushed
@@ -88,7 +83,7 @@ def save_file(request, entity, data):
         # file, we use the magic number instead. The magic number approach
         # offers better guarantees that the format will be identified
         # correctly.
-        file_magic = magic.detect_from_filename(full_file_name)
+        file_magic = magic.detect_from_filename(file_name)
         mime_type = file_magic.mime_type
         major, minor = mime_type.split('/')
 
@@ -98,7 +93,7 @@ def save_file(request, entity, data):
         entity.mime = mime_obj
 
         # bytes -> megabytes
-        entity.file_size = os.path.getsize(full_file_name) / 1024.0 / 1024.0
+        entity.file_size = os.path.getsize(file_name) / 1024.0 / 1024.0
 
         return entity
 
