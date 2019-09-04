@@ -9,10 +9,8 @@ from sqlalchemy.exc import InternalError
 
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
-from amnesia.modules.state import State
 from amnesia.modules.content import Content
 from amnesia.modules.folder import Folder
-from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.folder.exc import PasteError
 
 
