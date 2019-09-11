@@ -10,13 +10,11 @@ def includeme(config):
     tables = config.registry['metadata'].tables
 
     orm.mapper(
-        MimeMajor,
-        tables['mime_major']
+        MimeMajor, tables['mime_major']
     )
 
     orm.mapper(
-        Mime,
-        tables['mime'],
+        Mime, tables['mime'],
         properties={
             'major': orm.relationship(MimeMajor, lazy='joined')
         }

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import orm
+import logging
+
+log = logging.getLogger(__name__)
 
 class Base:
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from marshmallow import post_load
 from marshmallow.fields import String
 from marshmallow.fields import Integer
 from marshmallow.fields import Raw

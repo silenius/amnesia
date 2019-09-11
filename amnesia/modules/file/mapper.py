@@ -17,10 +17,12 @@ def includeme(config):
     config.include('amnesia.modules.content_type.mapper')
     config.include('amnesia.modules.mime.mapper')
 
-    orm.mapper(
+    file_mapper = orm.mapper(
         File, tables['data'], inherits=Content,
-        polymorphic_identity=get_type_id(config, 'file'),
-        properties={
-            'mime': orm.relationship(Mime, lazy='joined')
-        }
+        polymorphic_identity=get_type_id(config, 'file')
     )
+
+    if tables['data'].columns.get('mime_id'):
+        file_mapper.add_property(
+            'mime', orm.relationship(Mime, lazy='joined')
+        )

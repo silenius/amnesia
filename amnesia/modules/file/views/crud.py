@@ -8,7 +8,6 @@ import shutil
 
 import magic
 
-
 from hashids import Hashids
 
 from marshmallow import ValidationError
@@ -24,6 +23,7 @@ from amnesia.modules.folder import FolderEntity
 from amnesia.modules.file import File
 from amnesia.modules.file import FileEntity
 from amnesia.modules.file.validation import FileSchema
+from amnesia.modules.file.events import FileUpdated
 from amnesia.modules.content.views import ContentCRUD
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -57,6 +57,7 @@ def save_file(request, entity, data):
 
     if entity.id and input_file:
         hashid = Hashids(salt=salt, min_length=8)
+        log.debug('===>>> save_file: %s', entity.path_name)
         hid = hashid.encode(entity.path_name)
 
         file_name = pathlib.Path(
@@ -161,11 +162,6 @@ class FileCRUD(ContentCRUD):
             'original_name': ''
         })
 
-        # The primary key of file_obj will be used for the filename (so that it
-        # ensures uniqueness). If it's a new file_obj (so no id yet) we have to
-        # insert it first in the database (to get a new id), so the idea if to
-        # flush but don't COMMIT until the file is saved on disk.
-        # NOTE: the "fk_mime" constraint is marked DEFERRABLE INITIALLY DEFERRED
         new_entity = self.context.create(File, data)
 
         if new_entity:
@@ -194,9 +190,18 @@ class FileCRUD(ContentCRUD):
         except ValidationError as error:
             return self.edit_form(form_data, error.messages)
 
+        data.update({
+            'file_size': self.entity.file_size,
+            'mime_id': self.entity.mime_id,
+            'original_name': self.entity.original_name
+        })
+
         updated_entity = self.context.update(data)
+        evt = FileUpdated(self.request, self.entity)
+        self.request.registry.notify(evt)
 
         if updated_entity:
             if isinstance(data['content'], cgi_FieldStorage):
                 save_file(self.request, updated_entity, data)
+
             return HTTPFound(location=self.request.resource_url(updated_entity))

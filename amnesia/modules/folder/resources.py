@@ -2,6 +2,8 @@
 
 # pylint: disable=no-member
 
+import logging
+
 from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
@@ -12,6 +14,8 @@ from amnesia.modules.content import EntityManager
 from amnesia.modules.content import Content
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder.exc import PasteError
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class FolderEntity(Entity):

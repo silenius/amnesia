@@ -3,6 +3,5 @@
 
 from ..content import Content
 
-
 class Document(Content):
     ''' A document '''
