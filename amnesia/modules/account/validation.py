@@ -12,6 +12,11 @@ from marshmallow.fields import Boolean
 from marshmallow.validate import Length
 from marshmallow.validate import Range
 
+from amnesia.modules.account import Role
+from amnesia.modules.account import Permission
+
+from amnesia.utils.validation import PyramidContextMixin
+
 
 class LoginSchema(Schema):
     login = String(required=True, validate=Length(min=4))
@@ -76,7 +81,7 @@ class BrowseRoleSchema(Schema):
         unknown = EXCLUDE
 
 
-class ACLSchema(Schema):
+class ACLSchema(Schema, PyramidContextMixin):
     id = Integer(validate=Range(min=1))
     permission_id = Integer(validate=Range(min=1))
     weight = Integer(validation=Range(min=1))
@@ -84,6 +89,14 @@ class ACLSchema(Schema):
 
     class Meta:
         unknown = EXCLUDE
+
+    @post_load
+    def permission(self, item):
+        if 'permission_id' in item:
+            item['permission'] = self.dbsession.query(Permission).get(
+                item['permission_id'])
+
+        return item
 
 class ContentACLSchema(ACLSchema):
     role_id = Integer(validate=Range(min=1))
@@ -93,3 +106,10 @@ class ContentACLSchema(ACLSchema):
 
     class Meta:
         unknown = EXCLUDE
+
+    @post_load
+    def role(self, item):
+        if 'role_id' in item:
+            item['role'] = self.dbsession.query(Role).get(item['role_id'])
+
+        return item

@@ -468,7 +468,7 @@ create table acl (
 
     constraint unique_content_resource_weight
         unique (content_id, resource_id, weight)
-        deferrable initially deferred,
+        deferrable initially deferred
 );
 
 create unique index u_idx_acl on acl (role_id, permission_id, resource_id, coalesce(content_id, -1));

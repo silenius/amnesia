@@ -479,8 +479,9 @@ class ContentACLEntity(Resource):
         return self.dbsession.query(ContentACL).filter_by(content=self.content)
 
     def create(self, role, permission, allow):
-        acl = ContentACL(content=self.content, role=role, permission=permission,
-                         allow=allow)
+        acl = ContentACL(content=self.content, role=role,
+                         permission=permission, allow=allow)
+
         try:
             self.dbsession.add(acl)
             self.dbsession.flush()
@@ -543,7 +544,6 @@ class ContentACLEntity(Resource):
 
         filters = sql.and_(
             ContentACL.content == self.content,
-            ContentACL.role == role,
             ContentACL.resource_id == content_resource.c.id,
             ContentACL.weight.between(min_weight, max_weight),
         )

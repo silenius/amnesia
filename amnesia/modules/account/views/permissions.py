@@ -4,8 +4,11 @@ import logging
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+from pyramid.httpexceptions import HTTPCreated
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPUnauthorized
+from pyramid.httpexceptions import HTTPInternalServerError
+from pyramid.httpexceptions import HTTPNoContent
 
 from marshmallow import ValidationError
 
@@ -168,18 +171,23 @@ class ContentACLView(BaseView):
     @view_config(request_method='POST', renderer='json')
     def post(self):
         form_data = self.request.POST.mixed()
-        schema = ContentACLSchema()
+        schema = ContentACLSchema(context={
+            'request': self.request
+        })
 
         try:
             data = schema.load(form_data)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        permission = self.context.dbsession.query(Permission).get(data['permission_id'])
-        role = self.context.dbsession.query(Role).get(data['role_id'])
-        self.context.create(role, permission, data['allow'])
+        new_acl = self.context.create(data['role'], data['permission'],
+                                      data['allow'])
 
-        return data
+        if new_acl:
+            location = self.request.resource_url(self.context, new_acl.id)
+            return HTTPCreated(location=location)
+
+        raise HTTPInternalServerError()
 
     #########
     # PATCH #
@@ -189,20 +197,31 @@ class ContentACLView(BaseView):
                  renderer='json')
     def patch(self):
         form_data = self.request.POST.mixed()
-        schema = ContentACLSchema()
+        schema = ContentACLSchema(context={
+            'request': self.request
+        })
 
         try:
             data = schema.load(form_data, partial=True)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
+        # Inhertis parent ACL
         if 'inherits_parent_acl' in data:
-            if self.request.has_permission('manage_acl'):
-                self.context.set_inherits_parent_acl(data['inherits_parent_acl'])
-            else:
-                raise HTTPUnauthorized()
-            return True
-        return False
+            if not self.context.set_inherits_parent_acl(
+                data['inherits_parent_acl']
+            ):
+                raise HTTPInternalServerError()
+
+        # Change ACL weight
+        if all(k in data for k in ('permission', 'role', 'weight')):
+            if not self.context.update_permission_weight(
+                role=data['role'], permission=data['permission'],
+                weight=data['weight']
+            ):
+                raise HTTPInternalServerError()
+
+        return HTTPNoContent()
 
     ##########
     # DELETE #
@@ -211,7 +230,9 @@ class ContentACLView(BaseView):
     @view_config(request_method='DELETE', renderer='json')
     def delete(self):
         form_data = self.request.POST.mixed()
-        schema = ContentACLSchema()
+        schema = ContentACLSchema(context={
+            'request': self.request
+        })
 
         try:
             data = schema.load(form_data)
