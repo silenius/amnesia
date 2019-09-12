@@ -22,7 +22,7 @@ def includeme(config):
         polymorphic_identity=get_type_id(config, 'file')
     )
 
-    if tables['data'].columns.get('mime_id'):
+    if 'mime_id' in tables['data'].columns:
         file_mapper.add_property(
             'mime', orm.relationship(Mime, lazy='joined')
         )

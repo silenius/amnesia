@@ -188,17 +188,21 @@ class ContentACLView(BaseView):
     @view_config(request_method='PATCH',
                  renderer='json')
     def patch(self):
-        data = self.request.POST.mixed()
+        form_data = self.request.POST.mixed()
+        schema = ContentACLSchema()
 
-        inherits_parent_acl = data.get('inherits_parent_acl')
-        if inherits_parent_acl:
+        try:
+            data = schema.load(form_data, partial=True)
+        except ValidationError as errors:
+            raise HTTPBadRequest('Validation error')
+
+        if 'inherits_parent_acl' in data:
             if self.request.has_permission('manage_acl'):
-                self.context.set_inherits_parent_acl(inherits_parent_acl)
+                self.context.set_inherits_parent_acl(data['inherits_parent_acl'])
             else:
                 raise HTTPUnauthorized()
             return True
         return False
-
 
     ##########
     # DELETE #

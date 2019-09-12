@@ -125,10 +125,6 @@ def _content_callback():
         'acls': orm.relationship(ContentACL, back_populates='content'),
     })
 
-    setattr(Content, 'inherits_parent_acl', pg_json_property(
-        'props', 'inherits_parent_acl', Boolean, default=True
-    ))
-
 
 @event.listens_for(Account, 'mapper_configured')
 def _account_callback(mapper, class_):

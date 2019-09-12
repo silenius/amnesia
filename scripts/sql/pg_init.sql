@@ -280,6 +280,7 @@ create table content (
     effective           timestamptz,
     expiration          timestamptz,
     exclude_nav         boolean     not null    default false,
+    inherits_parent_acl boolean     not null    default true,
     weight              integer     not null,
     is_fts              boolean     not null    default true,
     props               json,

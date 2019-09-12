@@ -88,6 +88,7 @@ class ACLSchema(Schema):
 class ContentACLSchema(ACLSchema):
     role_id = Integer(validate=Range(min=1))
     weight = Integer(validation=Range(min=1))
+    inherits_parent_acl = Boolean()
     allow = Boolean()
 
     class Meta:

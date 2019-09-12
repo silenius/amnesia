@@ -57,7 +57,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
 
-    inherits_parent_acl = Boolean(dump_only=True, missing=True)
+    inherits_parent_acl = Boolean(missing=True)
 
     props = JSON(required=False)
 
@@ -124,12 +124,12 @@ class ContentSchema(Schema, PyramidContextMixin):
         if not has_permission('manage_acl'):
             # Update
             if entity:
-                if (item['props'].get('inherits_parent_acl') !=
-                        entity.props.get('inherits_parent_acl')):
+                if (item['inherits_parent_acl'] !=
+                        entity.inherits_parent_acl):
                     raise ValidationError('Inherits ACL: permission denied')
             # Create
             else:
-                if 'inherits_parent_acl' in item['props']:
+                if 'inherits_parent_acl' in item:
                     raise ValidationError('Inherits ACL: permission denied')
 
         return item
