@@ -209,15 +209,15 @@ class ContentACLView(BaseView):
         # Inhertis parent ACL
         if 'inherits_parent_acl' in data:
             if not self.context.set_inherits_parent_acl(
-                data['inherits_parent_acl']
+                    data['inherits_parent_acl']
             ):
                 raise HTTPInternalServerError()
 
         # Change ACL weight
         if all(k in data for k in ('permission', 'role', 'weight')):
             if not self.context.update_permission_weight(
-                role=data['role'], permission=data['permission'],
-                weight=data['weight']
+                    role=data['role'], permission=data['permission'],
+                    weight=data['weight']
             ):
                 raise HTTPInternalServerError()
 

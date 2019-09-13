@@ -54,6 +54,7 @@ def include_authorization(config):
 def include_security(config):
     config.set_default_csrf_options(require_csrf=True)
 
+
 def include_entry_points(config):
     for entry_point in iter_entry_points(group='amnesiacms.pkgs'):
         plugin = entry_point.load()

@@ -95,8 +95,8 @@ def get_entity_acl(request, entity, strict=False):
 def get_parent_acl(resource):
     parent_acl = []
 
-    for f in lineage(resource):
-        for ace in f.__acl__():
-            parent_acl.append((f, ace))
+    for res in lineage(resource):
+        for ace in res.__acl__():
+            parent_acl.append((res, ace))
 
     return parent_acl
