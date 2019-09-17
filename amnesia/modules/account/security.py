@@ -8,7 +8,9 @@ from pyramid.traversal import lineage
 
 from sqlalchemy import sql
 from sqlalchemy import orm
+from sqlalchemy.types import Integer
 
+from amnesia.modules.content import Content
 from amnesia.modules.account import ACL
 from amnesia.modules.account import ContentACL
 from amnesia.modules.account import GlobalACL
@@ -58,39 +60,59 @@ def get_global_acl(request, strict=False):
 
     return acl.order_by(GlobalACL.weight.desc()).all()
 
-def get_entity_acl(request, entity, strict=False):
+def get_content_acl(request, entity, recursive=False, with_global_acl=True):
     dbsession = request.dbsession
 
-    # ACL for specific entity ("local" ACL)
-    acl_query = dbsession.query(ContentACL).filter_by(content=entity)
+    if not recursive:
+        if not with_global_acl:
+            return dbsession.query(ContentACL).filter_by(
+                content=entity).order_by(ContentACL.weight.desc()).all()
 
-    if not strict:
-        return acl_query.order_by(ContentACL.weight.desc()).all()
+        acl_types = orm.with_polymorphic(ACL, [ContentACL, GlobalACL])
 
-    user = request.user
-    principals = request.effective_principals
+        return dbsession.query(acl_types).join(acl_types.resource).options(
+            orm.contains_eager(acl_types.resource)
+        ).filter(
+            sql.or_(acl_types.ContentACL.content == entity,
+                    ACL.resource.of_type(GlobalACL))
+        ).order_by(
+            sql.desc(ACL.resource.of_type(ContentACL)),
+            acl_types.ContentACL.weight.desc(),
+            sql.desc(ACL.resource.of_type(GlobalACL)),
+            acl_types.GlobalACL.weight.desc()
+        ).all()
 
-    # Virtual roles which are in principals
-    virtual = sql.and_(
-        Role.virtual == True,
-        Role.name.in_(principals)
+    # Recursive ACL, we need to fetch hierarchy first
+    acls = dbsession.query(
+        Content, sql.literal(1, type_=Integer).label('level')
+    ).filter(Content.id == entity.id).cte(name='all_content', recursive=True)
+
+    acls_join = dbsession.query(Content, acls.c.level + 1).join(
+        acls, acls.c.container_id == Content.id
     )
 
-    # Select ACL for those virtual roles
-    acl = acl_query.join(ContentACL.role).options(
-        orm.contains_eager(ContentACL.role)).filter(virtual)
+    acls = acls.union_all(acls_join)
 
-    if user:
-        # Roles for user
-        user_roles = dbsession.query(AccountRole.role_id).filter_by(
-            account_id=user.id)
+    # Now that we have the hierarchy, select ACL.
 
-        # If user, then add user's roles local ACL too
-        acl = acl.union(
-            acl_query.filter(ContentACL.role_id.in_(user_roles))
+    if with_global_acl:
+        acls = dbsession.query(ContentACL, acls.c.level.label('level')).join(
+            acls, acls.c.id == ContentACL.content_id
         )
 
-    return acl.order_by(ContentACL.weight.desc()).all()
+        global_acls = dbsession.query(GlobalACL,
+                                      sql.literal(None).label('level'))
+        acls = acls.union_all(global_acls).subquery()
+
+        return dbsession.query(ACL).select_entity_from(acls).order_by(
+            acls.c.level.nullslast(), acls.c.acl_weight.desc()
+        ).all()
+
+    return dbsession.query(ContentACL).join(
+        acls, acls.c.id == ContentACL.content_id
+    ).order_by(
+        acls.c.level, acls.c.weight.desc()
+    ).all()
 
 def get_parent_acl(resource):
     parent_acl = []

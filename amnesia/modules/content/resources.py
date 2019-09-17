@@ -5,6 +5,8 @@
 import logging
 import operator
 
+from pyramid.decorator import reify
+
 from pyramid.security import Allow
 from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
@@ -63,11 +65,16 @@ class Entity(Resource):
         if self.entity.owner is self.request.user:
             yield Allow, str(self.request.user.id), ALL_PERMISSIONS
 
-        # FIXME
-        from amnesia.modules.account.security import get_entity_acl
+        if not hasattr(self.request, '_cached_acls'):
+            from amnesia.modules.account.security import get_content_acl
+            self.request._cached_acls = get_content_acl(
+                self.request, self.entity, recursive=True,
+                with_global_acl=True
+            )
 
-        for acl in get_entity_acl(self.request, self.entity):
-            yield from self.__acl_adapter__(acl.to_pyramid_acl())
+        for acl in self.request._cached_acls:
+            if acl.resource.name == 'CONTENT' and acl.content is self.entity:
+                yield from self.__acl_adapter__(acl.to_pyramid_acl())
 
         if not self.entity.inherits_parent_acl:
             yield DENY_ALL
