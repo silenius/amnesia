@@ -66,6 +66,7 @@ class Entity(Resource):
             yield Allow, str(self.request.user.id), ALL_PERMISSIONS
 
         if not hasattr(self.request, '_cached_acls'):
+            # FIXME: circular imports
             from amnesia.modules.account.security import get_content_acl
             self.request._cached_acls = get_content_acl(
                 self.request, self.entity, recursive=True,

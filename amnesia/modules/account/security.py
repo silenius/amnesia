@@ -83,35 +83,36 @@ def get_content_acl(request, entity, recursive=False, with_global_acl=True):
         ).all()
 
     # Recursive ACL, we need to fetch hierarchy first
-    acls = dbsession.query(
+    contents = dbsession.query(
         Content, sql.literal(1, type_=Integer).label('level')
     ).filter(Content.id == entity.id).cte(name='all_content', recursive=True)
 
-    acls_join = dbsession.query(Content, acls.c.level + 1).join(
-        acls, acls.c.container_id == Content.id
+    contents_join = dbsession.query(Content, contents.c.level + 1).join(
+        contents, contents.c.container_id == Content.id
     )
 
-    acls = acls.union_all(acls_join)
+    contents = contents.union_all(contents_join)
 
-    # Now that we have the hierarchy, select ACL.
+    content_acls = dbsession.query(ContentACL).join(
+        contents, contents.c.id == ContentACL.content_id
+    )
 
     if with_global_acl:
-        acls = dbsession.query(ContentACL, acls.c.level.label('level')).join(
-            acls, acls.c.id == ContentACL.content_id
+        content_acls = content_acls.add_columns(
+            contents.c.level.label('level')
         )
 
         global_acls = dbsession.query(GlobalACL,
                                       sql.literal(None).label('level'))
-        acls = acls.union_all(global_acls).subquery()
+
+        acls = content_acls.union_all(global_acls).subquery()
 
         return dbsession.query(ACL).select_entity_from(acls).order_by(
             acls.c.level.nullslast(), acls.c.acl_weight.desc()
         ).all()
 
-    return dbsession.query(ContentACL).join(
-        acls, acls.c.id == ContentACL.content_id
-    ).order_by(
-        acls.c.level, acls.c.weight.desc()
+    return content_acls.order_by(
+        contents.c.level, contents.c.weight.desc()
     ).all()
 
 def get_parent_acl(resource):
