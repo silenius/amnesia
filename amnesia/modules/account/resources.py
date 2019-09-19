@@ -401,10 +401,9 @@ class ACLEntity(Resource):
         try:
             self.dbsession.delete(role_perm)
             self.dbsession.flush()
+            return role_perm
         except DatabaseError:
             return False
-
-        return role_perm
 
     def update_permission_weight(self, permission, weight):
         """ Change the weight of a permission. """

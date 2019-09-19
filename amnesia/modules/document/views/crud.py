@@ -6,6 +6,7 @@ from marshmallow import ValidationError
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPCreated
 
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
@@ -90,7 +91,7 @@ class DocumentCRUD(ContentCRUD):
         new_entity = self.context.create(Document, data)
 
         if new_entity:
-            return HTTPFound(location=self.request.resource_url(new_entity))
+            return HTTPCreated(location=self.request.resource_url(new_entity))
 
         return self.edit_form(form_data, view='@add_document')
 

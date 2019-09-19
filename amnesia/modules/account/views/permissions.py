@@ -75,17 +75,22 @@ class ACLView(BaseView):
                  renderer='json')
     def post(self):
         form_data = self.request.POST.mixed()
-        schema = ACLSchema()
+        schema = ACLSchema(context={
+            'request': self.request
+        })
 
         try:
             data = schema.load(form_data)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        permission = self.context.dbsession.query(Permission).get(data['permission_id'])
-        self.context.create(permission, data['allow'])
+        new_entity = self.context.create(data['permission'], data['allow'])
 
-        return data
+        if new_entity:
+            location = self.request.resource_url(self.context, new_entity.id)
+            return HTTPCreated(location=location)
+
+        raise HTTPInternalServerError()
 
     #########
     # PATCH #
@@ -96,7 +101,9 @@ class ACLView(BaseView):
                  renderer='json')
     def patch(self):
         form_data = self.request.POST.mixed()
-        schema = ACLSchema()
+        schema = ACLSchema(context={
+            'request': self.request
+        })
 
         try:
             data = schema.load(form_data)
@@ -118,16 +125,19 @@ class ACLView(BaseView):
                  permission='manage_acl', renderer='json')
     def delete(self):
         form_data = self.request.POST.mixed()
-        schema = ACLSchema()
+        schema = ACLSchema(context={
+            'request': self.request
+        })
 
         try:
             data = schema.load(form_data)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        self.context.delete_permission(**data)
+        if self.context.delete_permission(**data):
+            return HTTPNoContent()
 
-        return data
+        raise HTTPInternalServerError()
 
 
 @view_defaults(context=ContentACLEntity, name='', permission='manage_acl')

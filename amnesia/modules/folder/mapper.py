@@ -4,7 +4,10 @@ from pyramid.events import subscriber
 from pyramid.events import ApplicationCreated
 
 from sqlalchemy import orm
+from sqlalchemy.event import listen
+from sqlalchemy.types import Integer
 
+from amnesia.db.ext import pg_json_property
 from amnesia.modules.folder import Folder
 from amnesia.modules.content import Content
 from amnesia.modules.document import Document
@@ -21,9 +24,7 @@ def includeme(config):
 
     tables = config.registry['metadata'].tables
 
-    t_content = tables['content']
     t_folder = tables['folder']
-    t_document = tables['document']
 
 #    q_count_children = sql.select([
 #        sql.func.count('*').label('cpt')
@@ -31,7 +32,8 @@ def includeme(config):
 #        t_content.c.container_id == t_folder.c.content_id
 #    ).lateral('children')
 
-    orm.mapper(Folder, t_folder, inherits=Content,
+    orm.mapper(
+        Folder, t_folder, inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=tables['folder'].c.content_id ==
         tables['content'].c.id,
@@ -50,8 +52,15 @@ def includeme(config):
                 ContentType,
                 secondary=tables['folder_polymorphic_loading']
             ),
+
         }
     )
+
+    listen(Folder, 'mapper_configured', default_limit)
+
+def default_limit(mapper, class_):
+    class_.default_limit = pg_json_property('props', 'default_limit', Integer,
+                                            default=50)
 
 
 @subscriber(ApplicationCreated)
