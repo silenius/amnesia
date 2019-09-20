@@ -38,7 +38,7 @@ class AccountSchema(Schema):
         unknown = EXCLUDE
 
     @post_load
-    def check_password_repeat(self, data):
+    def check_password_repeat(self, data, **kwargs):
         if 'password' and 'password_repeat' in data:
             if data['password'] != data['password_repeat']:
                 raise ValidationError("Passwords don't match", 'password')
@@ -91,7 +91,7 @@ class ACLSchema(Schema, PyramidContextMixin):
         unknown = EXCLUDE
 
     @post_load
-    def permission(self, item):
+    def permission(self, item, **kwargs):
         if 'permission_id' in item:
             item['permission'] = self.dbsession.query(Permission).get(
                 item['permission_id'])
@@ -108,7 +108,7 @@ class ContentACLSchema(ACLSchema):
         unknown = EXCLUDE
 
     @post_load
-    def role(self, item):
+    def role(self, item, **kwargs):
         if 'role_id' in item:
             item['role'] = self.dbsession.query(Role).get(item['role_id'])
 

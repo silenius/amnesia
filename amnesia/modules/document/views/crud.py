@@ -5,7 +5,7 @@ import logging
 from marshmallow import ValidationError
 
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPCreated
 from pyramid.httpexceptions import HTTPInternalServerError
 
@@ -57,7 +57,7 @@ class DocumentCRUD(ContentCRUD):
             'request': self.request
         })
 
-        return schema.dump(self.context.entity, many=False)
+        return schema.dump(self.context.entity)
 
     @view_config(request_method='GET',
                  renderer='amnesia:templates/document/show.pt',
@@ -93,7 +93,12 @@ class DocumentCRUD(ContentCRUD):
         new_entity = self.context.create(Document, data)
 
         if new_entity:
-            return HTTPCreated(location=self.request.resource_url(new_entity))
+            location = self.request.resource_url(new_entity)
+            http_code = data['on_success']
+            if http_code == 201:
+                return HTTPCreated(location=location)
+            if http_code == 303:
+                return HTTPSeeOther(location=location)
 
         raise HTTPInternalServerError()
 

@@ -22,6 +22,7 @@ from marshmallow.fields import Nested
 from marshmallow.fields import List
 
 from marshmallow.validate import Range
+from marshmallow.validate import OneOf
 
 from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
@@ -53,6 +54,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     container_id = Integer(dump_only=True)
     owner_id = Integer(dump_only=True)
     state_id = Integer(dump_only=True)
+    on_success = Integer(default=201, missing=201, validate=OneOf((201, 303)))
 
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
@@ -83,7 +85,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     ########
 
     @pre_load
-    def pre_load_process(self, data):
+    def pre_load_process(self, data, **kwargs):
         _data = {k: None if v == '' else v for k, v in data.items()}
 
         # Starts / Ends
@@ -107,7 +109,7 @@ class ContentSchema(Schema, PyramidContextMixin):
         return _data
 
     @post_load
-    def post_load_process(self, item):
+    def post_load_process(self, item, **kwargs):
         if 'tags_id' in item:
             filters = Tag.id.in_(item.pop('tags_id'))
             item['tags'] = self.dbsession.query(Tag).filter(filters).all()
@@ -139,7 +141,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     ########
 
     @post_dump(pass_original=True)
-    def post_dump_process(self, data, orig):
+    def post_dump_process(self, data, orig, **kwargs):
         # Effective / Expiration dates
         date_col = ('year', 'month', 'day')
         datetime_col = ('year', 'month', 'day', 'hour', 'minute')
@@ -162,7 +164,7 @@ class IdListSchema(Schema):
     ids = List(Integer(validate=Range(min=1)), required=True)
 
     @pre_load
-    def ensure_list(self, data):
+    def ensure_list(self, data, **kwargs):
         try:
             data['ids'] = as_list(data['ids'])
         except KeyError:

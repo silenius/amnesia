@@ -28,7 +28,7 @@ class ArchiveSchema(Schema):
     ids = List(Integer(), missing=[])
 
     @pre_load
-    def ensure_list(self, data):
+    def ensure_list(self, data, **kwargs):
         try:
             data['ids'] = as_list(data['ids'])
         except KeyError:

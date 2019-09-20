@@ -26,18 +26,18 @@ class PolymorphicOrderSelectionSchema(Schema):
     # LOAD
 
     @pre_load
-    def pre_load_adapt_polymorphic(self, data):
+    def pre_load_adapt_polymorphic(self, data, **kwargs):
         data['pc'] = as_list(data.get('pc', ()))
 
         try:
             data['selected'] = json.loads(data['selected'])
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, KeyError):
             data['selected'] = []
 
         return data
 
     @post_load
-    def post_load_adapt_polymorphic(self, data):
+    def post_load_adapt_polymorphic(self, data, **kwargs):
         entities = []
         pm = orm.class_mapper(Content).polymorphic_map
 

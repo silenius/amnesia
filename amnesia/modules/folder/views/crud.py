@@ -11,6 +11,8 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPInternalServerError
+from pyramid.httpexceptions import HTTPCreated
+from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.renderers import render_to_response
 from pyramid.security import Authenticated
 from pyramid.view import view_config
@@ -89,7 +91,12 @@ class FolderCRUD(ContentCRUD):
         new_entity = self.context.create(Folder, data)
 
         if new_entity:
-            return HTTPFound(location=self.request.resource_url(new_entity))
+            location = self.request.resource_url(new_entity)
+            http_code = data['on_success']
+            if http_code == 201:
+                return HTTPCreated(location=location)
+            if http_code == 303:
+                return HTTPSeeOther(location=location)
 
         raise HTTPInternalServerError()
 

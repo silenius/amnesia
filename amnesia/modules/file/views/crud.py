@@ -14,6 +14,8 @@ from marshmallow import ValidationError
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPCreated
+from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPInternalServerError
 
@@ -168,7 +170,12 @@ class FileCRUD(ContentCRUD):
 
         if new_entity:
             save_file(self.request, new_entity, data)
-            return HTTPFound(location=self.request.resource_url(new_entity))
+            location = self.request.resource_url(new_entity)
+            http_code = data['on_success']
+            if http_code == 201:
+                return HTTPCreated(location=location)
+            if http_code == 303:
+                return HTTPSeeOther(location=location)
 
         raise HTTPInternalServerError()
 

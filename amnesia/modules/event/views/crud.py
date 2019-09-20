@@ -6,13 +6,14 @@ from marshmallow import ValidationError
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPCreated
+from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from amnesia.modules.country import Country
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.event import Event
 from amnesia.modules.event import EventEntity
-from amnesia.modules.event import EventResource
 from amnesia.modules.event.validation import EventSchema
 from amnesia.modules.content.views import ContentCRUD
 
@@ -76,7 +77,12 @@ class EventCRUD(ContentCRUD):
         new_entity = self.context.create(Event, data)
 
         if new_entity:
-            return HTTPFound(location=self.request.resource_url(new_entity))
+            location = self.request.resource_url(new_entity)
+            http_code = data['on_success']
+            if http_code == 201:
+                return HTTPCreated(location=location)
+            if http_code == 303:
+                return HTTPSeeOther(location=location)
 
         raise HTTPInternalServerError()
 

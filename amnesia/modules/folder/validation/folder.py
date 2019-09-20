@@ -40,14 +40,14 @@ class FolderSchema(ContentSchema):
     polymorphic_children = Nested(ContentTypeSchema, dump_only=True, many=True)
     polymorphic_children_ids = List(Integer, load_only=True)
 
-    default_order = Nested(FolderOrder, many=True, default=None)
+    default_order = Nested(FolderOrder, many=True, default=[], missing=[])
 
     ########
     # LOAD #
     ########
 
     @pre_load
-    def pre_load_adapt_polymorphic(self, data):
+    def pre_load_adapt_polymorphic(self, data, **kwargs):
         try:
             data['polymorphic_children_ids'] = as_list(data['polymorphic_children_ids'])
         except KeyError:
@@ -61,7 +61,7 @@ class FolderSchema(ContentSchema):
         return data
 
     @post_load
-    def post_load_adapt_polymorphic(self, data):
+    def post_load_adapt_polymorphic(self, data, **kwargs):
         if data['polymorphic_loading']:
             pc = data.get('polymorphic_children_ids', [])
             if pc:

@@ -31,7 +31,7 @@ class SortListField(Field, PyramidContextMixin):
         super().__init__(*args, **kwargs)
         self.nested_field = nested_field
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         ret = []
 
         for i in range(0, MAX_SORT):
@@ -81,7 +81,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
         unknown = INCLUDE
 
     @pre_load
-    def ensure_list(self, data):
+    def ensure_list(self, data, **kwarsg):
         try:
             data['filter_types'] = as_list(data['filter_types'])
         except KeyError:
@@ -90,7 +90,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
         return data
 
     @post_load
-    def make_sort(self, data):
+    def make_sort(self, data, **kwargs):
         orders = self.registry.settings['amnesia:orders']
         sort_by = []
 

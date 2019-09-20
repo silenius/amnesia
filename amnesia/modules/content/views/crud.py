@@ -65,19 +65,23 @@ class ContentCRUD(BaseView):
             q_tag = self.dbsession.query(Tag)
             data['all_tags'] = q_tag.order_by(Tag.name).all()
 
+        if 'on_success' not in data:
+            data['on_success'] = 303
+
         if 'props' not in data:
             data['props'] = {}
 
         if self.request.has_permission('manage_acl'):
             if 'permissions' not in data:
-                data['permissions'] = self.dbsession.query(Permission).order_by(
-                    Permission.name)
+                data['permissions'] = self.dbsession.query(
+                    Permission).order_by(Permission.name)
 
             if 'parent_acl' not in data:
                 data['parent_acl'] = get_parent_acl(self.context)
 
             if 'roles' not in data:
-                data['roles'] = self.dbsession.query(Role).order_by(Role.virtual.desc())
+                data['roles'] = self.dbsession.query(Role).order_by(
+                    Role.virtual.desc())
 
         if 'is_fts' not in data:
             data['is_fts'] = True
