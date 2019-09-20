@@ -7,6 +7,7 @@ from marshmallow import ValidationError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPCreated
+from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from amnesia.modules.folder import FolderEntity
