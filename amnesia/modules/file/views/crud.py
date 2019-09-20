@@ -15,6 +15,7 @@ from marshmallow import ValidationError
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPInternalServerError
 
 from webob.compat import cgi_FieldStorage
 
@@ -154,6 +155,7 @@ class FileCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
+            self.request.response.status_int = 400
             return self.edit_form(form_data, error.messages, view='@@add_file')
 
         data.update({
@@ -168,7 +170,7 @@ class FileCRUD(ContentCRUD):
             save_file(self.request, new_entity, data)
             return HTTPFound(location=self.request.resource_url(new_entity))
 
-        return self.edit_form(form_data, view='@@add_file')
+        raise HTTPInternalServerError()
 
     #########################################################################
     # UPDATE                                                                #

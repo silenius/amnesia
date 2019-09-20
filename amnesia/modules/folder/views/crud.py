@@ -10,6 +10,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPForbidden
+from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.renderers import render_to_response
 from pyramid.security import Authenticated
 from pyramid.view import view_config
@@ -81,6 +82,7 @@ class FolderCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
+            self.request.response.status_int = 400
             return self.edit_form(form_data, error.messages,
                                   view='@@add_folder')
 
@@ -89,7 +91,7 @@ class FolderCRUD(ContentCRUD):
         if new_entity:
             return HTTPFound(location=self.request.resource_url(new_entity))
 
-        return self.edit_form(form_data, view='@@add_folder')
+        raise HTTPInternalServerError()
 
     #########################################################################
     # READ                                                                  #

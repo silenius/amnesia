@@ -6,6 +6,7 @@ import logging
 
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPNoContent
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from pyramid.view import view_defaults

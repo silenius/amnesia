@@ -6,6 +6,7 @@ from marshmallow import ValidationError
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPInternalServerError
 
 from amnesia.modules.country import Country
 from amnesia.modules.folder import FolderEntity
@@ -68,14 +69,16 @@ class EventCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages, view='@@add_event')
+            self.request.response.status_int = 400
+            return self.edit_form(form_data, error.messages,
+                                  view='@@add_event')
 
         new_entity = self.context.create(Event, data)
 
         if new_entity:
             return HTTPFound(location=self.request.resource_url(new_entity))
 
-        return self.edit_form(form_data, view='@@add_event')
+        raise HTTPInternalServerError()
 
     #########################################################################
     # READ                                                                  #
