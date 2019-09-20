@@ -33,6 +33,6 @@ class EventSchema(ContentSchema):
     ends = DateTime('%Y-%m-%d %H:%M', required=True)
 
     @validates_schema
-    def validate_dates(self, data):
+    def validate_dates(self, data, **kwargs):
         if data['ends'] < data['starts']:
             raise ValidationError('End date must be greater than Start date')
