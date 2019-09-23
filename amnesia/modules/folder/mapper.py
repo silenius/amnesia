@@ -60,7 +60,7 @@ def includeme(config):
 
 def default_limit(mapper, class_):
     class_.default_limit = pg_json_property('props', 'default_limit', Integer,
-                                            default=50)
+                                            default=10)
 
 
 @subscriber(ApplicationCreated)
