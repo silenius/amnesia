@@ -29,7 +29,10 @@ class FolderBrowserView(BaseView):
                  name='browse', accept='application/json')
     def browse_json(self):
         params = self.request.GET.mixed()
-        schema = FolderBrowserSchema(context={'request': self.request})
+        schema = FolderBrowserSchema(context={
+            'request': self.request,
+            'folder': self.context.entity
+        })
 
         try:
             data = schema.load(params)
@@ -44,7 +47,10 @@ class FolderBrowserView(BaseView):
     @view_config(request_method='GET', name='browse')
     def browse(self, **kwargs):
         params = self.request.GET.mixed()
-        schema = FolderBrowserSchema(context={'request': self.request})
+        schema = FolderBrowserSchema(context={
+            'request': self.request,
+            'folder': self.context.entity
+        })
 
         try:
             data = schema.load(params)

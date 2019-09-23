@@ -21,9 +21,12 @@ class FolderBrowser:
         self.folder = folder
         self.dbsession = dbsession
 
-    def query(self, sort_by=(), offset=0, limit=50, deferred=(), undeferred=(),
-              sort_folder_first=False, count=True, filter_types=(),
-              only_published=True, **kwargs):
+    def query(self, sort_by=(), offset=0, limit=None, deferred=(),
+              undeferred=(), sort_folder_first=False, count=True,
+              filter_types=(), only_published=True, **kwargs):
+
+        if limit is None:
+            limit = self.folder.default_limit
 
         #########
         # QUERY #

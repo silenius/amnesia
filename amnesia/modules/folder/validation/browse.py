@@ -68,7 +68,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
 
     components = List(String(), missing=('main', 'pagination', 'navigation'))
     display = String(missing='list')
-    limit = Integer(validate=Range(min=1, max=100), missing=50)
+    limit = Integer(validate=Range(min=1, max=500), missing=None)
     offset = Integer(validate=Range(min=0), missing=0)
     sort_by = SortListField(Nested(SortSchema), missing=[])
     deferred = List(String(), missing=())
@@ -125,5 +125,12 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
                         sort_by.append(_sort)
 
         data['sort_by'] = sort_by
+
+        return data
+
+    @post_load
+    def set_default_limit(self, data, **kwargs):
+        if data['limit'] is None:
+            data['limit'] = self.context['folder'].default_limit
 
         return data

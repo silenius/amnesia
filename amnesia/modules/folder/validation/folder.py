@@ -41,6 +41,8 @@ class FolderSchema(ContentSchema):
     polymorphic_children_ids = List(Integer, load_only=True)
 
     default_order = Nested(FolderOrder, many=True, default=[], missing=[])
+    default_limit = Integer(missing=10, default=10,
+                            validate=OneOf((10, 50, 100, 500)))
 
     ########
     # LOAD #
@@ -49,7 +51,9 @@ class FolderSchema(ContentSchema):
     @pre_load
     def pre_load_adapt_polymorphic(self, data, **kwargs):
         try:
-            data['polymorphic_children_ids'] = as_list(data['polymorphic_children_ids'])
+            data['polymorphic_children_ids'] = as_list(
+                data['polymorphic_children_ids']
+            )
         except KeyError:
             data['polymorphic_children_ids'] = []
 

@@ -22,7 +22,7 @@ class Folder(Content):
 
     def feed(self, **kwargs):
         # Those columns must be loaded at first.
-        for c in ('polymorphic_loading', 'polymorphic_children'):
+        for c in ('props', 'polymorphic_loading', 'polymorphic_children'):
             if c in kwargs:
                 setattr(self, c, kwargs.pop(c))
 
