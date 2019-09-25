@@ -61,7 +61,7 @@ class ContentSchema(Schema, PyramidContextMixin):
 
     inherits_parent_acl = Boolean(missing=True)
 
-    props = JSON(required=False)
+    props = JSON(missing=None, default=None)
 
     # XXX: remvoe this and use ISO format
     effective_year = Integer(load_only=True, required=False, allow_none=True)
