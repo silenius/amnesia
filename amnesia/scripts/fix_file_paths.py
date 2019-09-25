@@ -23,6 +23,14 @@ def parse_args(argv):
     return parser.parse_args(argv[1:])
 
 
+def _filename(file_obj):
+    return '{0}{1}'.format(file_obj.id, file_obj.extension)
+
+
+def _subpath(file_obj):
+    return os.path.join(*((str(file_obj.id))[0:3].zfill(3)))
+
+
 def main(argv=sys.argv):
     args = parse_args(argv)
     setup_logging(args.config_uri)
@@ -41,8 +49,8 @@ def main(argv=sys.argv):
         for f in files:
             old_file = os.path.join(
                 file_storage_dir,
-                f.subpath,
-                f.filename
+                _subpath(f),
+                _filename(f)
             )
 
             if not os.path.exists(old_file):
