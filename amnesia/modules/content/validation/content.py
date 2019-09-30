@@ -124,15 +124,15 @@ class ContentSchema(Schema, PyramidContextMixin):
         entity = self.context.get('entity')
         has_permission = self.context['request'].has_permission
         if not has_permission('manage_acl'):
+            k = 'inherits_parent_acl'
             # Update
             if entity:
-                if (item['inherits_parent_acl'] !=
-                        entity.inherits_parent_acl):
+                if item[k] != entity.inherits_parent_acl:
                     raise ValidationError('Inherits ACL: permission denied')
             # Create
             else:
-                if 'inherits_parent_acl' in item:
-                    raise ValidationError('Inherits ACL: permission denied')
+                if k in item:
+                    del item[k]
 
         return item
 
