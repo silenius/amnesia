@@ -76,6 +76,8 @@ class Entity(Resource):
         for acl in self.request._cached_acls:
             if acl.resource.name == 'CONTENT' and acl.content is self.entity:
                 yield from self.__acl_adapter__(acl.to_pyramid_acl())
+            if acl.resource.name == 'GLOBAL':
+                yield from self.__acl_adapter__(acl.to_pyramid_acl())
 
         if not self.entity.inherits_parent_acl:
             yield DENY_ALL
