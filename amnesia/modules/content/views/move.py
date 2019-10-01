@@ -23,13 +23,16 @@ class WeightSchema(Schema):
 
 
 @view_config(name='weight', context=Entity, request_method='POST',
-             renderer='json')
+             renderer='json', permission='change_weight')
 def weight(context, request):
     """Change the weight of a Content (within its container)
        Returns the number of updated Content (rows)."""
 
+    form_data = request.POST.mixed()
+    schema = WeightSchema()
+
     try:
-        result = WeightSchema().load(request.POST.mixed())
+        result = schema.load(form_data)
     except ValidationError as error:
         raise HTTPBadRequest(error.messages)
 
