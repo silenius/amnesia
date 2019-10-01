@@ -5,8 +5,6 @@
 import logging
 import operator
 
-from pyramid.decorator import reify
-
 from pyramid.security import Allow
 from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
