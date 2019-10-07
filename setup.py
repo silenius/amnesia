@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.1.7.post2'
+__version__ = '0.1.7.post3'
 
 import os
 
