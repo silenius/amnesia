@@ -20,9 +20,16 @@ def includeme(config):
 @view_config(request_method='POST', name='paste', context=FolderEntity,
              renderer='json', permission='paste')
 def paste(context, request):
+    schema = IdListSchema(context={
+        'request': request,
+        'folder': context.entity
+    })
+
+    form_data = request.POST.mixed()
+
     try:
-        result = IdListSchema().load(request.POST.mixed())
-        context.paste(result['oid'])
+        result = schema.load(form_data)
+        context.paste(result['ids'])
         return {'pasted': True}
     except ValidationError as error:
         raise HTTPBadRequest(error.messages)
