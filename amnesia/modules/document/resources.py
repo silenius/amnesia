@@ -2,14 +2,9 @@
 
 import logging
 
-from sqlalchemy.exc import DatabaseError
-
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.document import Document
-from amnesia.modules.document.validation import DocumentSchema
-from amnesia.modules.state import State
-from amnesia.modules.folder import Folder
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

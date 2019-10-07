@@ -21,10 +21,8 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy import sql
 
 from amnesia.resources import Resource
-from amnesia.modules.content import Entity
 from amnesia.modules.account import Account
 from amnesia.modules.account import Role
-from amnesia.modules.account import ACL
 from amnesia.modules.account import ACLResource
 from amnesia.modules.account import ContentACL
 from amnesia.modules.account import GlobalACL
