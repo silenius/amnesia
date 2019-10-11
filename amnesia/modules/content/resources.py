@@ -33,6 +33,11 @@ class Entity(Resource):
         if path == 'acl':
             return ContentACLEntity(self.request, content=self.entity,
                                     parent=self)
+
+        for extra_path, factory in self.extra_paths.items():
+            if extra_path == path:
+                return factory(self.request, content=self.entity, parent=self)
+
         raise KeyError
 
     def __str__(self):
