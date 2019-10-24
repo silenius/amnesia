@@ -13,7 +13,7 @@ import sqlalchemy as sa
 # revision identifiers, used by Alembic.
 revision = 'e025de45166e'
 down_revision = None
-branch_labels = None
+branch_labels = ('amnesiacms', )
 depends_on = None
 
 migration_path = Path(__file__)
