@@ -1,20 +1,20 @@
-"""${message}
+"""init
 
-Revision ID: ${up_revision}
-Revises: ${down_revision | comma,n}
-Create Date: ${create_date}
+Revision ID: e025de45166e
+Revises:
+Create Date: 2019-10-22 17:34:53.661066
 
 """
 from pathlib import Path
 from alembic import op
 import sqlalchemy as sa
-${imports if imports else ""}
+
 
 # revision identifiers, used by Alembic.
-revision = ${repr(up_revision)}
-down_revision = ${repr(down_revision)}
-branch_labels = ${repr(branch_labels)}
-depends_on = ${repr(depends_on)}
+revision = 'e025de45166e'
+down_revision = None
+branch_labels = ('amnesiacms', )
+depends_on = None
 
 migration_path = Path(__file__)
 migration_sql_path = migration_path.parent.parent / 'sql'
@@ -24,7 +24,11 @@ upgrade_sql = migration_sql_path / 'upgrade' / migration_sql_file
 downgrade_sql = migration_sql_path / 'downgrade' / migration_sql_file
 
 def upgrade():
-    ${upgrades if upgrades else "pass"}
+    print('===>>> Executing ', upgrade_sql)
+    with open(upgrade_sql, 'r') as fp:
+        op.execute(fp.read())
 
 def downgrade():
-    ${downgrades if downgrades else "pass"}
+    print('===>>> Executing ', downgrade_sql)
+    with open(downgrade_sql, 'r') as fp:
+        op.execute(fp.read())

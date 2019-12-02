@@ -33,6 +33,13 @@ class Resource:
         yield ace
 
     @property
+    def extra_paths(self):
+        try:
+            return self.request.registry.cms_resource_paths[self.__class__]
+        except (KeyError, AttributeError):
+            return {}
+
+    @property
     def dbsession(self):
         ''' Database session '''
         return self.request.dbsession

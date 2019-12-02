@@ -72,6 +72,11 @@ def include_config_directives(config):
         'amnesia.lib.configurator.cms_add_entity_resource'
     )
 
+    config.add_directive(
+        'cms_add_resource_path',
+        'amnesia.lib.configurator.cms_add_resource_path'
+    )
+
 
 def include_request_methods(config):
     config.add_request_method(

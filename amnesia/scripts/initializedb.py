@@ -1,60 +1,36 @@
 # -*- coding: utf-8 -*-
 
-import os
+
+import argparse
 import sys
 
-import bcrypt
-import transaction
+from pyramid.paster import bootstrap, setup_logging
+from sqlalchemy.exc import OperationalError
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import orm, sql
-from sqlalchemy.orm.exc import NoResultFound
+def parse_args(argv):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'config_uri',
+        help='Configuration file, e.g., development.ini',
+    )
+    return parser.parse_args(argv[1:])
 
-from pyramid.scripts.common import parse_vars
-from pyramid.paster import get_appsettings
-from pyramid.paster import setup_logging
 
-#from ..models import DBSession
-#from ..models import Account
-#from ..models import Folder
-#from ..models import State
-#from ..models import init_models
-#from ..models import meta
-#
-#
-#def usage(argv):
-#    cmd = os.path.basename(argv[0])
-#    print('usage: %s <config_uri> [var=value]\n'
-#          '(example: "%s development.ini")' % (cmd, cmd))
-#    sys.exit(1)
-#
-#
-#def main(argv=sys.argv):
-#
-#    if len(argv) < 2:
-#        usage(argv)
-#
-#    config_uri = argv[1]
-#    options = parse_vars(argv[2:])
-#    setup_logging(config_uri)
-#    settings = get_appsettings(config_uri, options=options)
-#    engine = engine_from_config(settings, 'sqlalchemy.')
-#    DBSession.configure(bind=engine)
-#    meta.bind = engine
-#    meta.reflect()
-#
-#    init_models()
-#
-#    admin = Account(login='admin', password=bcrypt.hashpw('admin',
-#                                                          bcrypt.gensalt()),
-#                    first_name='Admin', last_name='Admin', email='change@me')
-#
-#    published = DBSession.query(State).filter_by(name='published').one()
-#
-#    root_folder = Folder(title='Home', description='Home folder',
-#                         owner=admin, state=published)
-#
-#    DBSession.add(root_folder)
-#
-#    transaction.commit()
+def main(argv=sys.argv):
+    args = parse_args(argv)
+    setup_logging(args.config_uri)
+    env = bootstrap(args.config_uri)
 
+    try:
+        with env['request'].tm:
+            dbsession = env['request'].dbsession
+    except OperationalError:
+        print('''
+Pyramid is having a problem using your SQL database.  The problem
+might be caused by one of the following things:
+1.  You may need to initialize your database tables with `alembic`.
+    Check your README.txt for description and try to run it.
+2.  Your database server may not be running.  Check that the
+    database server referred to by the "sqlalchemy.url" setting in
+    your "development.ini" file is running.
+            ''')
