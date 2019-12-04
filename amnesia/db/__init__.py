@@ -3,18 +3,17 @@
 from pyramid.settings import asbool
 from pyramid.settings import aslist
 
-from sqlalchemy import engine_from_config
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
 
 # from .meta import metadata
 
 import zope.sqlalchemy
 
+from amnesia.utils.db import engine_from_config
+
+
 def get_engine(settings, prefix='sqlalchemy.'):
-    if settings.get('sqlalchemy.poolclass') == 'NullPool':
-        settings['sqlalchemy.poolclass'] = NullPool
     return engine_from_config(settings, prefix)
 
 
