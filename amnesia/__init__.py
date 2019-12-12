@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 def include_pyramid_addons(config):
     config.include('pyramid_chameleon')
-    config.include('pyramid_beaker')
     config.include('pyramid_tm')
     config.include('pyramid_mailer')
 
@@ -50,6 +49,20 @@ def include_authorization(config):
     authz_policy = ACLAuthorizationPolicy()
     config.set_authorization_policy(authz_policy)
 
+
+def include_session(config):
+    registry = config.registry
+    settings = registry.settings
+
+    if settings.get('session.type') == 'ext:sqla':
+        config.include('amnesia.db')
+        from pyramid_beaker import session_factory_from_settings
+        settings['session.bind'] = registry['engine']
+        settings['session.table'] = registry['metadata'].tables['_sessions']
+        session_factory = session_factory_from_settings(settings)
+        config.set_session_factory(session_factory)
+    else:
+        config.include('pyramid_beaker')
 
 def include_security(config):
     config.set_default_csrf_options(require_csrf=True)
@@ -110,6 +123,7 @@ def include_amnesia(config):
     config.include(include_pyramid_addons)
     config.include(include_authentication)
     config.include(include_authorization)
+    config.include(include_session)
     #config.include(include_security)
 
     config.include('amnesia.subscribers')

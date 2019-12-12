@@ -85,6 +85,7 @@ def includeme(config):
     session_factory = get_session_factory(engine)
     config.registry['dbsession_factory'] = session_factory
     config.registry['metadata'] = meta
+    config.registry['engine'] = engine
 
     # make request.dbsession available for use in Pyramid
     config.add_request_method(
