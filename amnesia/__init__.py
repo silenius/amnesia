@@ -9,7 +9,7 @@ from pyramid.settings import asbool
 
 from amnesia.traversal import AmnesiaResourceURL
 from amnesia.resources import get_root
-from amnesia.authentication import AmnesiaAuthenticationPolicy
+from amnesia.authentication import AmnesiaSessionAuthenticationPolicy
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
@@ -33,11 +33,11 @@ def include_authentication(config):
 
     settings = config.registry.settings
     debug = asbool(settings.get('auth.debug', 'false'))
-    http_only = asbool(settings.get('auth.http_only', 'true'))
-    authn_policy = AmnesiaAuthenticationPolicy(
-        settings['auth.secret'],
+    #http_only = asbool(settings.get('auth.http_only', 'true'))
+    authn_policy = AmnesiaSessionAuthenticationPolicy(
+        #settings['auth.secret'],
         debug=debug,
-        http_only=http_only
+        #http_only=http_only
     )
     config.set_authentication_policy(authn_policy)
 
@@ -54,15 +54,24 @@ def include_session(config):
     registry = config.registry
     settings = registry.settings
 
-    if settings.get('session.type') == 'ext:sqla':
-        config.include('amnesia.db')
-        from pyramid_beaker import session_factory_from_settings
-        settings['session.bind'] = registry['engine']
-        settings['session.table'] = registry['metadata'].tables['_sessions']
-        session_factory = session_factory_from_settings(settings)
-        config.set_session_factory(session_factory)
-    else:
-        config.include('pyramid_beaker')
+    session_package = settings.pop('session.package', None)
+
+    if session_package == 'nacl':
+        config.include('pyramid_nacl_session')
+    elif session_package == 'beaker':
+        session_type = settings.get('session.type')
+        if session_type == 'ext:sqla':
+            # FIXME: don't use it yet, there are <idle in transaction>
+            # issues
+            from pyramid_beaker import session_factory_from_settings
+            config.include('amnesia.db')
+            settings['session.bind'] = registry['engine']
+            settings['session.table'] = registry['metadata'].tables['_sessions']
+            factory = session_factory_from_settings(settings)
+            config.set_session_factory(factory)
+        else:
+            config.include('pyramid_beaker')
+
 
 def include_security(config):
     config.set_default_csrf_options(require_csrf=True)
