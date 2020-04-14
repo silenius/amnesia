@@ -20,8 +20,10 @@ class FileEntity(Entity):
     def storage_dir(self):
         dirname = self.settings['file_storage_dir']
         path = pathlib.Path(dirname)
+
         if not path.is_absolute():
             raise ValueError('file_storage_dir must be an absolute path')
+
         return path
 
     @property
@@ -59,8 +61,10 @@ class FileEntity(Entity):
 
     def serve(self):
         serve_method = self.settings.get('amnesia.serve_file_method')
+
         if serve_method == 'internal':
             return self.serve_file_internal()
+
         return self.serve_file_response()
 
     def serve_file_response(self):
@@ -86,7 +90,8 @@ class FileEntity(Entity):
         x_accel = pathlib.Path('/', prefix, self.relative_path)
 
         resp = self.request.response
-        resp.headers.add('X-Accel-Redirect', x_accel)
+        resp.headers.add('X-Accel-Redirect', str(x_accel))
+
         return resp
 
 
