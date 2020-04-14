@@ -19,7 +19,10 @@ class FileEntity(Entity):
     @property
     def storage_dir(self):
         dirname = self.settings['file_storage_dir']
-        return pathlib.Path(dirname)
+        path = pathlib.Path(dirname)
+        if not path.is_absolute():
+            raise ValueError('file_storage_dir must be an absolute path')
+        return path
 
     @property
     def absolute_path(self):
@@ -28,11 +31,12 @@ class FileEntity(Entity):
         hashid = Hashids(salt=salt, min_length=8)
         hid = hashid.encode(self.entity.path_name)
 
-        return pathlib.Path(
-            self.storage_dir,
+        path = self.storage_dir.joinpath(
             *(hid[:4]),
             hid + self.entity.extension
         )
+
+        return path
 
     @property
     def relative_path(self):
@@ -79,8 +83,7 @@ class FileEntity(Entity):
             prefix = self.settings.get('amnesia.serve_internal_path',
                                        '__pfiles')
         prefix = prefix.strip('/')
-        relative_path = self.relative_path.strip('/')
-        x_accel = '/' + '/'.join(prefix, relative_path)
+        x_accel = pathlib.Path('/', prefix, self.relative_path)
 
         resp = self.request.response
         resp.headers.add('X-Accel-Redirect', x_accel)
