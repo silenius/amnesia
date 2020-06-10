@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os.path
 import pathlib
 import unicodedata
 
 from pyramid.response import FileResponse
-
-from hashids import Hashids
 
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
@@ -30,8 +27,7 @@ class FileEntity(Entity):
     def absolute_path(self):
         ''' Returns file path on disk '''
         salt = self.settings['amnesia.hashid_file_salt']
-        hashid = Hashids(salt=salt, min_length=8)
-        hid = hashid.encode(self.entity.path_name)
+        hid = self.entity.get_hashid(salt=salt)
 
         path = self.storage_dir.joinpath(
             *(hid[:4]),
@@ -44,13 +40,9 @@ class FileEntity(Entity):
     def relative_path(self):
         return self.absolute_path.relative_to(self.storage_dir)
 
-    def get_cleaned_name(self):
-        file_name, file_ext = os.path.splitext(self.entity.original_name)
-        return ''.join(s for s in file_name if s.isalnum()) + file_ext
-
     def get_content_disposition(self, name=None):
         if not name:
-            name = self.get_cleaned_name()
+            name = self.entity.alnum_fname
 
         # Only ASCII is guaranteed to work in HTTP headers, so ensure that the
         # filename contains only ASCII characters
@@ -68,7 +60,7 @@ class FileEntity(Entity):
         return self.serve_file_response()
 
     def serve_file_response(self):
-        file_path_on_disk = self.get_absolute_path()
+        file_path_on_disk = self.absolute_path
 
         try:
             resp = FileResponse(file_path_on_disk, self.request,

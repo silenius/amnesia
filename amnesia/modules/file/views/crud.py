@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import os
 import os.path
@@ -7,8 +5,6 @@ import pathlib
 import shutil
 
 import magic
-
-from hashids import Hashids
 
 from marshmallow import ValidationError
 
@@ -59,9 +55,8 @@ def save_file(request, entity, data):
     salt = settings['amnesia.hashid_file_salt']
 
     if entity.id and input_file:
-        hashid = Hashids(salt=salt, min_length=8)
         log.debug('===>>> save_file: %s', entity.path_name)
-        hid = hashid.encode(entity.path_name)
+        hid = entity.get_hashid(salt=salt)
 
         file_name = pathlib.Path(
             dirname,
