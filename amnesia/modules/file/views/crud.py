@@ -20,6 +20,7 @@ from webob.compat import cgi_FieldStorage
 from amnesia.modules.mime import Mime
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.file import File
+from amnesia.modules.file import utils as file_utils
 from amnesia.modules.file import FileEntity
 from amnesia.modules.file.validation import FileSchema
 from amnesia.modules.file.events import FileUpdated
@@ -42,61 +43,6 @@ def download(context, request):
         return HTTPNotFound()
 
     return file_response
-
-
-def save_file(request, entity, data):
-    settings = request.registry.settings
-
-    input_file = data['content'].file
-    input_file_name = data['content'].filename
-    entity.original_name = input_file_name
-
-    dirname = settings['file_storage_dir']
-    salt = settings['amnesia.hashid_file_salt']
-
-    if entity.id and input_file:
-        log.debug('===>>> save_file: %s', entity.path_name)
-        hid = entity.get_hashid(salt=salt)
-
-        file_name = pathlib.Path(
-            dirname,
-            *(hid[:4]),
-            hid + entity.extension
-        )
-
-        if not file_name.parent.exists():
-            file_name.parent.mkdir(parents=True)
-
-        # Ensure that the current file position of the input file is 0 (= we
-        # are at the begining of the file)
-        input_file.seek(0)
-        with open(file_name, 'wb') as output_file:
-            shutil.copyfileobj(input_file, output_file)
-
-            # Close both files, to ensure buffers are flushed
-            input_file.close()
-            output_file.close()
-
-        # A file must be associated to a MIME type (image/png,
-        # application/pdf, etc). Rather than trusting the extension of the
-        # file, we use the magic number instead. The magic number approach
-        # offers better guarantees that the format will be identified
-        # correctly.
-        file_magic = magic.detect_from_filename(file_name)
-        mime_type = file_magic.mime_type
-        major, minor = mime_type.split('/')
-
-        # Fetch mime from database
-        mime_obj = Mime.q_major_minor(request.dbsession, major, minor)
-
-        entity.mime = mime_obj
-
-        # bytes -> megabytes
-        entity.file_size = os.path.getsize(file_name) / 1024.0 / 1024.0
-
-        return entity
-
-    return False
 
 
 class FileCRUD(ContentCRUD):
@@ -164,7 +110,7 @@ class FileCRUD(ContentCRUD):
         new_entity = self.context.create(File, data)
 
         if new_entity:
-            save_file(self.request, new_entity, data)
+            file_utils.save_to_disk(self.request, new_entity, data)
             location = self.request.resource_url(new_entity)
             http_code = data['on_success']
             if http_code == 201:

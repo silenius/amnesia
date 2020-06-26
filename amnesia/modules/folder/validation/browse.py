@@ -81,7 +81,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
         unknown = INCLUDE
 
     @pre_load
-    def ensure_list(self, data, **kwarsg):
+    def ensure_list(self, data, **kwargs):
         try:
             data['filter_types'] = as_list(data['filter_types'])
         except KeyError:
