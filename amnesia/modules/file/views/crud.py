@@ -152,6 +152,6 @@ class FileCRUD(ContentCRUD):
 
         if updated_entity:
             if isinstance(data['content'], cgi_FieldStorage):
-                save_file(self.request, updated_entity, data)
+                file_utils.save_to_disk(self.request, updated_entity, data)
 
             return HTTPFound(location=self.request.resource_url(updated_entity))
