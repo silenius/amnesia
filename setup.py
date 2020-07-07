@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.1.9.dev5'
+__version__ = '0.1.9.dev6'
 
 import os
 
