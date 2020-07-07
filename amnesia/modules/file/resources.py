@@ -82,6 +82,7 @@ class FileEntity(Entity):
         x_accel = pathlib.Path('/', prefix, self.relative_path)
 
         resp = self.request.response
+        resp.content_type = self.entity.mime.full
         resp.headers.add('X-Accel-Redirect', str(x_accel))
 
         return resp
