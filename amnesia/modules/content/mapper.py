@@ -19,7 +19,12 @@ from amnesia.modules.folder import Folder
 @event.listens_for(Content, 'before_update', propagate=True)
 def updated_listener(mapper, connection, target):
     registry = get_current_registry()
-    tz = registry.settings.get('timezone', 'UTC')
+
+    if registry and registry.settings:
+        tz = registry.settings.get('timezone', 'UTC')
+    else:
+        tz = 'UTC'
+
     target.updated = datetime.now(timezone(tz))
 
 

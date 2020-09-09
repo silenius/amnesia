@@ -52,10 +52,12 @@ class ContentCRUD(BaseView):
         else:
             action = self.request.resource_path(self.context)
 
-        return {
+        form_data.update({
             'form': self.form(form_data, errors),
             'form_action': action
-        }
+        })
+
+        return form_data
 
     def form(self, data=None, errors=None):
         if data is None:

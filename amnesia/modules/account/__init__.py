@@ -22,12 +22,16 @@ from .resources import RoleMemberEntity
 
 def _get_user(request):
     userid = request.unauthenticated_userid
+    user = None
 
     if userid is not None:
-        return request.dbsession.query(Account).filter_by(
-            id=userid, enabled=True).first()
+        user = (
+            request.dbsession.query(Account)
+            .filter(id=userid, enabled=True)
+            .one_or_none()
+        )
 
-    return None
+    return user
 
 
 def includeme(config):
