@@ -176,10 +176,9 @@ class LanguageSelector(Widget):
             Language.id.in_(langs)).order_by(Language.name)
 
     def url(self, lang):
-        try:
-            (quote, root, _lang, *_) = self.request.script_name.split('/', 3)
+        if self.request._script_name != self.request.script_name:
             return self.request.resource_url(self.request.root, '..', lang)
-        except ValueError:
+        else:
             return self.request.resource_url(self.request.root, lang)
 
 
