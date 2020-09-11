@@ -27,7 +27,7 @@ def _get_user(request):
     if userid is not None:
         user = (
             request.dbsession.query(Account)
-            .filter(id=userid, enabled=True)
+            .filter_by(id=userid, enabled=True)
             .one_or_none()
         )
 
