@@ -3,7 +3,6 @@
 import logging
 
 from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.authentication import SessionAuthenticationPolicy
 
 from pyramid.security import Authenticated
 from pyramid.security import Everyone
@@ -11,7 +10,7 @@ from pyramid.security import Everyone
 log = logging.getLogger(__name__)
 
 
-class AmnesiaSessionPolicyBase:
+class AmnesiaAuthenticationPolicy(AuthTktAuthenticationPolicy):
 
     def authenticated_userid(self, request):
         if hasattr(request, 'user') and request.user:
@@ -31,17 +30,3 @@ class AmnesiaSessionPolicyBase:
                     principals.append('role:{}'.format(role.name))
 
         return principals
-
-
-class AmnesiaAuthTktAuthenticationPolicy(AmnesiaSessionPolicyBase,
-                                         AuthTktAuthenticationPolicy):
-    """
-    Obtain data from a Pyramid "auth ticket" cookie.
-    """
-
-
-class AmnesiaSessionAuthenticationPolicy(AmnesiaSessionPolicyBase,
-                                         SessionAuthenticationPolicy):
-    """
-    Obtain data from the configured session.
-    """
