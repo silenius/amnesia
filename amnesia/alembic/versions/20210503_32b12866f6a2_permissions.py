@@ -14,7 +14,7 @@ import sqlalchemy as sa
 revision = '32b12866f6a2'
 down_revision = 'e025de45166e'
 branch_labels = None
-depends_on = 'e025de45166e'
+depends_on = None
 
 migration_path = Path(__file__)
 migration_sql_path = migration_path.parent.parent / 'sql'
