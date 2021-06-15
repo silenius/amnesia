@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import json
+import logging
 
 from operator import attrgetter
 
 from sqlalchemy import inspect
 from sqlalchemy import orm
+from sqlalchemy import sql
 
 from .modules.content import Content
 
+log = logging.getLogger(__name__)
 
 class Path:
 
@@ -45,6 +48,7 @@ class EntityOrder:
     def __init__(self, src, prop, direction='asc', nulls=None, doc=None,
                  path=None):
         insp = inspect(src)
+        self.src = src
         self._mapper = insp.mapper
         self.prop = prop
         self.direction = direction
@@ -148,9 +152,10 @@ class EntityOrder:
 
     JSON = to_json
 
-    def to_sql(self, direction=None, nulls=None):
+    def to_sql(self, entity, direction=None, nulls=None):
         """ Returns an SQL expression """
-        col = self.col
+
+        col = getattr(self.src, self.prop)
 
         if not direction:
             direction = self.direction

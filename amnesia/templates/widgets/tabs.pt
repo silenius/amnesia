@@ -3,7 +3,7 @@
         <metal:block define-macro="tabs">
         <metal:block tal:repeat="tab current_item">
             <li class="nav-item${' dropdown' if dropdown else None}" tal:define="dropdown level == 1 and tab.id in widget.grouped_tabs">
-            <a href="${request.resource_path(tab)}" class="nav-link${' dropdown-toggle' if dropdown else None}" tal:attributes="data-toggle 'dropdown' if dropdown else None">${tab.title}</a>
+            <a href="${request.resource_path(tab.Folder)}" class="nav-link${' dropdown-toggle' if dropdown else None}" tal:attributes="data-toggle 'dropdown' if dropdown else None">${tab.title}</a>
                 <ul tal:condition="tab.id in widget.grouped_tabs" class="dropdown-menu">
                     <metal:block use-macro="macros.tabs" tal:define="current_item widget.grouped_tabs[tab.id]; level level+1" />
                 </ul>

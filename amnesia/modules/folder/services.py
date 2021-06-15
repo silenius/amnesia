@@ -9,7 +9,8 @@ from amnesia.modules.folder import Folder
 
 log = logging.getLogger(__name__)
 
-__all__ = ['get_children']
+
+__all__ = ['get_lineage', 'get_children_containers']
 
 
 class FolderHierarchy:
@@ -25,7 +26,7 @@ class FolderHierarchy:
         data = reversed(self.data) if reverse else self.data
         return groupby(data, lambda x: x.Folder.container_id)
 
-    def as_tree(self):
+    def as_tree(self, merge_key='children'):
         def _merge(src, dst):
             while src:
                 src_item = src.pop()
@@ -33,7 +34,7 @@ class FolderHierarchy:
 
                 for dst_item in dst:
                     if src_item['folder'] is dst_item['folder'].parent:
-                        src_item.setdefault('children',
+                        src_item.setdefault(merge_key,
                                             []).append(dst_item)
                         visited.append(dst_item)
 
@@ -92,3 +93,27 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
     ).all()
 
     return FolderHierarchy(tabs)
+
+
+def get_lineage(dbsession, folder_id):
+    root = dbsession.query(
+        Folder, sql.literal(1, type_=Integer).label('level')
+    ).filter(
+        Folder.id == folder_id
+    ).cte(
+        name='parents', recursive=True
+    )
+
+    root = root.union_all(
+        dbsession.query(Folder, root.c.level + 1).join(
+            root, root.c.container_id == Folder.id
+        )
+    )
+
+    parents = dbsession.query(Folder).join(
+        root, root.c.id == Folder.id
+    ).order_by(
+        root.c.level.desc()
+    ).all()
+
+    return parents

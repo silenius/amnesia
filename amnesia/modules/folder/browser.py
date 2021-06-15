@@ -2,6 +2,8 @@
 
 # pylint: disable=E1101
 
+import logging
+
 from collections import namedtuple
 from operator import attrgetter
 
@@ -9,6 +11,8 @@ from sqlalchemy import orm
 from sqlalchemy import sql
 
 from amnesia.modules.content_type import ContentType
+
+log = logging.getLogger(__name__)
 
 FolderBrowserResult = namedtuple(
     'FolderBrowserResult',
@@ -143,14 +147,13 @@ class FolderBrowser:
         ##########################
 
         if sort_by:
-            sort_by = [o.to_sql() for o in sort_by]
+            sort_by = [o.to_sql(entity) for o in sort_by]
         else:
             sort_by = [entity.weight.desc()]
 
         if sort_folder_first:
             q = q.join(entity.type).options(orm.contains_eager(entity.type))
             sort_by.insert(0, sql.func.lower(ContentType.name) != 'folder')
-
         # Query database
         # FIXME: OFFSET based pagination isn't scalable
         q = q.options(
