@@ -155,7 +155,7 @@ class ContentSchema(Schema, PyramidContextMixin):
                 for i in date_col:
                     data['{}_{}'.format(col, i)] = getattr(value, i)
 
-        data['tags_id'] = [i['id'] for i in data['tags']]
+        #data['tags_id'] = [i['id'] for i in data['tags']]
 
         return data
 

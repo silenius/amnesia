@@ -23,6 +23,7 @@ from amnesia.modules.document import Document
 from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
 from amnesia.modules.language import Language
+from amnesia.modules.folder.services import get_children_containers
 
 from amnesia.utils.widgets import widget_config
 
@@ -102,43 +103,17 @@ class Tabs(Widget):
     def __init__(self, request, root_id=None, **kwargs):
         super().__init__(request)
 
-        root = self.dbsession.query(
-            Folder, sql.literal(1, type_=Integer).label('level')
-        ).filter(
-            sql.and_(
-                Folder.exclude_nav == False,
-                Folder.container_id == root_id
-            )
-        ).cte(
-            name='parents', recursive=True
-        )
-
-        root = root.union_all(
-            self.dbsession.query(Folder, root.c.level + 1).join(
-                root, root.c.id == Folder.container_id
-            ).filter(
-                sql.and_(
-                    Folder.exclude_nav == False,
-                    Folder.container_id != None
-                )
-            )
-        )
-
-        self.tabs = self.dbsession.query(
-            Folder
-        ).join(root, root.c.id == Folder.id).order_by(
-            root.c.container_id, root.c.level.desc(), root.c.weight.desc()
-        )
-
         self.kwargs = kwargs
         if 'template' in kwargs:
             self.template = kwargs['template']
 
         self.root_id = root_id
 
-        # Group tabs per container_id:
-        grp_by_container = groupby(self.tabs, lambda x: x.container_id)
-        self.grouped_tabs = {i[0]: tuple(i[1]) for i in grp_by_container}
+        tabs = get_children_containers(
+            self.dbsession, root_id, max_depth=1
+        ).per_container()
+
+        self.grouped_tabs = {i[0]: tuple(i[1]) for i in tabs}
 
 
 @widget_config('recent_posts')

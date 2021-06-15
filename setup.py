@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 import os
 
@@ -23,7 +23,7 @@ install_requires = [
     'alembic',
     'pyramid_tm',
     'pyramid_mailer',
-    'SQLAlchemy~=1.2',
+    'SQLAlchemy~=1.3',
     'transaction',
     'zope.sqlalchemy',
     'psycopg2',
