@@ -137,6 +137,7 @@ def include_amnesia(config):
     config.include(include_session)
     #config.include(include_security)
 
+    config.include('amnesia.widgets')
     config.include('amnesia.subscribers')
     config.include('amnesia.renderers')
     config.include('amnesia.db')
@@ -145,7 +146,6 @@ def include_amnesia(config):
     config.include(include_entity_resource_mapping)
 
     config.include('amnesia.views')
-    config.include('amnesia.widgets')
 
     config.add_resource_url_adapter(AmnesiaResourceURL)
 

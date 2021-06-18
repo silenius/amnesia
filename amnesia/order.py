@@ -17,15 +17,8 @@ class Path:
 
     def __init__(self, class_, prop):
         self.class_ = class_
+        self.mapper = orm.class_mapper(class_)
         self.prop = prop
-
-    @property
-    def class_(self):
-        return self.mapper.entity
-
-    @class_.setter
-    def class_(self, value):
-        self.mapper = orm.class_mapper(value)
 
     def __eq__(self, other):
         return self.class_ == other.class_ and self.prop == other.prop
@@ -34,7 +27,7 @@ class Path:
         return not self.__eq__(other)
 
     def __str__(self):
-        return '%s.%s' % (self.class_.__name__, self.prop)
+        return '{}.{}'.format(self.class_.__name__, self.prop)
 
     def to_dict(self):
         return {
@@ -78,13 +71,13 @@ class EntityOrder:
     def nulls(self, value):
         try:
             value = value.lower()
-
+        except:
+            self._nulls = None
+        else:
             if value in ('first', 'last'):
                 self._nulls = value
             else:
                 self._nulls = None
-        except:
-            self._nulls = None
 
     @property
     def doc(self):

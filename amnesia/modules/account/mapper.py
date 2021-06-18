@@ -34,7 +34,8 @@ def includeme(config):
         ),
 
         'account_roles': orm.relationship(
-            AccountRole, back_populates="account"
+            AccountRole,
+            back_populates="account"
         )
     })
 
@@ -42,7 +43,9 @@ def includeme(config):
 
     orm.mapper(Role, tables['role'], properties={
         'accounts': orm.relationship(
-            AccountRole, back_populates="role", cascade='all, delete-orphan'
+            AccountRole,
+            back_populates="role",
+            cascade='all, delete-orphan'
         ),
 
         'acls': orm.relationship(
