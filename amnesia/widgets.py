@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def includeme(config):
-    config.scan(__name__)
+    config.scan(__name__, categories=('pyramid', 'amnesia'))
 
 
 class Widget(object):

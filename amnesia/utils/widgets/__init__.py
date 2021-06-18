@@ -18,5 +18,5 @@ class widget_config:
         widgets[self.name] = wrapped
 
     def __call__(self, wrapped):
-        venusian.attach(wrapped, self.register)
+        venusian.attach(wrapped, self.register, category='amnesia')
         return wrapped
