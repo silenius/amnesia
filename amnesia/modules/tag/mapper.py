@@ -2,7 +2,7 @@
 
 from sqlalchemy import orm
 
-from amnesia.db import mapper
+from amnesia.db import mapper_registry
 
 from amnesia.modules.tag import Tag
 from amnesia.modules.content import Content
