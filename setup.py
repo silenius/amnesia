@@ -23,7 +23,7 @@ install_requires = [
     'alembic',
     'pyramid_tm',
     'pyramid_mailer',
-    'SQLAlchemy~=1.3',
+    'SQLAlchemy~=1.4',
     'transaction',
     'zope.sqlalchemy',
     'psycopg2',
