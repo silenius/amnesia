@@ -3,6 +3,7 @@ import logging
 from itertools import groupby
 
 from sqlalchemy import sql
+from sqlalchemy import orm
 from sqlalchemy.types import Integer
 
 from amnesia.modules.folder import Folder
@@ -67,15 +68,17 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
         name='parents', recursive=True
     )
 
-    filters = sql.and_(
+    filters = [
         Folder.exclude_nav == False,
         Folder.container_id != None
-    )
+    ]
 
     if max_depth:
         filters.append(
             root.c.level <= max_depth
         )
+
+    filters = sql.and_(*filters)
 
     root = root.union_all(
         dbsession.query(Folder, root.c.level + 1).join(
@@ -91,6 +94,7 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
     ).order_by(
         root.c.level, root.c.container_id, root.c.weight.desc()
     ).all()
+
 
     return FolderHierarchy(tabs)
 
