@@ -7,6 +7,7 @@ from sqlalchemy import orm
 from sqlalchemy.event import listen
 from sqlalchemy.types import Integer
 
+from amnesia.db import mapper_registry
 from amnesia.db.ext import pg_json_property
 from amnesia.modules.folder import Folder
 from amnesia.modules.content import Content
@@ -32,8 +33,10 @@ def includeme(config):
 #        t_content.c.container_id == t_folder.c.content_id
 #    ).lateral('children')
 
-    orm.mapper(
-        Folder, t_folder, inherits=Content,
+    mapper_registry.map_imperatively(
+        Folder,
+        t_folder,
+        inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=tables['folder'].c.content_id ==
         tables['content'].c.id,

@@ -2,6 +2,8 @@
 
 from sqlalchemy import orm
 
+from amnesia.db import mapper
+
 from amnesia.modules.tag import Tag
 from amnesia.modules.content import Content
 
@@ -9,10 +11,13 @@ from amnesia.modules.content import Content
 def includeme(config):
     tables = config.registry['metadata'].tables
 
-    orm.mapper(
-        Tag, tables['tag'], properties={
+    mapper_registry.map_imperatively(
+        Tag,
+        tables['tag'],
+        properties={
             'contents': orm.relationship(
-                Content, secondary=tables['content_tag'],
+                Content,
+                secondary=tables['content_tag'],
                 back_populates='tags'
             )
         }

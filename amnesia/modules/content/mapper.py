@@ -14,6 +14,7 @@ from amnesia.modules.state import State
 from amnesia.modules.content_type import ContentType
 from amnesia.modules.tag import Tag
 from amnesia.modules.folder import Folder
+from amnesia.db import mapper_registry
 
 
 @event.listens_for(Content, 'before_update', propagate=True)
@@ -67,7 +68,7 @@ def includeme(config):
 
     _count_alias = tables['content'].alias('_count_children')
 
-    orm.mapper(
+    mapper_registry.map_imperatively(
         Content, tables['content'],
         polymorphic_on=tables['content'].c.content_type_id,
         properties={

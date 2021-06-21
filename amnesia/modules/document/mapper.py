@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy import orm
+
+from amnesia.db import mapper_registry
 
 from amnesia.modules.document import Document
 from amnesia.modules.content import Content
@@ -13,7 +13,9 @@ def includeme(config):
     config.include('amnesia.modules.content.mapper')
     config.include('amnesia.modules.content_type.mapper')
 
-    orm.mapper(
-        Document, tables['document'], inherits=Content,
+    mapper_registry.map_imperatively(
+        Document,
+        tables['document'],
+        inherits=Content,
         polymorphic_identity=get_type_id(config, 'document')
     )

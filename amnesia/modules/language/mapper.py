@@ -2,9 +2,14 @@
 
 from sqlalchemy import orm
 
+from amnesia.db import mapper_registry
+
 from .model import Language
 
 
 def includeme(config):
     tables = config.registry['metadata'].tables
-    orm.mapper(Language, tables['language'])
+
+    mapper_registry.map_imperatively(
+        Language, tables['language']
+    )

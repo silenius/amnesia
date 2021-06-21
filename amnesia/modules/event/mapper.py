@@ -2,6 +2,8 @@
 
 from sqlalchemy import orm
 
+from amnesia.db import mapper_registry
+
 from amnesia.modules.event import Event
 from amnesia.modules.content import Content
 from amnesia.modules.content_type.utils import get_type_id
@@ -15,8 +17,10 @@ def includeme(config):
     config.include('amnesia.modules.content_type.mapper')
     config.include('amnesia.modules.country.mapper')
 
-    orm.mapper(
-        Event, tables['event'], inherits=Content,
+    mapper_registry.map_imperatively(
+        Event,
+        tables['event'],
+        inherits=Content,
         polymorphic_identity=get_type_id(config, 'event'),
         properties={
             'country': orm.relationship(

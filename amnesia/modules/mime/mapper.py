@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy import orm
+
+from amnesia.db import mapper_registry
 
 from .model import MimeMajor
 from .model import Mime
@@ -9,13 +9,18 @@ def includeme(config):
     ''' Pyramid includeme '''
     tables = config.registry['metadata'].tables
 
-    orm.mapper(
-        MimeMajor, tables['mime_major']
+    mapper_registry.map_imperatively(
+        MimeMajor,
+        tables['mime_major']
     )
 
-    orm.mapper(
-        Mime, tables['mime'],
+    mapper_registry.map_imperatively(
+        Mime,
+        tables['mime'],
         properties={
-            'major': orm.relationship(MimeMajor, lazy='joined')
+            'major': orm.relationship(
+                MimeMajor,
+                lazy='joined'
+            )
         }
     )

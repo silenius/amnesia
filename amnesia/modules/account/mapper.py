@@ -6,6 +6,7 @@ from sqlalchemy import sql
 from sqlalchemy import Boolean
 from sqlalchemy.ext.associationproxy import association_proxy
 
+from amnesia.db import mapper_registry
 from amnesia.db.ext import pg_json_property
 from amnesia.modules.content import Content
 
@@ -24,71 +25,93 @@ def includeme(config):
 
     # ACCOUNTS
 
-    orm.mapper(Account, tables['account'], properties={
-        'count_content': orm.column_property(
-            sql.select(
-                [sql.func.count()],
-                tables['account'].c.id == tables['content'].c.owner_id
-            ).label('count_content'),
-            deferred=True
-        ),
+    mapper_registry.map_imperatively(
+        Account,
+        tables['account'],
+        properties={
+            'count_content': orm.column_property(
+                sql.select(
+                    [sql.func.count()],
+                    tables['account'].c.id == tables['content'].c.owner_id
+                ).label('count_content'),
+                deferred=True
+            ),
 
-        'account_roles': orm.relationship(
-            AccountRole,
-            back_populates="account"
-        )
-    })
+            'account_roles': orm.relationship(
+                AccountRole,
+                back_populates="account"
+            )
+        }
+    )
 
     # ROLES
 
-    orm.mapper(Role, tables['role'], properties={
-        'accounts': orm.relationship(
-            AccountRole,
-            back_populates="role",
-            cascade='all, delete-orphan'
-        ),
+    mapper_registry.map_imperatively(
+        Role,
+        tables['role'],
+        properties={
+            'accounts': orm.relationship(
+                AccountRole,
+                back_populates="role",
+                cascade='all, delete-orphan'
+            ),
 
-        'acls': orm.relationship(
-            ACL, back_populates="role", cascade='all, delete-orphan'
-        ),
+            'acls': orm.relationship(
+                ACL,
+                back_populates="role",
+                cascade='all, delete-orphan'
+            ),
 
-        'virtual': orm.column_property(
-            sql.func.starts_with(
-                tables['role'].c.name, 'system.'
+            'virtual': orm.column_property(
+                sql.func.starts_with(
+                    tables['role'].c.name, 'system.'
+                )
             )
-        )
-    })
+        }
+    )
 
-    orm.mapper(AccountRole, tables['account_role'], properties={
-        'role': orm.relationship(
-            Role, back_populates='accounts'
-        ),
+    mapper_registry.map_imperatively(
+        AccountRole,
+        tables['account_role'],
+        properties={
+            'role': orm.relationship(
+                Role, back_populates='accounts'
+            ),
 
-        'account': orm.relationship(
-            Account, back_populates='account_roles'
-        ),
-    })
+            'account': orm.relationship(
+                Account, back_populates='account_roles'
+            ),
+        }
+    )
 
     # ACL RESOURCES
 
-    orm.mapper(ACLResource, tables['resource'], properties={
-        'acls': orm.relationship(
-            ACL, back_populates='resource'
-        )
-    })
+    mapper_registry.map_imperatively(
+        ACLResource,
+        tables['resource'],
+        properties={
+            'acls': orm.relationship(
+                ACL, back_populates='resource'
+            )
+        }
+    )
 
     # PERMISSIONS
 
-    orm.mapper(Permission, tables['permission'], properties={
-        'acls': orm.relationship(
-            ACL, back_populates='permission'
-        )
-    })
+    mapper_registry.map_imperatively(
+        Permission,
+        tables['permission'],
+        properties={
+            'acls': orm.relationship(
+                ACL, back_populates='permission'
+            )
+        }
+    )
 
     # ACCESS CONTROL LIST
     # TODO: include_properties/exclude_properties
 
-    orm.mapper(
+    mapper_registry.map_imperatively(
         ACL, tables['acl'],
         polymorphic_on=tables['acl'].c.resource_id,
         properties={
@@ -108,11 +131,11 @@ def includeme(config):
             )
         })
 
-    orm.mapper(
+    mapper_registry.map_imperatively(
         GlobalACL, inherits=ACL, polymorphic_identity=1,
     )
 
-    orm.mapper(
+    mapper_registry.map_imperatively(
         ContentACL, inherits=ACL, polymorphic_identity=2,
         properties={
             'content': orm.relationship(

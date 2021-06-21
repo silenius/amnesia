@@ -11,14 +11,12 @@ from sqlalchemy.orm import sessionmaker
 import zope.sqlalchemy
 
 from amnesia.utils.db import engine_from_config
+from .meta import metadata
+from .meta import mapper_registry
 
 
 def get_engine(settings, prefix='sqlalchemy.'):
     return engine_from_config(settings, prefix)
-
-
-def get_metadata(settings):
-    return MetaData()
 
 
 def get_session_factory(engine):
@@ -80,19 +78,18 @@ def includeme(config):
     if not dbengine:
         dbengine = get_engine(settings)
 
-    meta = get_metadata(settings)
     session_factory = get_session_factory(dbengine)
     config.registry['dbsession_factory'] = session_factory
 
-    config.registry['metadata'] = meta
+    config.registry['metadata'] = metadata
     config.registry['dbengine'] = dbengine
 
     if asbool(settings.get('amnesia.reflect_db', False)):
-        meta.reflect(bind=dbengine)
+        metadata.reflect(bind=dbengine)
 
         schemas = aslist(settings.get('amnesia.reflect_schemas', []))
         for schema in schemas:
-            meta.reflect(bind=dbengine, schema=schema)
+            metadata.reflect(bind=dbengine, schema=schema)
 
     # make request.dbsession available for use in Pyramid
     def dbsession(request):

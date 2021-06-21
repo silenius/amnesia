@@ -1,8 +1,14 @@
 from sqlalchemy import orm
 
+from amnesia.db import mapper_registry
+
 from .model import ContentType
 
 
 def includeme(config):
     tables = config.registry['metadata'].tables
-    orm.mapper(ContentType, tables['content_type'])
+
+    mapper_registry.map_imperatively(
+        ContentType,
+        tables['content_type']
+    )
