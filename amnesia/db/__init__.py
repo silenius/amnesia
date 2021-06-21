@@ -31,7 +31,7 @@ def get_session_factory(engine):
     return factory
 
 
-def get_tm_session(session_factory, transaction_manager):
+def get_tm_session(session_factory, transaction_manager, request=None):
     """
     Get a ``sqlalchemy.orm.Session`` instance backed by a transaction.
 
@@ -52,9 +52,10 @@ def get_tm_session(session_factory, transaction_manager):
               dbsession = get_tm_session(session_factory, transaction.manager)
 
     """
-    dbsession = session_factory()
-    zope.sqlalchemy.register(dbsession,
-                             transaction_manager=transaction_manager)
+    dbsession = session_factory(info={"request": request})
+    zope.sqlalchemy.register(
+        dbsession, transaction_manager=transaction_manager
+    )
     return dbsession
 
 
@@ -73,24 +74,35 @@ def includeme(config):
 
     # use pyramid_retry to retry a request when transient exceptions occur
     config.include('pyramid_retry')
-    engine = get_engine(settings)
+
+    # hook to share the dbengine fixture in testing
+    dbengine = settings.get('dbengine')
+    if not dbengine:
+        dbengine = get_engine(settings)
+
     meta = get_metadata(settings)
+    session_factory = get_session_factory(dbengine)
+    config.registry['dbsession_factory'] = session_factory
+
+    config.registry['metadata'] = meta
+    config.registry['dbengine'] = dbengine
 
     if asbool(settings.get('amnesia.reflect_db', False)):
-        meta.reflect(bind=engine)
+        meta.reflect(bind=dbengine)
 
-        for schema in aslist(settings.get('amnesia.reflect_schemas', [])):
-            meta.reflect(bind=engine, schema=schema)
-
-    session_factory = get_session_factory(engine)
-    config.registry['dbsession_factory'] = session_factory
-    config.registry['metadata'] = meta
-    config.registry['engine'] = engine
+        schemas = aslist(settings.get('amnesia.reflect_schemas', []))
+        for schema in schemas:
+            meta.reflect(bind=dbengine, schema=schema)
 
     # make request.dbsession available for use in Pyramid
-    config.add_request_method(
-        # r.tm is the transaction manager used by pyramid_tm
-        lambda r: get_tm_session(session_factory, r.tm),
-        'dbsession',
-        reify=True
-    )
+    def dbsession(request):
+        # hook to share the dbsession fixture in testing
+        dbsession = request.environ.get('app.dbsession')
+        if dbsession is None:
+            # request.tm is the transaction manager used by pyramid_tm
+            dbsession = get_tm_session(
+                session_factory, request.tm, request=request
+            )
+        return dbsession
+
+    config.add_request_method(dbsession, reify=True)
