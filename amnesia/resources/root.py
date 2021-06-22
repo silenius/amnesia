@@ -40,7 +40,7 @@ class Root(Resource):
     def __getitem__(self, path):
         # Access to a specific resource through it's id, ex: /123
         if path.isdigit():
-            entity = self.dbsession.query(Content).enable_eagerloads(False).get(path)
+            entity = self.dbsession.get(Content, path)
             resource = self.request.cms_get_resource(entity)
             return resource(self.request, entity)
 

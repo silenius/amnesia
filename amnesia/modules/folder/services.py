@@ -57,7 +57,7 @@ class FolderHierarchy:
 
 
 def get_children_containers(dbsession, folder_id, max_depth=None):
-    root = dbsession.query(
+    root = sql.select(
         Folder, sql.literal(1, type_=Integer).label('level')
     ).filter(
         sql.and_(
@@ -81,11 +81,11 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
     filters = sql.and_(*filters)
 
     root = root.union_all(
-        dbsession.query(Folder, root.c.level + 1).join(
+        sql.select(Folder, root.c.level + 1).join(
             root, root.c.id == Folder.container_id
         ).filter(filters))
 
-    tabs = dbsession.query(
+    stmt = sql.select(
         Folder
     ).join(
         root, root.c.id == Folder.id
@@ -93,8 +93,9 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
         root.c.level.label('level')
     ).order_by(
         root.c.level, root.c.container_id, root.c.weight.desc()
-    ).all()
+    )
 
+    tabs = dbsession.execute(stmt).all()
 
     return FolderHierarchy(tabs)
 

@@ -6,11 +6,10 @@ from pyramid.settings import aslist
 from sqlalchemy.schema import MetaData
 from sqlalchemy.orm import sessionmaker
 
-# from .meta import metadata
-
 import zope.sqlalchemy
 
 from amnesia.utils.db import engine_from_config
+
 from .meta import metadata
 from .meta import mapper_registry
 
