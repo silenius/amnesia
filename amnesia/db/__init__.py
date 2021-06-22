@@ -21,7 +21,7 @@ def get_engine(settings, prefix='sqlalchemy.'):
 
 def get_session_factory(engine):
     # The sessionmaker factory generates new Session objects when called.
-    factory = sessionmaker()
+    factory = sessionmaker(future=True)
 
     # An Engine with which newly created Session objects will be associated.
     factory.configure(bind=engine)
