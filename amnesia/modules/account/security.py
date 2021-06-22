@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # pylint: disable=no-member,singleton-comparison
 
 import logging

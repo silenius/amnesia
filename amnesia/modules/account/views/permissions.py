@@ -12,6 +12,8 @@ from pyramid.httpexceptions import HTTPNoContent
 
 from marshmallow import ValidationError
 
+from sqlalchemy import sql
+
 from amnesia.views import BaseView
 from amnesia.modules.account import Role
 from amnesia.modules.account import Permission
