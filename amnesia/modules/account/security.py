@@ -30,10 +30,11 @@ def get_principals(userid, request):
 def get_global_acl(request, strict=False):
     dbsession = request.dbsession
 
-    acl_query = dbsession.query(GlobalACL)
+    acl_query = sql.select(GlobalACL)
 
     if not strict:
-        return acl_query.order_by(GlobalACL.weight.desc()).all()
+        stmt = acl_query.order_by(GlobalACL.weight.desc())
+        return dbsession.execute(stmt).scalars().all()
 
     user = request.user
     principals = request.effective_principals
@@ -45,15 +46,25 @@ def get_global_acl(request, strict=False):
     )
 
     # Select ACL for those virtual roles
-    acl = acl_query.join(GlobalACL.role).options(
-        orm.contains_eager(GlobalACL.role)).filter(virtual)
+    acl = acl_query.join(
+        GlobalACL.role
+    ).options(
+        orm.contains_eager(GlobalACL.role)
+    ).filter(
+        virtual
+    )
 
     if user:
-        user_roles = dbsession.query(AccountRole.role_id).filter_by(
-            account_id=user.id)
+        user_roles = sql.select(
+            AccountRole.role_id
+        ).filter_by(
+            account_id=user.id
+        )
 
         acl = acl.union(
-            acl_query.filter(ContentACL.role_id.in_(user_roles))
+            acl_query.filter(
+                ContentACL.role_id.in_(user_roles)
+            )
         )
 
     return acl.order_by(GlobalACL.weight.desc()).all()
@@ -61,37 +72,68 @@ def get_global_acl(request, strict=False):
 def get_content_acl(request, entity, recursive=False, with_global_acl=True):
     dbsession = request.dbsession
 
+    # We want ACL for this entity only
     if not recursive:
+        # Content ACL only
         if not with_global_acl:
-            return dbsession.query(ContentACL).filter_by(
-                content=entity).order_by(ContentACL.weight.desc()).all()
+            stmt = sql.select(
+                ContentACL
+            ).filter_by(
+                content=entity
+            ).order_by(
+                ContentACL.weight.desc()
+            )
 
-        acl_types = orm.with_polymorphic(ACL, [ContentACL, GlobalACL])
+            return dbsession.execute(stmt).scalars().all()
 
-        return dbsession.query(acl_types).join(acl_types.resource).options(
+        # Content ACL and Global ACL
+        acl_types = orm.with_polymorphic(
+            ACL, [ContentACL, GlobalACL]
+        )
+
+        # Select Content ACL for this entity or Global ACL
+        filters = sql.or_(
+            acl_types.ContentACL.content == entity,
+            ACL.resource.of_type(GlobalACL)
+        )
+
+        stmt = sql.select(
+            acl_types
+        ).join(
+            acl_types.resource
+        ).options(
             orm.contains_eager(acl_types.resource)
         ).filter(
-            sql.or_(acl_types.ContentACL.content == entity,
-                    ACL.resource.of_type(GlobalACL))
+            filters
         ).order_by(
             sql.desc(ACL.resource.of_type(ContentACL)),
             acl_types.ContentACL.weight.desc(),
             sql.desc(ACL.resource.of_type(GlobalACL)),
             acl_types.GlobalACL.weight.desc()
-        ).all()
+        )
+
+        return dbsession.execute(stmt).scalars().all()
 
     # Recursive ACL, we need to fetch hierarchy first
-    contents = dbsession.query(
+    contents = sql.select(
         Content, sql.literal(1, type_=Integer).label('level')
-    ).filter(Content.id == entity.id).cte(name='all_content', recursive=True)
+    ).filter(
+        Content.id == entity.id
+    ).cte(
+        name='all_content', recursive=True
+    )
 
-    contents_join = dbsession.query(Content, contents.c.level + 1).join(
+    contents_join = sql.select(
+        Content, contents.c.level + 1
+    ).join(
         contents, contents.c.container_id == Content.id
     )
 
     contents = contents.union_all(contents_join)
 
-    content_acls = dbsession.query(ContentACL).join(
+    content_acls = sql.select(
+        ContentACL
+    ).join(
         contents, contents.c.id == ContentACL.content_id
     )
 
@@ -100,18 +142,29 @@ def get_content_acl(request, entity, recursive=False, with_global_acl=True):
             contents.c.level.label('level')
         )
 
-        global_acls = dbsession.query(GlobalACL,
-                                      sql.literal(None).label('level'))
+        global_acls = sql.select(
+            GlobalACL, sql.literal(None).label('level')
+        )
 
-        acls = content_acls.union_all(global_acls).subquery()
+        acls = content_acls.union_all(
+            global_acls
+        ).subquery()
 
-        return dbsession.query(ACL).select_entity_from(acls).order_by(
-            acls.c.level.nullslast(), acls.c.acl_weight.desc()
-        ).all()
+        au = orm.aliased(ACL, acls)
 
-    return content_acls.order_by(
+        stmt = sql.select(
+            au
+        ).order_by(
+            acls.c.level.nullslast(), acls.c.weight.desc()
+        )
+
+        return dbsession.execute(stmt).scalars().all()
+
+    stmt = content_acls.order_by(
         contents.c.level, contents.c.weight.desc()
-    ).all()
+    )
+
+    return dbsession.execute(stmt).scalars().al()
 
 def get_parent_acl(resource):
     parent_acl = []
