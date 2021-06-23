@@ -64,7 +64,7 @@ def contact(request):
 
         mailer.send_immediately(message, fail_silently=False)
 
-        obj = request.dbsession.query(Content).get(data['oid'])
+        obj = request.dbsession.get(Content, data['oid'])
 
         return {
             'content': obj,

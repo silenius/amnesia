@@ -24,6 +24,7 @@ from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
 from amnesia.modules.language import Language
 from amnesia.modules.folder.services import get_children_containers
+from amnesia.modules.folder.services import get_lineage
 
 from amnesia.utils.widgets import widget_config
 
@@ -66,32 +67,15 @@ class Navigation(Widget):
         self.obj_dump = kwargs.get('obj_dump')
 
         if isinstance(content_or_id, (int, str)):
-            self.content = self.dbsession.query(Content).get(content_or_id)
+            self.content = self.dbsession.get(Content, content_or_id)
         else:
             self.content = content_or_id
 
     @property
     def parents(self):
-        root = self.dbsession.query(
-            Folder, sql.literal(1, type_=Integer).label('level')
-        ).filter(
-            Folder.id == self.content.container_id
-        ).cte(
-            name='parents', recursive=True
-        )
+        tabs = get_lineage(self.dbsession, self.content.container_id)
 
-        root = root.union_all(
-            self.dbsession.query(Folder, root.c.level + 1).join(
-                root, root.c.container_id == Content.id
-            )
-        )
-
-        yield from self.dbsession.query(Folder).join(
-            root, root.c.id == Folder.id
-        ).order_by(
-            root.c.level.desc()
-        )
-
+        yield from tabs
         yield self.content
 
 
@@ -147,8 +131,16 @@ class LanguageSelector(Widget):
     def __init__(self, request):
         super().__init__(request)
         langs = aslist(self.settings.get('available_languages', ''))
-        self.available_languages = self.dbsession.query(Language).filter(
-            Language.id.in_(langs)).order_by(Language.name)
+
+        stmt = sql.select(
+            Language
+        ).filter(
+            Language.id.in_(langs)
+        ).order_by(
+            Language.name
+        )
+
+        self.available_languages = self.dbsession.execute(stmt).scalars().all()
 
     def url(self, lang):
         if self.request._script_name != self.request.script_name:

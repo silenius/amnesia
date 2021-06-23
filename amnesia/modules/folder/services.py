@@ -81,9 +81,14 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
     filters = sql.and_(*filters)
 
     root = root.union_all(
-        sql.select(Folder, root.c.level + 1).join(
+        sql.select(
+            Folder, root.c.level + 1
+        ).join(
             root, root.c.id == Folder.container_id
-        ).filter(filters))
+        ).filter(
+            filters
+        )
+    )
 
     stmt = sql.select(
         Folder
@@ -101,7 +106,7 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
 
 
 def get_lineage(dbsession, folder_id):
-    root = dbsession.query(
+    root = sql.select(
         Folder, sql.literal(1, type_=Integer).label('level')
     ).filter(
         Folder.id == folder_id
@@ -110,15 +115,21 @@ def get_lineage(dbsession, folder_id):
     )
 
     root = root.union_all(
-        dbsession.query(Folder, root.c.level + 1).join(
+        sql.select(
+            Folder, root.c.level + 1
+        ).join(
             root, root.c.container_id == Folder.id
         )
     )
 
-    parents = dbsession.query(Folder).join(
+    stmt = sql.select(
+        Folder
+    ).join(
         root, root.c.id == Folder.id
     ).order_by(
         root.c.level.desc()
-    ).all()
+    )
 
-    return parents
+    lineage = dbsession.execute(stmt).scalars().all()
+
+    return lineage
