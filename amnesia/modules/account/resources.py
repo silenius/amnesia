@@ -69,14 +69,15 @@ class DatabaseAuthResource(AuthResource):
 
     @property
     def query(self):
-        return self.dbsession.query(Account)
+        return sql.select(Account)
 
     def get_user(self, user_id):
         return self.query.get(user_id)
 
     def find_login(self, login, **kwargs):
         try:
-            return self.query.filter_by(login=login).one()
+            stmt = self.query.filter_by(login=login)
+            return self.dbsession.execute(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
 
@@ -86,7 +87,8 @@ class DatabaseAuthResource(AuthResource):
         filters = sql.func.lower(email) == sql.func.lower(Account.email)
 
         try:
-            return self.query.filter(filters).one()
+            stmt = self.query.filter(filters)
+            return self.dbsession.execute(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
 
@@ -94,7 +96,8 @@ class DatabaseAuthResource(AuthResource):
 
     def find_token(self, token):
         try:
-            return self.query.filter_by(lost_token=token).one()
+            stmt = self.query.filter_by(lost_token=token)
+            return self.dbsession.query(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
 
@@ -201,7 +204,7 @@ class RoleResource(Resource):
 
     def __getitem__(self, path):
         if path.isdigit():
-            entity = self.dbsession.query(Role).get(path)
+            entity = self.dbsession.get(Role, path)
             if entity:
                 return RoleEntity(self.request, entity, self)
 
@@ -219,7 +222,7 @@ class RoleResource(Resource):
                 yield allow_deny, principal, _op
 
     def query(self):
-        return self.dbsession.query(Role)
+        return sql.select(Role)
 
     def create(self, name, description):
         role = Role(name=name, description=description)
@@ -282,21 +285,25 @@ class RoleMember(Resource):
 
     def __getitem__(self, path):
         if path.isdigit():
-            account = self.dbsession.query(Account).get(path)
+            account = self.dbsession.get(Account, path)
             if account:
-                return RoleMemberEntity(self.request, role=self.role,
-                                        account=account, parent=self,
-                                        name=account.id)
+                return RoleMemberEntity(
+                    self.request, role=self.role, account=account, parent=self,
+                    name=account.id
+                )
         raise KeyError
 
     def query(self):
-        return self.dbsession.query(AccountRole).filter(
-            AccountRole == self.role)
+        return sql.select(AccountRole).filter(
+            AccountRole == self.role
+        )
 
     def get_members(self):
-        return self.dbsession.query(Account).filter(
+        stmt = sql.select(Account).filter(
             Account.account_roles.any(role=self.role)
-        ).all()
+        )
+
+        return self.dbsession.execute(stmt).scalars().all()
 
     def add_member(self, account):
         try:
@@ -326,9 +333,14 @@ class RoleMemberEntity(Resource):
         self.__name__ = name
 
     def query(self):
-        filters = sql.and_(AccountRole.role == self.role,
-                           AccountRole.account == self.account)
-        return self.dbsession.query(AccountRole).filter(filters)
+        filters = sql.and_(
+            AccountRole.role == self.role,
+            AccountRole.account == self.account
+        )
+
+        stmt = sql.select(AccountRole).filter(filters)
+
+        return stmt
 
     def delete(self):
         try:
@@ -359,7 +371,7 @@ class ACLEntity(Resource):
         return self.parent
 
     def query(self):
-        return self.dbsession.query(GlobalACL).filter_by(role=self.role)
+        return sql.select(GlobalACL).filter_by(role=self.role)
 
     def create(self, permission, allow):
         acl = GlobalACL(role=self.role, permission=permission, allow=allow)
@@ -376,7 +388,7 @@ class ACLEntity(Resource):
         query = self.query().filter_by(permission=permission)
 
         try:
-            role_perm = query.with_lockmode('update').one()
+            role_perm = query.with_for_update().one()
             self.update_permission_weight(permission, weight)
 
             role_perm.feed(**data)
@@ -392,7 +404,7 @@ class ACLEntity(Resource):
 
         try:
             # FIXME: .delete()
-            role_perm = query.with_lockmode('update').one()
+            role_perm = query.with_for_update().one()
         except NoResultFound:
             return False
 
@@ -405,10 +417,12 @@ class ACLEntity(Resource):
 
     def update_permission_weight(self, permission, weight):
         """ Change the weight of a permission. """
-        query = self.query().filter_by(permission=permission)
+        stmt = self.query().filter_by(
+            permission=permission
+        ).with_for_update()
 
         try:
-            obj = query.enable_eagerloads(False).with_lockmode('update').one()
+            obj = self.dbsession.execute(stmt).scalar_one()
         except NoResultFound:
             return False
 
@@ -430,8 +444,11 @@ class ACLEntity(Resource):
 
         # See Caveats section at
         # https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.update
-        global_resource = self.dbsession.query(ACLResource.id).filter_by(
-            name='GLOBAL').subquery()
+        global_resource = sql.select(
+            ACLResource.id
+        ).filter_by(
+            name='GLOBAL'
+        ).subquery()
 
         filters = sql.and_(
             GlobalACL.weight.between(min_weight, max_weight),
@@ -445,7 +462,7 @@ class ACLEntity(Resource):
             else_=operation(GlobalACL.weight, 1)
         )
 
-        bulk_update = self.dbsession.query(GlobalACL).filter(filters)
+        bulk_update = sql.select(GlobalACL).filter(filters)
 
         try:
             # The UPDATE statement
@@ -514,7 +531,7 @@ class ContentACLEntity(Resource):
         query = self.query().filter(filters)
 
         try:
-            obj = query.enable_eagerloads(False).with_lockmode('update').one()
+            obj = query.enable_eagerloads(False).with_for_update().one()
         except NoResultFound:
             return False
 

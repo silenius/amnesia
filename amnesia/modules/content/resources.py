@@ -125,7 +125,7 @@ class Entity(Resource):
         """ Change the weight of the entity within it's container. """
 
         obj = self.dbsession.query(Content).enable_eagerloads(False).\
-            with_lockmode('update').get(self.entity.id)
+            with_for_update().get(self.entity.id)
 
         (min_weight, max_weight) = sorted((new_weight, obj.weight))
 
