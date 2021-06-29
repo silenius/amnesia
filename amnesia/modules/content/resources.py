@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # pylint: disable=E1101
 
 import logging
@@ -124,8 +122,7 @@ class Entity(Resource):
     def change_weight(self, new_weight: int):
         """ Change the weight of the entity within it's container. """
 
-        obj = self.dbsession.query(Content).enable_eagerloads(False).\
-            with_for_update().get(self.entity.id)
+        obj = self.dbsession.get(Content, self.entity.id, with_for_update=True)
 
         (min_weight, max_weight) = sorted((new_weight, obj.weight))
 
@@ -152,11 +149,19 @@ class Entity(Resource):
 
         try:
             # The UPDATE statement
-            updated = self.dbsession.query(Content).enable_eagerloads(False).\
-                filter(filters).\
-                update({'weight': new_weight}, synchronize_session=False)
+            stmt = sql.update(
+                Content
+            ).where(
+                filters
+            ).values(
+                weight=new_weight
+            ).execution_options(
+                synchronize_session=False
+            )
+
+            updated = self.dbsession.execute(stmt)
             self.dbsession.flush()
-            return updated
+            return updated.rowcount
         except DatabaseError:
             return None
 
