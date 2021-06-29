@@ -149,18 +149,18 @@ class Entity(Resource):
             else_=operation(Content.weight, 1)
         )
 
-        try:
-            # The UPDATE statement
-            stmt = sql.update(
-                Content
-            ).where(
-                filters
-            ).values(
-                weight=new_weight
-            ).execution_options(
-                synchronize_session=False
-            )
+        # The UPDATE statement
+        stmt = sql.update(
+            Content
+        ).where(
+            filters
+        ).values(
+            weight=new_weight
+        ).execution_options(
+            synchronize_session=False
+        )
 
+        try:
             updated = self.dbsession.execute(stmt)
 
             # XXX: temporary

@@ -9,6 +9,8 @@ from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.exc import InternalError
 
+from zope.sqlalchemy import invalidate
+
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.content import Content
@@ -23,16 +25,26 @@ class FolderEntity(Entity):
     """ Folder """
 
     def paste(self, content_ids):
-        _cls = orm.class_mapper(Folder).base_mapper.class_
+        stmt = sql.update(
+            Content
+        ).where(
+            Content.id.in_(content_ids)
+        ).values(
+            container_id=self.entity.id
+        ).execution_options(
+            synchronize_session=False
+        )
 
         try:
-            self.dbsession.query(_cls).enable_eagerloads(False).filter(
-                _cls.id.in_(content_ids)
-            ).update({
-                _cls.container_id: self.entity.id
-            }, synchronize_session=False)
+            updated = self.dbsession.execute(stmt)
 
-            self.dbsession.flush()
+            # XXX: temporary
+            # see https://github.com/zopefoundation/zope.sqlalchemy/issues/67
+            # The ORM-enabled UPDATE and DELETE features bypass ORM
+            # unit-of-work automation.
+            invalidate(self.dbsession)
+
+            return updated.rowcount
         except InternalError:
             raise PasteError(self.entity)
 
