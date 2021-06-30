@@ -62,15 +62,19 @@ class FolderEntity(Entity):
             return False
 
     def bulk_delete(self, ids, owner=None):
-        filters = sql.and_(
+        filters = [
             Content.id.in_(ids),
             Content.parent == self.entity
-        )
+        ]
 
         if owner:
             filters.append(Content.owner == owner)
 
-        items = self.dbsession.query(Content).filter(filters)
+        filters = sql.and_(*filters)
+
+        stmt = sql.select(Content).filter(filters)
+
+        items = self.dbsession.execute(stmt).scalars()
 
         for item in items:
             self.dbsession.delete(item)
@@ -88,11 +92,11 @@ class FolderResource(EntityManager):
 
     def __getitem__(self, path):
         if path.isdigit():
-            entity = self.dbsession.query(Folder).get(path)
+            entity = self.dbsession.get(Folder, path)
             if entity:
                 return FolderEntity(self.request, entity)
 
         raise KeyError
 
     def query(self):
-        return self.dbsession.query(Folder)
+        return sql.select(Folder)
