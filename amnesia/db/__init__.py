@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyramid.settings import asbool
 from pyramid.settings import aslist
 
@@ -65,6 +63,7 @@ def includeme(config):
     """
     settings = config.get_settings()
     settings['tm.manager_hook'] = 'pyramid_tm.explicit_manager'
+    #settings['tm.commit_veto'] = 'pyramid_tm.default_commit_veto'
 
     # use pyramid_tm to hook the transaction lifecycle to the request
     config.include('pyramid_tm')

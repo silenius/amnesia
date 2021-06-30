@@ -20,9 +20,12 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import sql
 
+from zope.sqlalchemy import invalidate
+
 from amnesia.resources import Resource
 from amnesia.modules.account import Account
 from amnesia.modules.account import Role
+from amnesia.modules.account import Permission
 from amnesia.modules.account import ACLResource
 from amnesia.modules.account import ContentACL
 from amnesia.modules.account import GlobalACL
@@ -61,7 +64,7 @@ class DatabaseAuthResource(AuthResource):
 
     def __getitem__(self, path):
         if path.isdigit():
-            account = self.query.get(path)
+            account = self.get_user(path)
             if account:
                 return AccountEntity(self.request, account)
 
@@ -72,11 +75,12 @@ class DatabaseAuthResource(AuthResource):
         return sql.select(Account)
 
     def get_user(self, user_id):
-        return self.query.get(user_id)
+        return self.dbsession.get(Account, user_id)
 
     def find_login(self, login, **kwargs):
+        stmt = sql.select(Account).filter_by(login=login)
+
         try:
-            stmt = self.query.filter_by(login=login)
             return self.dbsession.execute(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
@@ -84,10 +88,11 @@ class DatabaseAuthResource(AuthResource):
         return None
 
     def find_email(self, email):
-        filters = sql.func.lower(email) == sql.func.lower(Account.email)
+        stmt = sql.select(Account).filter(
+            sql.func.lower(email) == sql.func.lower(Account.email)
+        )
 
         try:
-            stmt = self.query.filter(filters)
             return self.dbsession.execute(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
@@ -95,8 +100,9 @@ class DatabaseAuthResource(AuthResource):
         return None
 
     def find_token(self, token):
+        stmt = sql.select(Account).filter_by(lost_token=token)
+
         try:
-            stmt = self.query.filter_by(lost_token=token)
             return self.dbsession.query(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
@@ -221,8 +227,32 @@ class RoleResource(Resource):
             if _ctx == 'role':
                 yield allow_deny, principal, _op
 
-    def query(self):
-        return sql.select(Role)
+    def count(self):
+        stmt = sql.select(
+            sql.func.count('*')
+        ).select_from(
+            Role
+        )
+
+        result = self.dbsession.execute(stmt).scalar_one()
+
+        return result
+
+    def query(self, order_by=None, limit=None, offset=None):
+        stmt = sql.select(Role)
+
+        if order_by is not None:
+            stmt = stmt.order_by(order_by)
+
+        if limit is not None:
+            stmt = stmt.limit(limit)
+
+        if offset is not None:
+            stmt = stmt.offset(offset)
+
+        result = self.dbsession.execute(stmt).scalars()
+
+        return result
 
     def create(self, name, description):
         role = Role(name=name, description=description)
@@ -315,10 +345,15 @@ class RoleMember(Resource):
             return False
 
     def delete(self):
+        stmt = sql.delete(AccountRole).filter(
+            AccountRole == self.role
+        )
+
         try:
-            deleted = self.query().delete()
-            self.dbsession.flush()
-            return deleted
+            result = self.dbsession.execute(stmt)
+            invalidate(self.dbsession)
+
+            return result.rowcount
         except DatabaseError:
             return False
 
@@ -343,10 +378,17 @@ class RoleMemberEntity(Resource):
         return stmt
 
     def delete(self):
+        filters = sql.and_(
+            AccountRole.role == self.role,
+            AccountRole.account == self.account
+        )
+
+        stmt = sql.delete(AccountRole).filter(filters)
+
         try:
-            deleted = self.query().delete()
-            self.dbsession.flush()
-            return deleted
+            deleted = self.dbsession.execute(stmt)
+            invalidate(self.dbsession)
+            return deleted.rowcount
         except DatabaseError:
             return False
 
@@ -370,8 +412,15 @@ class ACLEntity(Resource):
     def __parent__(self):
         return self.parent
 
-    def query(self):
-        return sql.select(GlobalACL).filter_by(role=self.role)
+    def query(self, order_by=None):
+        stmt = sql.select(GlobalACL).filter_by(role=self.role)
+
+        if order_by is not None:
+            stmt = stmt.order_by(order_by)
+
+        result = self.dbsession.execute(stmt).scalars()
+
+        return result
 
     def create(self, permission, allow):
         acl = GlobalACL(role=self.role, permission=permission, allow=allow)
@@ -399,12 +448,28 @@ class ACLEntity(Resource):
         except (NoResultFound, DatabaseError):
             return False
 
+    def get_permissions(self, order_by=None):
+        stmt = sql.select(Permission)
+
+        if order_by is not None:
+            stmt = stmt.order_by(order_by)
+
+        result = self.dbsession.execute(stmt).scalars()
+
+        return result
+
     def delete_permission(self, permission_id, **kwargs):
-        query = self.query().filter_by(permission_id=permission_id)
+        stmt = sql.select(
+            GlobalACL
+        ).filter_by(
+            role=self.role
+        ).filter_by(
+            permission_id=permission_id
+        ).with_for_update()
 
         try:
             # FIXME: .delete()
-            role_perm = query.with_for_update().one()
+            role_perm = self.dbsession.execute(stmt).scalar_one()
         except NoResultFound:
             return False
 
@@ -417,7 +482,11 @@ class ACLEntity(Resource):
 
     def update_permission_weight(self, permission, weight):
         """ Change the weight of a permission. """
-        stmt = self.query().filter_by(
+        stmt = sql.select(
+            GlobalACL
+        ).filter_by(
+            role=self.role
+        ).filter_by(
             permission=permission
         ).with_for_update()
 

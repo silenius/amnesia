@@ -2,6 +2,8 @@
 
 import logging
 
+from sqlalchemy import sql
+
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.document import Document
@@ -18,11 +20,11 @@ class DocumentResource(EntityManager):
 
     def __getitem__(self, path):
         if path.isdigit():
-            entity = self.dbsession.query(Document).get(path)
+            entity = self.dbsession.get(Document, path)
             if entity:
                 return DocumentEntity(self.request, entity)
 
         raise KeyError
 
     def query(self):
-        return self.dbsession.query(Document)
+        return sql.select(Document)

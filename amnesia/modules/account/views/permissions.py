@@ -44,8 +44,9 @@ class ACLView(BaseView):
                  renderer='amnesia:templates/role/permissions.pt')
     def get_html(self):
         role = self.context.role
-        all_permissions = self.context.dbsession.query(Permission).\
-            order_by(Permission.name)
+        all_permissions = self.context.get_permissions(
+            order_by=Permission.name
+        )
 
         return {
             'role': role,
@@ -59,13 +60,11 @@ class ACLView(BaseView):
     def get_xml(self):
         self.request.response.content_type='application/xml'
 
-        permissions = self.context.query().order_by(
-            ACL.weight.desc()
-        )
+        acls = self.context.query(order_by=ACL.weight.desc())
 
         return {
             'extra_cols': (),
-            'permissions': permissions
+            'permissions': acls
         }
 
     ########

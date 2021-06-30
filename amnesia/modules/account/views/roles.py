@@ -49,13 +49,16 @@ class RoleBrowserView(BaseView):
         except ValidationError as error:
             raise HTTPBadRequest(error.messages)
 
-        query = self.context.query()
-        count = query.count()
-        result = query.order_by(Role.locked.desc()).\
-            limit(data['limit']).offset(data['offset']).all()
+        roles = self.context.query(
+            order_by = Role.locked.desc(),
+            limit = data['limit'],
+            offset = data['offset']
+        )
+
+        count = self.context.count()
 
         return {
-            'roles': result,
+            'roles': roles,
             'count': count,
             'limit': data['limit'],
             'offset': data['offset']
@@ -88,8 +91,9 @@ class RolesCRUD(BaseView):
         except ValidationError as error:
             raise HTTPBadRequest(error.messages)
 
-        role = self.context.create(name=data['role'],
-                                   description=data['description'])
+        role = self.context.create(
+            name=data['role'], description=data['description']
+        )
 
         if not role:
             raise HTTPInternalServerError()
