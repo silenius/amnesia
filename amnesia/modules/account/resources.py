@@ -480,14 +480,14 @@ class ACLEntity(Resource):
         except DatabaseError:
             return False
 
-    def update_permission_weight(self, permission, weight):
+    def update_permission_weight(self, permission_id, weight):
         """ Change the weight of a permission. """
         stmt = sql.select(
             GlobalACL
         ).filter_by(
             role=self.role
         ).filter_by(
-            permission=permission
+            permission_id=permission_id
         ).with_for_update()
 
         try:
@@ -531,14 +531,21 @@ class ACLEntity(Resource):
             else_=operation(GlobalACL.weight, 1)
         )
 
-        bulk_update = sql.select(GlobalACL).filter(filters)
+        stmt = sql.update(
+            GlobalACL
+        ).filter(
+            filters
+        ).values(
+            weight=weight
+        ).execution_options(
+            synchronize_session=False
+        )
 
         try:
             # The UPDATE statement
-            updated = bulk_update.update({'weight': weight},
-                                         synchronize_session=False)
-            self.dbsession.flush()
-            return updated
+            updated = self.dbsession.execute(stmt)
+            invalidate(self.dbsession)
+            return updated.rowcount
         except DatabaseError:
             return None
 

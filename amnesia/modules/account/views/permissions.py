@@ -111,12 +111,11 @@ class ACLView(BaseView):
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        permission = self.context.dbsession.query(Permission).get(data['permission_id'])
+        updated = self.context.update_permission_weight(
+            data['permission_id'], data['weight']
+        )
 
-        self.context.update_permission_weight(permission, data['weight'])
-        #self.context.update(permission, **data)
-
-        return data
+        return {'updated': updated}
 
     ##########
     # DELETE #
