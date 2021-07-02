@@ -565,12 +565,35 @@ class ContentACLEntity(Resource):
     def __parent__(self):
         return self.parent
 
-    def query(self):
-        return self.dbsession.query(ContentACL).filter_by(content=self.content)
+    def query(self, order_by=None):
+        stmt = sql.select(
+            ContentACL
+        ).filter_by(
+            content=self.content
+        )
+
+        if order_by is not None:
+            stmt = stmt.order_by(order_by)
+
+        result = self.dbsession.execute(stmt).scalars()
+
+        return result
+
+    def get_permissions(self, order_by=None):
+        stmt = sql.select(Permission)
+
+        if order_by is not None:
+            stmt = stmt.order_by(order_by)
+
+        result = self.dbsession.execute(stmt).scalars()
+
+        return result
 
     def create(self, role, permission, allow):
-        acl = ContentACL(content=self.content, role=role,
-                         permission=permission, allow=allow)
+        acl = ContentACL(
+            content=self.content, role=role, permission=permission,
+            allow=allow
+        )
 
         try:
             self.dbsession.add(acl)
@@ -580,10 +603,18 @@ class ContentACLEntity(Resource):
             return False
 
     def delete_permission(self, acl_id):
+        stmt = sql.delete(
+            ContentACL
+        ).filter_by(
+            content=self.content
+        ).filter_by(
+            id=acl_id
+        )
+
         try:
-            deleted = self.query().filter_by(id=acl_id).delete()
-            self.dbsession.flush()
-            return deleted
+            deleted = self.dbsession.execute(stmt)
+            invalidate(self.dbsession)
+            return deleted.rowcount
         except DatabaseError:
             return False
 
@@ -600,14 +631,19 @@ class ContentACLEntity(Resource):
     def update_permission_weight(self, role, permission, weight):
         """ Change the weight of a permission. """
         filters = sql.and_(
+            ContentACL.content == self.content,
             ContentACL.permission == permission,
             ContentACL.role == role
         )
 
-        query = self.query().filter(filters)
+        stmt = sql.select(
+            ContentACL
+        ).filter(
+            filters
+        ).with_for_update()
 
         try:
-            obj = query.enable_eagerloads(False).with_for_update().one()
+            obj = self.dbsession.execute(stmt).scalar_one()
         except NoResultFound:
             return False
 
@@ -623,18 +659,8 @@ class ContentACLEntity(Resource):
 
         # Select all the rows between the current weight and the new weight
 
-        # Note: The polymorphic identity WHERE criteria is not included for
-        # single- or joined- table updates - this must be added manually, even
-        # for single table inheritance.
-
-        # See Caveats section at
-        # https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.update
-        content_resource = self.dbsession.query(ACLResource.id).filter_by(
-            name='CONTENT').subquery()
-
         filters = sql.and_(
             ContentACL.content == self.content,
-            ContentACL.resource_id == content_resource.c.id,
             ContentACL.weight.between(min_weight, max_weight),
         )
 
@@ -645,14 +671,21 @@ class ContentACLEntity(Resource):
             else_=operation(ContentACL.weight, 1)
         )
 
-        bulk_update = self.dbsession.query(ContentACL).filter(filters)
+        stmt = sql.update(
+            ContentACL
+        ).filter(
+            filters
+        ).values(
+            weight=weight
+        ).execution_options(
+            synchronize_session=False
+        )
 
         try:
             # The UPDATE statement
-            updated = bulk_update.update({'weight': weight},
-                                         synchronize_session=False)
-            self.dbsession.flush()
-            return updated
+            updated = self.dbsession.execute(stmt)
+            invalidate(self.dbsession)
+            return updated.rowcount
         except DatabaseError:
             return None
 

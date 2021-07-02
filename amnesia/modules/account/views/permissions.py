@@ -151,8 +151,9 @@ class ContentACLView(BaseView):
                  renderer='amnesia:templates/content/permissions.pt')
     def get_html(self):
         content = self.context.content
-        all_permissions = self.context.dbsession.query(Permission).\
-            order_by(Permission.name)
+        all_permissions = self.context.get_permissions(
+            order_by=Permission.name
+        )
 
         return {
             'content': content,
@@ -165,13 +166,11 @@ class ContentACLView(BaseView):
     def get_xml(self):
         self.request.response.content_type='application/xml'
 
-        permissions = self.context.query().order_by(
-            ACL.weight.desc()
-        )
+        acls = self.context.query(order_by=ACL.weight.desc())
 
         return {
             'extra_cols': {'role'},
-            'permissions': permissions
+            'permissions': acls
         }
 
     ########
@@ -190,8 +189,9 @@ class ContentACLView(BaseView):
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        new_acl = self.context.create(data['role'], data['permission'],
-                                      data['allow'])
+        new_acl = self.context.create(
+            data['role'], data['permission'], data['allow']
+        )
 
         if new_acl:
             location = self.request.resource_url(self.context, new_acl.id)
