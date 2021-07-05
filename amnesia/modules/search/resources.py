@@ -17,7 +17,7 @@ from amnesia.utils import polymorphic_ids
 from amnesia.modules.content import Content
 
 search_result = namedtuple(
-    'SearchResult', ['query', 'count']
+    'SearchResult', ['result', 'count']
 )
 
 
@@ -37,7 +37,7 @@ class SearchResource(Resource):
     def fulltext(self, query, types='*', limit=None):
         # Base query
         search_for = orm.with_polymorphic(Content, types)
-        search_query = self.dbsession.query(search_for)
+        stmt = sql.select(search_for)
 
         # Transform query to a ts_query
         q_ts = sql.func.plainto_tsquery(query)
@@ -51,35 +51,45 @@ class SearchResource(Resource):
         hl_descr = sql.func.ts_headline(Content.description, q_ts, hl_sel)
 
         # Where clause
-        filters = sql.and_(
+        filters = [
             search_for.filter_published(),
-            q_ts.op('@@')(Content.fts),
+            q_ts.op('@@')(search_for.fts),
             Content.is_fts
-        )
+        ]
 
         if types != '*':
             ids = polymorphic_ids(search_for, types)
             filters.append(search_for.content_type_id.in_(ids))
 
-        search_query = search_query.filter(filters)
+        filters = sql.and_(*filters)
+
+        stmt = stmt.filter(filters)
 
         # Count how much rows we have
-        count = search_query.count()
+        count_stmt = sql.select(
+            sql.func.count('*')
+        ).select_from(
+            stmt
+        )
+
+        count = self.dbsession.execute(count_stmt).scalar_one()
 
         # Add the two highlighted columns
-        search_query = search_query.add_columns(
+        stmt = stmt.add_columns(
             hl_title.label('hl_title'),
             hl_descr.label('hl_descr')
         )
 
-        search_query = search_query.order_by(
+        stmt = stmt.order_by(
             q_ts.op('@@')(Content.fts)
         )
 
         if limit:
-            search_query = search_query.limit(limit)
+            stmt = stmt.limit(limit)
 
-        return search_result(search_query, count)
+        result = self.dbsession.execute(stmt).scalar()
+
+        return search_result(result, count)
 
     def tag_id(self, tag, types='*', limit=None):
         ''' Search all Content which are linked to a specific tag '''

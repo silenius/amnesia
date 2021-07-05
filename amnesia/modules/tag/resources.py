@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Entity
@@ -24,7 +23,7 @@ class TagResource(EntityManager):
 
     def __getitem__(self, path):
         if path.isdigit():
-            entity = self.dbsession.query(Tag).get(path)
+            entity = self.dbsession.get(Tag, path)
 
             if entity:
                 return TagEntity(self.request, entity, self)
@@ -35,7 +34,7 @@ class TagResource(EntityManager):
         return TagSchema(context={'request': self.request})
 
     def query(self):
-        return self.dbsession.query(Tag)
+        return sql.select(Tag)
 
     def create(self, data):
         new_tag = Tag(**data)

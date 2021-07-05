@@ -24,7 +24,7 @@ def search(context, request):
     search_query = context.fulltext(query, limit=500)
 
     return {
-        'results': search_query.query.all(),
+        'results': search_query.result,
         'count': search_query.count,
         'query': query
     }

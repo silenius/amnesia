@@ -5,6 +5,8 @@ import unicodedata
 
 from pyramid.response import FileResponse
 
+from sqlalchemy import sql
+
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.file import File
@@ -94,10 +96,10 @@ class FileResource(EntityManager):
 
     def __getitem__(self, path):
         if path.isdigit():
-            entity = self.dbsession.query(File).get(path)
+            entity = self.dbsession.get(File, path)
             if entity:
                 return FileEntity(self.request, entity)
         raise KeyError
 
     def query(self):
-        return self.dbsession.query(File)
+        return sql.select(File)

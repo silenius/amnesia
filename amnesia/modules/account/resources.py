@@ -103,7 +103,7 @@ class DatabaseAuthResource(AuthResource):
         stmt = sql.select(Account).filter_by(lost_token=token)
 
         try:
-            return self.dbsession.query(stmt).scalar_one()
+            return self.dbsession.execulet(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
 
@@ -434,10 +434,16 @@ class ACLEntity(Resource):
 
     # XXX: add patch= arg ?
     def update(self, permission, weight, **data):
-        query = self.query().filter_by(permission=permission)
+        stmt = sql.select(
+            GlobalACL
+        ).filter_by(
+            role=self.role
+        ).filter_by(
+            permission=permission
+        ).with_for_update()
 
         try:
-            role_perm = query.with_for_update().one()
+            role_perm = self.dbsession.execute(stmt).scalar_one()
             self.update_permission_weight(permission, weight)
 
             role_perm.feed(**data)
