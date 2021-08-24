@@ -37,7 +37,16 @@ class SearchResource(Resource):
     def fulltext(self, query, types='*', limit=None):
         # Base query
         search_for = orm.with_polymorphic(Content, types)
+
+
         stmt = sql.select(search_for)
+
+        if 'amnesia.translations' in self.request.registry:
+            stmt = stmt.join(
+                search_for.current_translation
+            ).options(
+                orm.lazyload('*')
+            )
 
         # Transform query to a ts_query
         q_ts = sql.func.plainto_tsquery(query)
@@ -47,14 +56,14 @@ class SearchResource(Resource):
 
         # Highlight title and descriptions columns (through the ts_headline()
         # function)
-        hl_title = sql.func.ts_headline(Content.title, q_ts, hl_sel)
-        hl_descr = sql.func.ts_headline(Content.description, q_ts, hl_sel)
+        hl_title = sql.func.ts_headline(search_for.title, q_ts, hl_sel)
+        hl_descr = sql.func.ts_headline(search_for.description, q_ts, hl_sel)
 
         # Where clause
         filters = [
             search_for.filter_published(),
             q_ts.op('@@')(search_for.fts),
-            Content.is_fts
+            search_for.is_fts
         ]
 
         if types != '*':
@@ -87,7 +96,7 @@ class SearchResource(Resource):
         if limit:
             stmt = stmt.limit(limit)
 
-        result = self.dbsession.execute(stmt).scalar()
+        result = self.dbsession.execute(stmt)
 
         return search_result(result, count)
 
@@ -95,24 +104,44 @@ class SearchResource(Resource):
         ''' Search all Content which are linked to a specific tag '''
         # Base query
         search_for = orm.with_polymorphic(Content, types)
-        search_query = self.dbsession.query(search_for)
+        stmt = sql.select(search_for)
 
-        filters = sql.and_(
+        if 'amnesia.translations' in self.request.registry:
+            stmt = stmt.join(
+                search_for.current_translation
+            ).options(
+                orm.lazyload('*')
+            )
+
+
+        filters = [
             search_for.filter_published(),
             search_for.tags.any(id=tag.id)
-        )
+        ]
 
         if types != '*':
             ids = polymorphic_ids(search_for, types)
             filters.append(search_for.content_type_id.in_(ids))
 
-        search_query = search_query.filter(filters)
-        count = search_query.count()
+        filters = sql.and_(*filters)
+
+        stmt = stmt.filter(filters)
+
+        # Count how much rows we have
+        count_stmt = sql.select(
+            sql.func.count('*')
+        ).select_from(
+            stmt
+        )
+
+        count = self.dbsession.execute(count_stmt).scalar_one()
 
         if limit:
-            search_query = search_query.limit(limit)
+            stmt = stmt.limit(limit)
 
-        return search_result(search_query, count)
+        result = self.dbsession.execute(stmt).scalars()
+
+        return search_result(result, count)
 
     def search_added(self, year, month=None, day=None, types='*', limit=None):
         ''' Search by added date '''
@@ -138,7 +167,15 @@ class SearchResource(Resource):
             filters.append(search_for.content_type_id.in_(ids))
 
         search_query = search_query.filter(filters)
-        count = search_query.count()
+
+        # Count how much rows we have
+        count_stmt = sql.select(
+            sql.func.count('*')
+        ).select_from(
+            stmt
+        )
+
+        count = self.dbsession.execute(count_stmt).scalar_one()
 
         search_query = search_query.order_by(search_for.added.desc())
 

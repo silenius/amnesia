@@ -6,6 +6,8 @@ import json
 
 from pyramid.view import view_config
 
+from sqlalchemy import sql
+
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.content_type import ContentType
 
@@ -19,7 +21,9 @@ def includeme(config):
 def admin(context, request):
     content = context.entity
     copy_oids = json.dumps(request.session.get('copy_oids', []))
-    content_types = request.dbsession.query(ContentType).all()
+
+    stmt = sql.select(ContentType).order_by(ContentType.name)
+    content_types = request.dbsession.execute(stmt).scalars().all()
 
     return {
         'content': content,

@@ -62,10 +62,7 @@ class FolderEntity(Entity):
             return False
 
     def bulk_delete(self, ids, owner=None):
-        filters = [
-            Content.id.in_(ids),
-            Content.parent == self.entity
-        ]
+        filters = [Content.id.in_(ids), Content.parent == self.entity]
 
         if owner:
             filters.append(Content.owner == owner)

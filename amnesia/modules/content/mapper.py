@@ -116,18 +116,23 @@ def includeme(config):
             #####################
 
             'position_in_container': orm.column_property(
-                sql.func.row_number().
-                over(partition_by=tables['content'].c.container_id,
-                     order_by=tables['content'].c.weight.desc()),
+                sql.func.row_number().over(
+                    partition_by=tables['content'].c.container_id,
+                    order_by=tables['content'].c.weight.desc()
+                ),
                 deferred=True,
                 group='window_func'
             ),
 
-            # FIXME: move to folder mapper with a LATERAL expression
             'count_children': orm.column_property(
-                sql.select([sql.func.count()]).where(
+                sql.select(
+                    sql.func.count('*')
+                ).where(
                     _count_alias.c.container_id == tables['content'].c.id
-                ).correlate(tables['content']).label('count_children'),
+                ).correlate_except(
+                    _count_alias
+                ).scalar_subquery(),
                 deferred=True
-            ),
+            )
+
         })

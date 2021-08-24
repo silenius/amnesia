@@ -76,22 +76,6 @@ class FolderBrowserView(BaseView):
 
         return response
 
-    @view_config(request_method='GET', name='browse_events')
-    def browse_events(self):
-        container_id = self.request.registry.settings['default_event_pictures_container_id']
-        random_pictures = self.request.dbsession.query(File).filter_by(
-            container_id=container_id).order_by(sql.func.random()).limit(50).all()
-        random_picture = lambda: choice(random_pictures)
-        return self.browse(random_picture=random_picture)
-
-    @view_config(request_method='GET', name='browse_news')
-    def browse_news(self):
-        container_id = self.request.registry.settings['default_news_pictures_container_id']
-        random_pictures = self.request.dbsession.query(File).filter_by(
-            container_id=container_id).order_by(sql.func.random()).limit(50).all()
-        random_picture = lambda: choice(random_pictures)
-        return self.browse(random_picture=random_picture)
-
     @view_config(request_method='GET', name='children',
                  accept='application/json')
     def children(self):

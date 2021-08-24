@@ -51,9 +51,8 @@ class EntityOrder:
         # If a path is required, the first one should be a polymorphic entity
         self.path = path if path is not None else []
 
-    #######################################################################
-    # PROPERTIES ##########################################################
-    #######################################################################
+
+    # DIRECTION
 
     @property
     def direction(self):
@@ -62,6 +61,8 @@ class EntityOrder:
     @direction.setter
     def direction(self, value):
         self._direction = 'desc' if value.lower() == 'desc' else 'asc'
+
+    # NULLS
 
     @property
     def nulls(self):
@@ -78,6 +79,8 @@ class EntityOrder:
                 self._nulls = value
             else:
                 self._nulls = None
+
+    # DOC
 
     @property
     def doc(self):
@@ -145,10 +148,19 @@ class EntityOrder:
 
     JSON = to_json
 
-    def to_sql(self, entity, direction=None, nulls=None):
+    def to_sql(self, entity=None, direction=None, nulls=None):
         """ Returns an SQL expression """
 
-        col = getattr(self.src, self.prop)
+        if entity:
+            insp = inspect(entity)
+
+            if insp.class_ is self.src:
+                col = getattr(entity, self.prop)
+            else:
+                col = getattr(entity, self.src.__name__)
+                col = getattr(col, self.prop)
+        else:
+            col = getattr(self.src, self.prop)
 
         if not direction:
             direction = self.direction
@@ -159,7 +171,12 @@ class EntityOrder:
         if direction == 'desc':
             col = col.desc()
 
-        return col.nullslast() if nulls == 'last' else col.nullsfirst()
+        if nulls == 'last':
+            col = col.nullslast()
+        elif nulls == 'first':
+            col = col.nullsfirst()
+
+        return col
 
     @classmethod
     def from_dict(cls, data, pm):

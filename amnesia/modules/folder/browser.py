@@ -12,6 +12,12 @@ from sqlalchemy import sql
 
 from amnesia.modules.content_type import ContentType
 
+try:
+    from amnesia_multilingual.utils import with_current_translations
+    WITH_TRANSLATION=True
+except ImportError:
+    WITH_TRANSLATION=False
+
 log = logging.getLogger(__name__)
 
 FolderBrowserResult = namedtuple(
@@ -61,7 +67,12 @@ class FolderBrowser:
             entity = orm.with_polymorphic(entity, with_polymorphic)
 
         # Ok, now we have our base entity \o/
-        q = self.dbsession.query(entity)
+        q = sql.select(entity)
+
+        # If amnesia_multilingual is enabled then we must JOIN the translation
+        # tables too
+        if WITH_TRANSLATION:
+            (q, lang_partition) = with_current_translations(q, entity)
 
         #########
         # SORTS #
@@ -125,7 +136,10 @@ class FolderBrowser:
         filters = entity.parent == self.folder
 
         if only_published:
-            filters = sql.and_(filters, entity.filter_published())
+            filters = sql.and_(
+                filters,
+                entity.filter_published()
+            )
 
         if filter_types:
             q = q.join(entity.type).options(orm.contains_eager(entity.type))
@@ -140,25 +154,34 @@ class FolderBrowser:
 
         # Count how much children we have in this container (used for
         # pagination)
-        count = q.count() if count else None
+        stmt_count = sql.select(
+            sql.func.count('*')
+        ).select_from(q)
+
+        count = self.dbsession.execute(stmt_count).scalar_one()
 
         ##########################
         # ORDER / LIMIT / OFFSET #
         ##########################
 
-        if sort_by:
-            sort_by = [o.to_sql(entity) for o in sort_by]
-        else:
-            sort_by = [entity.weight.desc()]
+#        if sort_by:
+#            sort_by = [o.to_sql(entity) for o in sort_by]
+#        else:
+#            sort_by = [entity.weight.desc()]
+
+        sort_by = []
 
         if sort_folder_first:
             q = q.join(entity.type).options(orm.contains_eager(entity.type))
             sort_by.insert(0, sql.func.lower(ContentType.name) != 'folder')
+
         # Query database
         # FIXME: OFFSET based pagination isn't scalable
         q = q.options(
-            (orm.defer(p) for p in deferred),
-            (orm.undefer(p) for p in undeferred)
+            *(orm.defer(p) for p in deferred),
+            *(orm.undefer(p) for p in undeferred)
         ).order_by(*sort_by).offset(offset).limit(limit)
 
-        return FolderBrowserResult(q, sort_by, count)
+        result = self.dbsession.execute(q).scalars()
+
+        return FolderBrowserResult(result, sort_by, count)

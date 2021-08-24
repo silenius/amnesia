@@ -18,6 +18,7 @@ from pyramid.security import Authenticated
 from pyramid.view import view_config
 
 from sqlalchemy import orm
+from sqlalchemy import sql
 
 from amnesia import order
 
@@ -118,7 +119,9 @@ class FolderCRUD(ContentCRUD):
         }
 
         if self.request.has_permission('create'):
-            context['content_types'] = self.dbsession.query(ContentType).all()
+            stmt = sql.select(ContentType).order_by(ContentType.name)
+            result = self.dbsession.execute(stmt).scalars().all()
+            context['content_types'] = result
 
         try:
             template = self.entity.props['template_show']

@@ -3,6 +3,7 @@
 from pyramid.events import subscriber
 from pyramid.events import ApplicationCreated
 
+from sqlalchemy import sql
 from sqlalchemy import orm
 from sqlalchemy.event import listen
 from sqlalchemy.types import Integer
@@ -62,20 +63,22 @@ def includeme(config):
     listen(Folder, 'mapper_configured', default_limit)
 
 def default_limit(mapper, class_):
-    class_.default_limit = pg_json_property('props', 'default_limit', Integer,
-                                            default=10)
+    class_.default_limit = pg_json_property(
+        'props', 'default_limit', Integer, default=10
+    )
 
-
-@subscriber(ApplicationCreated)
-def configure_root_folder(event):
-    registry = event.app.registry
-
-    dbsession = registry['dbsession_factory']()
-
-    registry['root_folder'] = dbsession.query(Folder).options(
-        orm.noload('*')
-    ).filter_by(
-        container_id=None
-    ).one()
-
-    dbsession.close()
+#@subscriber(ApplicationCreated)
+#def configure_root_folder(event):
+#    registry = event.app.registry
+#
+#    dbsession = registry['dbsession_factory']()
+#
+#    stmt = sql.select(Folder).options(
+#        orm.lazyload('*')
+#    ).where(
+#        Folder.container_id == None
+#    )
+#
+#    registry['root_folder'] = dbsession.execute(stmt).scalar_one()
+#
+#    dbsession.close()

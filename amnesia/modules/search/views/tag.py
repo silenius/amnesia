@@ -18,7 +18,7 @@ def includeme(config):
              renderer='amnesia:templates/search/tag.pt')
 def tag(context, request):
     tag_id = request.GET.get('id', '').strip()
-    tag_obj = request.dbsession.query(Tag).get(tag_id)
+    tag_obj = request.dbsession.get(Tag, tag_id)
 
     if not tag_obj:
         raise HTTPNotFound()
@@ -26,7 +26,7 @@ def tag(context, request):
     search_query = context.tag_id(tag_obj, limit=500)
 
     return {
-        'results': search_query.query.all(),
+        'results': search_query.result,
         'count': search_query.count,
         'tag': tag_obj
     }
