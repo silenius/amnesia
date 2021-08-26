@@ -17,6 +17,7 @@ def includeme(config):
 
     config.registry.settings['amnesia:orders'] = {
         'title': EntityOrder(Content, 'title', 'asc', doc='title'),
+        'description': EntityOrder(Content, 'description', 'asc', doc='description'),
         'weight': EntityOrder(Content, 'weight', 'desc', doc='default'),
         'update': EntityOrder(
             Content, 'last_update', 'desc', doc='last update'

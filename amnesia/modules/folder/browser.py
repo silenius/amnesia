@@ -27,9 +27,10 @@ FolderBrowserResult = namedtuple(
 
 class FolderBrowser:
 
-    def __init__(self, folder, dbsession):
+    def __init__(self, request, folder):
+        self.request = request
         self.folder = folder
-        self.dbsession = dbsession
+        self.dbsession = request.dbsession
 
     def query(self, sort_by=(), offset=0, limit=None, deferred=(),
               undeferred=(), sort_folder_first=False, count=True,
@@ -164,12 +165,14 @@ class FolderBrowser:
         # ORDER / LIMIT / OFFSET #
         ##########################
 
-#        if sort_by:
-#            sort_by = [o.to_sql(entity) for o in sort_by]
-#        else:
-#            sort_by = [entity.weight.desc()]
-
-        sort_by = []
+        if sort_by:
+            if WITH_TRANSLATION:
+                trans_cols = self.request.registry['amnesia.translations']['attrs']
+                sort_by = [o.to_sql(lang_partition) if (o.src in trans_cols and o.prop in trans_cols[o.src]) else o.to_sql(entity) for o in sort_by]
+            else:
+                sort_by = [o.to_sql(entity) for o in sort_by]
+        else:
+            sort_by = [entity.weight.desc()]
 
         if sort_folder_first:
             q = q.join(entity.type).options(orm.contains_eager(entity.type))

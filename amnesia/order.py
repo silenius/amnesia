@@ -148,16 +148,18 @@ class EntityOrder:
 
     JSON = to_json
 
-    def to_sql(self, entity=None, direction=None, nulls=None):
+    def to_sql(self, src=None, direction=None, nulls=None):
         """ Returns an SQL expression """
 
-        if entity:
-            insp = inspect(entity)
+        if src is not None:
+            insp = inspect(src)
 
-            if insp.class_ is self.src:
-                col = getattr(entity, self.prop)
+            if insp.is_selectable:
+                col = getattr(src.c, self.prop)
+            elif insp.class_ is self.src:
+                col = getattr(src, self.prop)
             else:
-                col = getattr(entity, self.src.__name__)
+                col = getattr(src, self.src.__name__)
                 col = getattr(col, self.prop)
         else:
             col = getattr(self.src, self.prop)

@@ -43,7 +43,7 @@ class FolderBrowserView(BaseView):
         except ValidationError as error:
             raise HTTPBadRequest(error.messages)
 
-        browser = FolderBrowser(self.context.entity, self.request.dbsession)
+        browser = FolderBrowser(self.request, self.context.entity)
         result = browser.query(**data)
         return {
             'results': schema.dump(result.query.all(), many=True)
@@ -62,7 +62,7 @@ class FolderBrowserView(BaseView):
         except ValidationError as error:
             raise HTTPBadRequest(error.messages)
 
-        browser = FolderBrowser(self.context.entity, self.request.dbsession)
+        browser = FolderBrowser(self.request, self.context.entity)
         result = browser.query(**data)
 
         data.update(result._asdict())
