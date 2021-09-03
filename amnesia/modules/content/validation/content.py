@@ -24,6 +24,8 @@ from marshmallow.fields import List
 from marshmallow.validate import Range
 from marshmallow.validate import OneOf
 
+from sqlalchemy import sql
+
 from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
 from amnesia.utils.validation.fields import JSON
@@ -112,14 +114,14 @@ class ContentSchema(Schema, PyramidContextMixin):
     def post_load_process(self, item, **kwargs):
         if 'tags_id' in item:
             filters = Tag.id.in_(item.pop('tags_id'))
-            item['tags'] = self.dbsession.query(Tag).filter(filters).all()
+            stmt_tags = sql.select(Tag).filter(filters)
+            item['tags'] = self.dbsession.execute(stmt_tags).scalars().all()
 
         if 'container_id' in item:
-            item['parent'] = self.dbsession.query(Folder).get(
-                item.pop('container_id'))
+            item['parent'] = self.dbsession.get(Folder, item.pop('container_id'))
 
-        item['state'] = self.dbsession.query(State).filter_by(
-            name='published').one()
+        stmt_state = sql.select(State).filter_by(name='published')
+        item['state'] = self.dbsession.execute(stmt_state).scalar_one()
 
         entity = self.context.get('entity')
         has_permission = self.context['request'].has_permission
