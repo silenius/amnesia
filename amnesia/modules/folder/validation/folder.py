@@ -17,6 +17,8 @@ from marshmallow.fields import List
 
 from marshmallow.validate import OneOf
 
+from sqlalchemy import sql
+
 from amnesia.utils.validation import as_list
 from amnesia.modules.content_type import ContentType
 from amnesia.modules.content.validation import ContentSchema
@@ -69,8 +71,10 @@ class FolderSchema(ContentSchema):
         if data['polymorphic_loading']:
             pc = data.get('polymorphic_children_ids', [])
             if pc:
-                pc = self.dbsession.query(ContentType).filter(
-                    ContentType.id.in_(pc)).all()
+                stmt_pc = sql.select(ContentType).filter(
+                    ContentType.id.in_(pc)
+                )
+                pc = self.dbsession.execute(stmt_pc).scalars().all()
             data['polymorphic_children'] = pc
         else:
             data['polymorphic_children'] = []

@@ -39,14 +39,13 @@ class Mime(Base):
             Mime.name == minor
         )
 
-        query = dbsession.query(Mime).join(Mime.major).options(
-            orm.contains_eager(Mime.major)
-        ).filter(cond)
+        result = dbsession.execute(
+            sql.select(Mime).join(Mime.major).options(
+                orm.contains_eager(Mime.major)
+            ).filter(cond)
+        )
 
-        try:
-            return query.one()
-        except NoResultFound:
-            return None
+        return result.one_or_none()
 
     ###########
     # Filters #

@@ -93,8 +93,9 @@ class ACLSchema(Schema, PyramidContextMixin):
     @post_load
     def permission(self, item, **kwargs):
         if 'permission_id' in item:
-            item['permission'] = self.dbsession.query(Permission).get(
-                item['permission_id'])
+            item['permission'] = self.dbsession.get(
+                Permission, item['permission_id']
+            )
 
         return item
 
@@ -110,6 +111,6 @@ class ContentACLSchema(ACLSchema):
     @post_load
     def role(self, item, **kwargs):
         if 'role_id' in item:
-            item['role'] = self.dbsession.query(Role).get(item['role_id'])
+            item['role'] = self.dbsession.get(Role, item['role_id'])
 
         return item

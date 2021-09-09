@@ -13,6 +13,8 @@ from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 
+from sqlalchemy import sql
+
 from amnesia.modules.content import Entity
 from amnesia.modules.account import Permission
 from amnesia.modules.account import Role
@@ -75,15 +77,17 @@ class ContentCRUD(BaseView):
 
         if self.request.has_permission('manage_acl'):
             if 'permissions' not in data:
-                data['permissions'] = self.dbsession.query(
-                    Permission).order_by(Permission.name)
+                data['permissions'] = self.dbsession.execute(
+                    sql.select(Permission).order_by(Permission.name)
+                ).scalars().all()
 
             if 'parent_acl' not in data:
                 data['parent_acl'] = get_parent_acl(self.context)
 
             if 'roles' not in data:
-                data['roles'] = self.dbsession.query(Role).order_by(
-                    Role.virtual.desc())
+                data['roles'] = self.dbsession.execute(
+                    sql.select(Role).order_by(Role.virtual.desc())
+                ).scalars().all()
 
         if 'is_fts' not in data:
             data['is_fts'] = True

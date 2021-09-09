@@ -11,6 +11,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from pyramid.httpexceptions import HTTPNotFound
 
 from marshmallow import ValidationError
+from sqlalchemy import sql
 
 from amnesia.views import BaseView
 from amnesia.modules.account import Account
@@ -148,7 +149,8 @@ class RoleMemberView(BaseView):
     @view_config(request_method='GET', accept='text/html',
                  renderer='amnesia:templates/role/members.pt')
     def get_html(self):
-        accounts = self.context.dbsession.query(Account).all()
+        stmt = sql.select(Account)
+        accounts = self.dbsession.execute(stmt).scalars().all()
 
         return {
             'role': self.context.role,
@@ -176,7 +178,7 @@ class RoleMemberView(BaseView):
         except (KeyError, ValueError) as e:
             raise HTTPInternalServerError()
         else:
-            account = self.context.dbsession.query(Account).get(account_id)
+            account = self.dbsession.get(Account, account_id)
 
             if not account:
                 raise HTTPNotFound()

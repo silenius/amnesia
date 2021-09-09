@@ -16,6 +16,12 @@ from amnesia.resources import Resource
 from amnesia.utils import polymorphic_ids
 from amnesia.modules.content import Content
 
+try:
+    from amnesia_multilingual.utils import with_current_translations
+    WITH_TRANSLATION=True
+except ImportError:
+    WITH_TRANSLATION=False
+
 search_result = namedtuple(
     'SearchResult', ['result', 'count']
 )
@@ -38,15 +44,13 @@ class SearchResource(Resource):
         # Base query
         search_for = orm.with_polymorphic(Content, types)
 
-
         stmt = sql.select(search_for)
 
         if 'amnesia.translations' in self.request.registry:
-            stmt = stmt.join(
-                search_for.current_translation
-            ).options(
-                orm.lazyload('*')
-            )
+            stmt, lang_partition = with_current_translations(stmt, search_for)
+            src = lang_partition.c
+        else:
+            src = search_for
 
         # Transform query to a ts_query
         q_ts = sql.func.plainto_tsquery(query)
@@ -56,13 +60,13 @@ class SearchResource(Resource):
 
         # Highlight title and descriptions columns (through the ts_headline()
         # function)
-        hl_title = sql.func.ts_headline(search_for.title, q_ts, hl_sel)
-        hl_descr = sql.func.ts_headline(search_for.description, q_ts, hl_sel)
+        hl_title = sql.func.ts_headline(src.title, q_ts, hl_sel)
+        hl_descr = sql.func.ts_headline(src.description, q_ts, hl_sel)
 
         # Where clause
         filters = [
             search_for.filter_published(),
-            q_ts.op('@@')(search_for.fts),
+            q_ts.op('@@')(src.fts),
             search_for.is_fts
         ]
 
@@ -90,7 +94,7 @@ class SearchResource(Resource):
         )
 
         stmt = stmt.order_by(
-            q_ts.op('@@')(Content.fts)
+            q_ts.op('@@')(src.fts)
         )
 
         if limit:
@@ -112,7 +116,6 @@ class SearchResource(Resource):
             ).options(
                 orm.lazyload('*')
             )
-
 
         filters = [
             search_for.filter_published(),
@@ -150,7 +153,7 @@ class SearchResource(Resource):
 
         search_date = date(year, month, day)
         search_for = orm.with_polymorphic(Content, types)
-        search_query = self.dbsession.query(search_for)
+        search_query = sql.select(search_for)
 
         filters = sql.and_(
             search_for.filter_published(),
