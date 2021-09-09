@@ -130,15 +130,15 @@ class LanguageSelector(Widget):
         super().__init__(request)
         langs = aslist(self.settings.get('available_languages', ''))
 
-        stmt = sql.select(
-            Language
-        ).filter(
-            Language.id.in_(langs)
-        ).order_by(
-            Language.name
-        )
-
-        self.available_languages = self.dbsession.execute(stmt).scalars().all()
+        self.available_languages = self.dbsession.execute(
+            sql.select(
+                Language
+            ).filter(
+                Language.id.in_(langs)
+            ).order_by(
+                Language.name
+            )
+        ).scalars().all()
 
     def url(self, lang):
         if self.request._script_name != self.request.script_name:

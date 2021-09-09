@@ -66,8 +66,9 @@ class ContentCRUD(BaseView):
             data = {}
 
         if 'all_tags' not in data:
-            q_tag = self.dbsession.query(Tag)
-            data['all_tags'] = q_tag.order_by(Tag.name).all()
+            data['all_tags'] = self.dbsession.execute(
+                sql.select(Tag).order_by(Tag.name)
+            ).scalars().all()
 
         if 'on_success' not in data:
             data['on_success'] = 303

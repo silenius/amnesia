@@ -10,6 +10,8 @@ from pyramid.httpexceptions import HTTPCreated
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPInternalServerError
 
+from sqlalchemy import sql
+
 from amnesia.modules.country import Country
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.event import Event
@@ -32,9 +34,9 @@ class EventCRUD(ContentCRUD):
 
     def form(self, data, errors=None):
         if 'countries' not in data:
-            # pylint: disable=E1101
-            q_country = self.dbsession.query(Country)
-            data['countries'] = q_country.order_by(Country.name).all()
+            data['countries'] = self.dbsession.execute(
+                sql.select(Country).order_by(Country.name)
+            ).scalars().all()
         return super().form(data, errors)
 
     @view_config(request_method='GET', name='edit',

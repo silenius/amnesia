@@ -25,11 +25,9 @@ def _get_user(request):
     user = None
 
     if userid is not None:
-        user = (
-            request.dbsession.query(Account)
-            .filter_by(id=userid, enabled=True)
-            .one_or_none()
-        )
+        user = request.dbsession.execute(
+            sql.select(Account).filter_by(id=userid, enabled=True)
+        ).one_or_none()
 
     return user
 
