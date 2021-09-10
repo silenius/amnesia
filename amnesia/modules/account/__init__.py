@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from sqlalchemy import sql
 
 from .model import Account
 from .model import Role
@@ -27,7 +27,7 @@ def _get_user(request):
     if userid is not None:
         user = request.dbsession.execute(
             sql.select(Account).filter_by(id=userid, enabled=True)
-        ).one_or_none()
+        ).scalar_one_or_none()
 
     return user
 

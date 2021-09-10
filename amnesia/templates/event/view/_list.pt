@@ -15,7 +15,7 @@
                 will take place
             </span>
 
-            in <span class="bold">${content.country.name} <img src="${request.static_url('amnesia:static/images/flags/{}.gif'.format(content.country.iso_code))}" class="opa" /></span> <span tal:condition="content.address">(${content.address})</span> -
+            in <span class="bold">${content.country.name} <img src="${request.static_url('amnesia:static/images/flags/{}.gif'.format(content.country.iso))}" class="opa" /></span> <span tal:condition="content.address">(${content.address})</span> -
 
             <!--! <span>${h.format_event_date(content)}</span> -->
         </div>
