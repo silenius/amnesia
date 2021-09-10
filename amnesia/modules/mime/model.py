@@ -43,9 +43,9 @@ class Mime(Base):
             sql.select(Mime).join(Mime.major).options(
                 orm.contains_eager(Mime.major)
             ).filter(cond)
-        )
+        ).scalar_one_or_none()
 
-        return result.one_or_none()
+        return result
 
     ###########
     # Filters #
