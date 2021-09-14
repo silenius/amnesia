@@ -130,6 +130,8 @@ class FolderBrowser:
             if contains_eager:
                 q = q.options(contains_eager)
 
+        q = q.join(entity.type).options(orm.contains_eager(entity.type))
+
         ###########
         # FILTERS #
         ###########
@@ -143,8 +145,6 @@ class FolderBrowser:
             )
 
         if filter_types:
-            q = q.join(entity.type).options(orm.contains_eager(entity.type))
-
             filters = sql.and_(
                 sql.func.lower(ContentType.name).in_(filter_types),
                 filters
@@ -175,7 +175,6 @@ class FolderBrowser:
             sort_by = [entity.weight.desc()]
 
         if sort_folder_first:
-            q = q.join(entity.type).options(orm.contains_eager(entity.type))
             sort_by.insert(0, sql.func.lower(ContentType.name) != 'folder')
 
         # Query database
