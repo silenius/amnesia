@@ -23,7 +23,7 @@ install_requires = [
     'pyramid_mailer',
     'SQLAlchemy~=1.4',
     'transaction',
-    'zope.sqlalchemy',
+    'zope.sqlalchemy>=1.6',
     'psycopg2',
     'pytz',
     'rutter',
