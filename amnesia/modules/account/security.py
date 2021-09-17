@@ -76,15 +76,17 @@ def get_content_acl(request, entity, recursive=False, with_global_acl=True):
     if not recursive:
         # Content ACL only
         if not with_global_acl:
-            stmt = sql.select(
-                ContentACL
-            ).filter_by(
-                content=entity
-            ).order_by(
-                ContentACL.weight.desc()
-            )
+            result = dbsession.execute(
+                sql.select(
+                    ContentACL
+                ).filter_by(
+                    content=entity
+                ).order_by(
+                    ContentACL.weight.desc()
+                )
+            ).scalars().all()
 
-            return dbsession.execute(stmt).scalars().all()
+            return result
 
         # Content ACL and Global ACL
         acl_types = orm.with_polymorphic(
@@ -155,16 +157,18 @@ def get_content_acl(request, entity, recursive=False, with_global_acl=True):
         stmt = sql.select(
             au
         ).order_by(
-            acls.c.level.nullslast(), acls.c.weight.desc()
+            acls.c.level.nullslast(),
+            acls.c.weight.desc()
         )
 
         return dbsession.execute(stmt).scalars().all()
 
     stmt = content_acls.order_by(
-        contents.c.level, contents.c.weight.desc()
+        contents.c.level,
+        contents.c.weight.desc()
     )
 
-    return dbsession.execute(stmt).scalars().al()
+    return dbsession.execute(stmt).scalars().all()
 
 def get_parent_acl(resource):
     parent_acl = []

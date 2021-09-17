@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# pylint: disable=E1101
-
 import logging
 
 from pyramid.httpexceptions import HTTPNotFound
