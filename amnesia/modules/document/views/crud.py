@@ -14,6 +14,7 @@ from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
 from amnesia.modules.document import DocumentEntity
 from amnesia.modules.document.validation import DocumentSchema
+from amnesia.modules.document.forms import DocumentForm
 
 from ...content.views import ContentCRUD
 
@@ -28,26 +29,80 @@ def includeme(config):
 class DocumentCRUD(ContentCRUD):
     ''' Document CRUD '''
 
-    form_tmpl = 'amnesia:templates/document/_form.pt'
-
     @view_config(request_method='GET', name='edit',
                  renderer='amnesia:templates/document/edit.pt',
                  context=DocumentEntity,
                  permission='edit')
     def edit(self):
         data = DocumentSchema().dump(self.entity)
-        return self.edit_form(data)
+        form = DocumentForm(self.request)
+        action = self.request.resource_path(self.context)
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     @view_config(request_method='GET', name='add_document',
                  renderer='amnesia:templates/document/edit.pt',
                  context=FolderEntity,
                  permission='create')
     def new(self):
-        form_data = self.request.GET.mixed()
-        return self.edit_form(form_data, view='@@add_document')
+        data = self.request.GET.mixed()
+        form = DocumentForm(self.request)
+        action = self.request.resource_path(self.context, '@@add_document')
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     #########################################################################
-    # READ                                                                  #
+    # (C)RUD - CREATE                                                       #
+    #########################################################################
+
+    @view_config(request_method='POST',
+                 renderer='amnesia:templates/document/edit.pt',
+                 context=FolderEntity,
+                 name='add_document',
+                 permission='create')
+    def create(self):
+        ''' Create a new Document '''
+
+        form_data = self.request.POST.mixed()
+        schema = DocumentSchema(context={
+            'request': self.request
+        })
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as error:
+            self.request.response.status_int = 400
+
+            form = DocumentForm(self.request)
+            form_action = self.request.resource_path(
+                self.context, '@@add_document'
+            )
+
+            return {
+                'form': form.render(form_data, error.messages),
+                'form_action': form_action
+            }
+
+        new_entity = self.context.create(Document, data)
+
+        if new_entity:
+            location = self.request.resource_url(new_entity)
+            http_code = data['on_success']
+            if http_code == 201:
+                return HTTPCreated(location=location)
+            if http_code == 303:
+                return HTTPSeeOther(location=location)
+
+        raise HTTPInternalServerError()
+
+    #########################################################################
+    # C(R)UD - READ                                                         #
     #########################################################################
 
     @view_config(request_method='GET', renderer='json',
@@ -68,49 +123,15 @@ class DocumentCRUD(ContentCRUD):
         return super().read()
 
     #########################################################################
-    # CREATE                                                                #
+    # CR(U)D - UPDATE                                                       #
     #########################################################################
 
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/document/edit.pt',
-                 context=FolderEntity,
-                 name='add_document',
-                 permission='create')
-    def create(self):
-        ''' Create a new Document '''
-
-        form_data = self.request.POST.mixed()
-        schema = DocumentSchema(context={
-            'request': self.request
-        })
-
-        try:
-            data = schema.load(form_data)
-        except ValidationError as error:
-            self.request.response.status_int = 400
-            return self.edit_form(form_data, error.messages,
-                                  view='@@add_document')
-
-        new_entity = self.context.create(Document, data)
-
-        if new_entity:
-            location = self.request.resource_url(new_entity)
-            http_code = data['on_success']
-            if http_code == 201:
-                return HTTPCreated(location=location)
-            if http_code == 303:
-                return HTTPSeeOther(location=location)
-
-        raise HTTPInternalServerError()
-
-    #########################################################################
-    # UPDATE                                                                #
-    #########################################################################
-
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/document/edit.pt',
-                 context=DocumentEntity,
-                 permission='edit')
+    @view_config(
+        request_method='POST',
+        renderer='amnesia:templates/document/edit.pt',
+        context=DocumentEntity,
+        permission='edit'
+    )
     def update(self):
         form_data = self.request.POST.mixed()
         schema = DocumentSchema(context={
@@ -120,7 +141,13 @@ class DocumentCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            form = DocumentForm(self.request)
+            form_action = self.request.resource_path(self.context)
+
+            return {
+                'form': form.render(form_data, error.messages),
+                'form_action': form_action
+            }
 
         updated_entity = self.context.update(data)
 

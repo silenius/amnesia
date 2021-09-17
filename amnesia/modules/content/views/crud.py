@@ -41,58 +41,6 @@ class ContentCRUD(BaseView):
     def session(self):
         return self.request.session
 
-    def edit_form(self, form_data, errors=None, view=None):
-        if errors is None:
-            errors = {}
-
-        if view:
-            action = self.request.resource_path(self.context, view)
-        else:
-            action = self.request.resource_path(self.context)
-
-        form_data.update({
-            'form': self.form(form_data, errors),
-            'form_action': action
-        })
-
-        return form_data
-
-    def form(self, data=None, errors=None):
-        if data is None:
-            data = {}
-
-        if 'all_tags' not in data:
-            data['all_tags'] = self.dbsession.execute(
-                sql.select(Tag).order_by(Tag.name)
-            ).scalars().all()
-
-        if 'on_success' not in data:
-            data['on_success'] = 303
-
-        if 'props' not in data:
-            data['props'] = {}
-
-        if self.request.has_permission('manage_acl'):
-            if 'permissions' not in data:
-                data['permissions'] = self.dbsession.execute(
-                    sql.select(Permission).order_by(Permission.name)
-                ).scalars().all()
-
-            if 'parent_acl' not in data:
-                data['parent_acl'] = get_parent_acl(self.context)
-
-            if 'roles' not in data:
-                data['roles'] = self.dbsession.execute(
-                    sql.select(Role).order_by(Role.virtual.desc())
-                ).scalars().all()
-
-        if 'is_fts' not in data:
-            data['is_fts'] = True
-
-        data['csrf_token'] = self.session.get_csrf_token()
-
-        return render_form(self.form_tmpl, self.request, data, errors=errors)
-
     #########################################################################
     # READ                                                                  #
     #########################################################################

@@ -23,6 +23,7 @@ from amnesia.modules.file import File
 from amnesia.modules.file import utils as file_utils
 from amnesia.modules.file import FileEntity
 from amnesia.modules.file.validation import FileSchema
+from amnesia.modules.file.forms import FileForm
 from amnesia.modules.file.events import FileUpdated
 from amnesia.modules.content.views import ContentCRUD
 
@@ -48,8 +49,6 @@ def download(context, request):
 class FileCRUD(ContentCRUD):
     """ File CRUD """
 
-    form_tmpl = 'amnesia:templates/file/_form.pt'
-
     @view_config(context=FileEntity, request_method='GET', name='edit',
                  renderer='amnesia:templates/file/edit.pt')
     def edit(self):
@@ -61,36 +60,26 @@ class FileCRUD(ContentCRUD):
                  renderer='amnesia:templates/file/edit.pt',
                  context=FolderEntity, permission='create')
     def new(self):
-        form_data = self.request.GET.mixed()
-        return self.edit_form(form_data, view='@@add_file')
+        data = self.request.GET.mixed()
+        form = FileForm(self.request)
+        action = self.request.resource_path(self.context, '@@add_file')
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     #########################################################################
-    # READ                                                                  #
+    # (C)RUD - CREATE                                                       #
     #########################################################################
 
-    @view_config(request_method='GET', renderer='json',
-                 accept='application/json', permission='read',
-                 context=FileEntity)
-    def read_json(self):
-        schema = FileSchema(context={'request': self.request})
-        return schema.dump(self.context.entity, many=False)
-
-    @view_config(request_method='GET',
-                 renderer='amnesia:templates/file/show.pt',
-                 accept='text/html', permission='read',
-                 context=FileEntity)
-    def read_html(self):
-        return super().read()
-
-    #########################################################################
-    # CREATE                                                                #
-    #########################################################################
-
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/file/edit.pt',
-                 context=FolderEntity,
-                 name='add_file',
-                 permission='create')
+    @view_config(
+        request_method='POST',
+        renderer='amnesia:templates/file/edit.pt',
+        context=FolderEntity,
+        name='add_file',
+        permission='create'
+    )
     def create(self):
         form_data = self.request.POST.mixed()
         schema = FileSchema(context={'request': self.request})
@@ -99,7 +88,15 @@ class FileCRUD(ContentCRUD):
             data = schema.load(form_data)
         except ValidationError as error:
             self.request.response.status_int = 400
-            return self.edit_form(form_data, error.messages, view='@@add_file')
+            form = FileForm(self.request)
+            form_action = self.request.resource_path(
+                self.context, '@@add_file'
+            )
+
+            return {
+                'form': form.render(form_data, error.messages),
+                'form_action': form_action
+            }
 
         data.update({
             'file_size': 0,
@@ -120,14 +117,42 @@ class FileCRUD(ContentCRUD):
 
         raise HTTPInternalServerError()
 
+
     #########################################################################
-    # UPDATE                                                                #
+    # C(R)UD - READ                                                         #
     #########################################################################
 
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/document/edit.pt',
-                 context=FileEntity,
-                 permission='edit')
+    @view_config(
+        request_method='GET',
+        renderer='json',
+        accept='application/json',
+        permission='read',
+        context=FileEntity
+    )
+    def read_json(self):
+        schema = FileSchema(context={'request': self.request})
+        return schema.dump(self.context.entity, many=False)
+
+    @view_config(
+        request_method='GET',
+        renderer='amnesia:templates/file/show.pt',
+        accept='text/html',
+        permission='read',
+        context=FileEntity
+    )
+    def read_html(self):
+        return super().read()
+
+    #########################################################################
+    # CR(U)D - UPDATE                                                       #
+    #########################################################################
+
+    @view_config(
+        request_method='POST',
+        renderer='amnesia:templates/file/edit.pt',
+        context=FileEntity,
+        permission='edit'
+    )
     def update(self):
         form_data = self.request.POST.mixed()
         schema = FileSchema(
@@ -138,7 +163,13 @@ class FileCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            form = FileForm(self.request)
+            form_action = self.request.resource_path(self.context)
+
+            return {
+                'form': form.render(form_data, error.messages),
+                'form_action': form_action
+            }
 
         data.update({
             'file_size': self.entity.file_size,

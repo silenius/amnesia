@@ -28,6 +28,7 @@ from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder.validation import FolderSchema
+from amnesia.modules.folder.forms import FolderForm
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -39,45 +40,46 @@ def includeme(config):
 class FolderCRUD(ContentCRUD):
     """ Folder CRUD """
 
-    form_tmpl = 'amnesia:templates/folder/_form.pt'
-
-    def form(self, data=None, errors=None):
-        if data is None:
-            data = {}
-
-        if 'polymorphic_children_ids' not in data:
-            pc_ids = [i['id'] for i in data.get('polymorphic_children', ())]
-            data['polymorphic_children_ids'] = pc_ids
-
-        if 'default_order' not in data:
-            data['default_order'] = []
-
-        return super().form(data, errors)
-
-    @view_config(context=FolderEntity, request_method='GET', name='edit',
-                 renderer='amnesia:templates/folder/edit.pt',
-                 permission='edit')
+    @view_config(
+        context=FolderEntity,
+        request_method='GET',
+        name='edit',
+        renderer='amnesia:templates/folder/edit.pt',
+        permission='edit'
+    )
     def edit(self):
         schema = FolderSchema(context={'request': self.request})
         data = schema.dump(self.entity)
         return self.edit_form(data)
 
-    @view_config(request_method='GET', name='add_folder',
-                 renderer='amnesia:templates/folder/edit.pt',
-                 context=FolderEntity, permission='create')
+    @view_config(
+        request_method='GET',
+        name='add_folder',
+        renderer='amnesia:templates/folder/edit.pt',
+        context=FolderEntity,
+        permission='create'
+    )
     def new(self):
-        form_data = self.request.GET.mixed()
-        return self.edit_form(form_data, view='@@add_folder')
+        data = self.request.GET.mixed()
+        form = FolderForm(self.request)
+        action = self.request.resource_path(self.context, '@@add_folder')
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     #########################################################################
-    # CREATE                                                                #
+    # (C)RUD - CREATE                                                       #
     #########################################################################
 
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/folder/edit.pt',
-                 context=FolderEntity,
-                 name='add_folder',
-                 permission='create')
+    @view_config(
+        request_method='POST',
+        renderer='amnesia:templates/folder/edit.pt',
+        context=FolderEntity,
+        name='add_folder',
+        permission='create'
+    )
     def create(self):
         form_data = self.request.POST.mixed()
         schema = FolderSchema(context={'request': self.request})
@@ -86,8 +88,15 @@ class FolderCRUD(ContentCRUD):
             data = schema.load(form_data)
         except ValidationError as error:
             self.request.response.status_int = 400
-            return self.edit_form(form_data, error.messages,
-                                  view='@@add_folder')
+            form = FolderForm(self.request)
+            form_action = self.request.resource_path(
+                self.context, '@@add_folder'
+            )
+
+            return {
+                'form': form.render(form_data, error.messages),
+                'form_action': form_action
+            }
 
         new_entity = self.context.create(Folder, data)
 
@@ -102,11 +111,15 @@ class FolderCRUD(ContentCRUD):
         raise HTTPInternalServerError()
 
     #########################################################################
-    # READ                                                                  #
+    # C(R)UD - READ                                                         #
     #########################################################################
 
-    @view_config(context=FolderEntity, request_method='GET', permission='read',
-                 accept='text/html')
+    @view_config(
+        context=FolderEntity,
+        request_method='GET',
+        permission='read',
+        accept='text/html'
+    )
     def read(self):
         pl_cfg = self.entity.polymorphic_config
         entity = orm.with_polymorphic(pl_cfg.base_mapper.entity, pl_cfg.cls)
@@ -134,13 +147,15 @@ class FolderCRUD(ContentCRUD):
             raise HTTPNotFound()
 
     #########################################################################
-    # UPDATE                                                                #
+    # CR(U)D - UPDATE                                                       #
     #########################################################################
 
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/folder/edit.pt',
-                 context=FolderEntity,
-                 permission='edit')
+    @view_config(
+        request_method='POST',
+        renderer='amnesia:templates/folder/edit.pt',
+        context=FolderEntity,
+        permission='edit'
+    )
     def update(self):
         form_data = self.request.POST.mixed()
         schema = FolderSchema(
@@ -151,7 +166,13 @@ class FolderCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            return self.edit_form(form_data, error.messages)
+            form = FolderForm(self.request)
+            form_action = self.request.resource_path(self.context)
+
+            return {
+                'form': form.render(form_data, error.messages),
+                'form_action': form_action
+            }
 
         updated_entity = self.context.update(data)
 
@@ -162,8 +183,13 @@ class FolderCRUD(ContentCRUD):
 
 # Bulk delete
 
-@view_config(request_method='POST', context=FolderEntity, name='bulk_delete',
-             renderer='json', effective_principals=Authenticated)
+@view_config(
+    request_method='POST',
+    context=FolderEntity,
+    name='bulk_delete',
+    renderer='json',
+    effective_principals=Authenticated
+)
 def delete(context, request):
     can_bulk_delete = request.has_permission('bulk_delete')
     can_bulk_delete_own = request.has_permission('bulk_delete_own')
