@@ -141,10 +141,9 @@ class LanguageSelector(Widget):
         ).scalars().all()
 
     def url(self, lang):
-        if self.request._script_name != self.request.script_name:
-            return self.request.resource_url(self.request.root, '..', lang)
-        else:
-            return self.request.resource_url(self.request.root, lang)
+        return self.request.resource_url(
+            self.request.root, '@@change_locale', query={'lang': lang}
+        )
 
 
 @widget_config('archives')
