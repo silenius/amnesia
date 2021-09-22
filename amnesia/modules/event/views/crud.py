@@ -38,7 +38,13 @@ class EventCRUD(ContentCRUD):
     def edit(self):
         schema = EventSchema(context={'request': self.request})
         data = schema.dump(self.entity)
-        return self.edit_form(data)
+        form = EventForm(self.request)
+        action = self.request.resource_path(self.context)
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     @view_config(request_method='GET', name='add_event',
                  renderer='amnesia:templates/event/edit.pt',

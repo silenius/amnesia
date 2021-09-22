@@ -2,21 +2,13 @@ import logging
 
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPNoContent
-from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 
-from sqlalchemy import sql
-
 from amnesia.modules.content import Entity
-from amnesia.modules.account import Permission
-from amnesia.modules.account import Role
-from amnesia.modules.account.security import get_parent_acl
-from amnesia.modules.tag import Tag
-from amnesia.utils.forms import render_form
 from amnesia.views import BaseView
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name

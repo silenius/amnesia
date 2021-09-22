@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# pylint: disable=invalid-name,no-member
-
 import logging
 
 from marshmallow import ValidationError
@@ -50,7 +46,13 @@ class FolderCRUD(ContentCRUD):
     def edit(self):
         schema = FolderSchema(context={'request': self.request})
         data = schema.dump(self.entity)
-        return self.edit_form(data)
+        form = FolderForm(self.request)
+        action = self.request.resource_path(self.context)
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     @view_config(
         request_method='GET',

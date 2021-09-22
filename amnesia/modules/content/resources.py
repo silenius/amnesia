@@ -31,8 +31,9 @@ class Entity(Resource):
         from amnesia.modules.account.resources import ContentACLEntity
 
         if path == 'acl':
-            return ContentACLEntity(self.request, content=self.entity,
-                                    parent=self)
+            return ContentACLEntity(
+                self.request, content=self.entity, parent=self
+            )
 
         for extra_path, factory in self.extra_paths.items():
             if extra_path == path:

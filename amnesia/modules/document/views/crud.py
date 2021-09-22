@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from marshmallow import ValidationError
@@ -29,10 +27,13 @@ def includeme(config):
 class DocumentCRUD(ContentCRUD):
     ''' Document CRUD '''
 
-    @view_config(request_method='GET', name='edit',
-                 renderer='amnesia:templates/document/edit.pt',
-                 context=DocumentEntity,
-                 permission='edit')
+    @view_config(
+        request_method='GET',
+        name='edit',
+        renderer='amnesia:templates/document/edit.pt',
+        context=DocumentEntity,
+        permission='edit'
+    )
     def edit(self):
         data = DocumentSchema().dump(self.entity)
         form = DocumentForm(self.request)
@@ -43,10 +44,13 @@ class DocumentCRUD(ContentCRUD):
             'form_action': action
         }
 
-    @view_config(request_method='GET', name='add_document',
-                 renderer='amnesia:templates/document/edit.pt',
-                 context=FolderEntity,
-                 permission='create')
+    @view_config(
+        request_method='GET',
+        name='add_document',
+        renderer='amnesia:templates/document/edit.pt',
+        context=FolderEntity,
+        permission='create'
+    )
     def new(self):
         data = self.request.GET.mixed()
         form = DocumentForm(self.request)
@@ -61,11 +65,13 @@ class DocumentCRUD(ContentCRUD):
     # (C)RUD - CREATE                                                       #
     #########################################################################
 
-    @view_config(request_method='POST',
-                 renderer='amnesia:templates/document/edit.pt',
-                 context=FolderEntity,
-                 name='add_document',
-                 permission='create')
+    @view_config(
+        request_method='POST',
+        renderer='amnesia:templates/document/edit.pt',
+        context=FolderEntity,
+        name='add_document',
+        permission='create'
+    )
     def create(self):
         ''' Create a new Document '''
 
@@ -105,9 +111,13 @@ class DocumentCRUD(ContentCRUD):
     # C(R)UD - READ                                                         #
     #########################################################################
 
-    @view_config(request_method='GET', renderer='json',
-                 accept='application/json', permission='read',
-                 context=DocumentEntity)
+    @view_config(
+        request_method='GET',
+        renderer='json',
+        accept='application/json',
+        permission='read',
+        context=DocumentEntity
+    )
     def read_json(self):
         schema = DocumentSchema(context={
             'request': self.request
@@ -115,10 +125,13 @@ class DocumentCRUD(ContentCRUD):
 
         return schema.dump(self.context.entity)
 
-    @view_config(request_method='GET',
-                 renderer='amnesia:templates/document/show.pt',
-                 accept='text/html', permission='read',
-                 context=DocumentEntity)
+    @view_config(
+        request_method='GET',
+        renderer='amnesia:templates/document/show.pt',
+        accept='text/html',
+        permission='read',
+        context=DocumentEntity
+    )
     def read_html(self):
         return super().read()
 

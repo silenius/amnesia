@@ -35,8 +35,12 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_config(context=FileEntity, name='download', request_method='GET',
-             permission='read')
+@view_config(
+    context=FileEntity,
+    name='download',
+    request_method='GET',
+    permission='read'
+)
 def download(context, request):
     file_response = context.serve()
 
@@ -54,7 +58,13 @@ class FileCRUD(ContentCRUD):
     def edit(self):
         schema = FileSchema(context={'request': self.request})
         data = schema.dump(self.entity)
-        return self.edit_form(data)
+        form = FileForm(self.request)
+        action = self.request.resource_path(self.context)
+
+        return {
+            'form': form.render(data),
+            'form_action': action
+        }
 
     @view_config(request_method='GET', name='add_file',
                  renderer='amnesia:templates/file/edit.pt',
