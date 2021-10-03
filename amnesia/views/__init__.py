@@ -1,7 +1,7 @@
-from urllib.parse import urljoin
-
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
+
+from amnesia.utils.locale import get_locale_url
 
 def includeme(config):
     config.include('.haproxy')
@@ -26,13 +26,6 @@ class BaseView(object):
 def change_locale(request):
     lang = request.GET.getone('lang')
 
-    location = urljoin(
-        request.resource_url(
-            request.root
-        ).rsplit(
-            request.locale_name, 1
-        )[0],
-        lang
-    )
+    location = get_locale_url(request, lang)
 
     return HTTPFound(location)
