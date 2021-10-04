@@ -25,7 +25,6 @@ class BaseView(object):
 @view_config(name='change_locale')
 def change_locale(request):
     lang = request.GET.getone('lang')
-
-    location = get_locale_url(request, lang)
+    location = get_locale_url(lang, request)
 
     return HTTPFound(location)
