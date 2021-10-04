@@ -63,11 +63,11 @@ class AmnesiaSecurityPolicy:
 
         return str(identity.id)
 
-    def remember(self, request, userid, **kw):
-        return self.helper.remember(request, userid, **kw)
+    def remember(self, request, userid, **kwargs):
+        return self.helper.remember(request, userid, **kwargs)
 
-    def forget(self, request, **kw):
-        return self.helper.forget(request, **kw)
+    def forget(self, request, **kwargs):
+        return self.helper.forget(request, **kwargs)
 
     def permits(self, request, context, permission):
         principals = self.effective_principals(request, context)

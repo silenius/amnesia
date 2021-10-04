@@ -19,6 +19,7 @@ from amnesia.modules.file import FileEntity
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
+
 def include_pyramid_addons(config):
     config.include('pyramid_chameleon')
     config.include('pyramid_tm')

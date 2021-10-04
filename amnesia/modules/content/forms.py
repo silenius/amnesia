@@ -7,6 +7,13 @@ from amnesia.modules.tag import Tag
 
 from amnesia.utils.forms import render_form
 
+
+class AllSections:
+
+    def __contains__(self, item):
+        return True
+
+
 class ContentForm:
 
     template = 'amnesia:templates/content/_form.pt'
@@ -29,12 +36,18 @@ class ContentForm:
     def context(self):
         return self.request.context
 
-    def render(self, data=None, errors=None):
+    def render(self, data=None, errors=None, meta=None, **kwargs):
         if errors is None:
             errors = {}
 
         if data is None:
             data = {}
+
+        if meta is None:
+            meta = {}
+
+        if 'sections' not in meta:
+            meta['sections'] = AllSections()
 
         if 'all_tags' not in data:
             data['all_tags'] = self.dbsession.execute(
@@ -65,5 +78,6 @@ class ContentForm:
             data['is_fts'] = True
 
         data['csrf_token'] = self.session.get_csrf_token()
+        data['meta'] = meta
 
         return render_form(self.template, self.request, data, errors=errors)
