@@ -1,5 +1,3 @@
-from sqlalchemy import sql
-
 from .model import Account
 from .model import Role
 from .model import Permission
@@ -21,16 +19,7 @@ from .resources import RoleMemberEntity
 
 
 def _get_user(request):
-    userid = request.unauthenticated_userid
-    user = None
-
-    if userid is not None:
-        user = request.dbsession.execute(
-            sql.select(Account).filter_by(id=userid, enabled=True)
-        ).scalar_one_or_none()
-
-    return user
-
+    return request.identity
 
 def includeme(config):
     config.add_request_method(_get_user, 'user', reify=True)

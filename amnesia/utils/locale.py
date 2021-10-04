@@ -25,7 +25,7 @@ def get_locales(request=None):
 
     return (current_locale, default_locale)
 
-def get_locale_url(request=None, lang):
+def get_locale_url(lang, request=None):
     if not request:
         request = get_current_request()
 

@@ -9,7 +9,6 @@ from pyramid.settings import asbool
 
 from sqlalchemy import sql
 
-from amnesia.modules.account import Account
 
 __all__ = ['cookie_security_policy']
 
@@ -18,7 +17,7 @@ log = logging.getLogger(__name__)
 
 def cookie_security_policy(settings):
     cfg = {
-        'debug': asbool(settings.get('auth.debug', 'false')),
+        #'debug': asbool(settings.get('auth.debug', 'false')),
         'http_only': asbool(settings.get('auth.http_only', 'true')),
         'secure': asbool(settings.get('auth.secure', 'false')),
         'secret': settings['auth.secret'],
@@ -37,6 +36,7 @@ class AmnesiaSecurityPolicy:
         self.acl = ACLHelper()
 
     def load_user(self, request):
+        from amnesia.modules.account import Account
         identity = self.helper.identify(request)
 
         if identity is None:

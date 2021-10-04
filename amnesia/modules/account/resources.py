@@ -23,13 +23,13 @@ from sqlalchemy import sql
 from zope.sqlalchemy import invalidate
 
 from amnesia.resources import Resource
-from amnesia.modules.account import Account
-from amnesia.modules.account import Role
-from amnesia.modules.account import Permission
-from amnesia.modules.account import ACLResource
-from amnesia.modules.account import ContentACL
-from amnesia.modules.account import GlobalACL
-from amnesia.modules.account import AccountRole
+from .model import Account
+from .model import Role
+from .model import Permission
+from .model import ACLResource
+from .model import ContentACL
+from .model import GlobalACL
+from .model import AccountRole
 
 from .util import bcrypt_hash_password
 from .util import bcrypt_check_password

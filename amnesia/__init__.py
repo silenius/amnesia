@@ -4,12 +4,10 @@ import logging
 
 from pkg_resources import iter_entry_points
 from pyramid.config import Configurator
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.settings import asbool
 
+from amnesia.security.policy import cookie_security_policy
 from amnesia.traversal import AmnesiaResourceURL
 from amnesia.resources import get_root
-from amnesia.authentication import AmnesiaAuthenticationPolicy
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
@@ -27,30 +25,9 @@ def include_pyramid_addons(config):
     config.include('pyramid_mailer')
 
 
-def include_authentication(config):
-    """Authentication is merely the mechanism by which credentials provided in
-    the request are resolved to one or more principal identifiers."""
-
-    settings = config.registry.settings
-    debug = asbool(settings.get('auth.debug', 'false'))
-    http_only = asbool(settings.get('auth.http_only', 'true'))
-    secret = settings['auth.secret']
-
-    authn_policy = AmnesiaAuthenticationPolicy(
-        secret=secret,
-        debug=debug,
-        http_only=http_only
-    )
-
-    config.set_authentication_policy(authn_policy)
-
-
-def include_authorization(config):
-    """Authorization then determines access based on the principal identifiers,
-    the requested permission, and a context"""
-
-    authz_policy = ACLAuthorizationPolicy()
-    config.set_authorization_policy(authz_policy)
+def include_security_policy(config):
+    policy = cookie_security_policy(config.registry.settings)
+    config.set_security_policy(policy)
 
 
 def include_session(config):
@@ -132,8 +109,6 @@ def include_amnesia(config):
     config.include(include_config_directives)
     config.include(include_request_methods)
     config.include(include_pyramid_addons)
-    config.include(include_authentication)
-    config.include(include_authorization)
     config.include(include_session)
     #config.include(include_security)
 
@@ -144,6 +119,7 @@ def include_amnesia(config):
 
     config.include(include_cms_modules)
     config.include(include_entity_resource_mapping)
+    config.include(include_security_policy)
 
     config.include('amnesia.views')
 
