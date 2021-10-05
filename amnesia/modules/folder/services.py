@@ -8,6 +8,13 @@ from sqlalchemy.types import Integer
 
 from amnesia.modules.folder import Folder
 
+try:
+    from amnesia_multilingual.utils import with_current_translations
+    WITH_TRANSLATION=True
+except ImportError:
+    WITH_TRANSLATION=False
+
+
 log = logging.getLogger(__name__)
 
 
@@ -126,7 +133,12 @@ def get_lineage(dbsession, folder_id):
         Folder
     ).join(
         root, root.c.id == Folder.id
-    ).order_by(
+    )
+
+    if WITH_TRANSLATION:
+        (stmt, lang_partition) = with_current_translations(stmt, Folder)
+
+    stmt = stmt.order_by(
         root.c.level.desc()
     )
 
