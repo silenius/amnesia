@@ -64,10 +64,10 @@ class Entity(Resource):
         return self.request.root
 
     def __acl__(self):
-        yield Allow, 'role:Manager', ALL_PERMISSIONS
+        yield Allow, 'r:Manager', ALL_PERMISSIONS
 
         if self.entity.owner is self.request.user:
-            yield Allow, str(self.request.user.id), ALL_PERMISSIONS
+            yield Allow, f'u:{self.request.user.id}', ALL_PERMISSIONS
 
         if not hasattr(self.request, '_cached_acls'):
             # FIXME: circular imports

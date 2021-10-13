@@ -24,7 +24,7 @@ def to_pyramid_acl(acl):
     if acl.role.virtual:
         role = acl.role.name
     else:
-        role = 'role:{}'.format(acl.role.name)
+        role = f'r:{acl.role.name}'
 
     if permission == 'ALL_PERMISSIONS':
         permission = ALL_PERMISSIONS

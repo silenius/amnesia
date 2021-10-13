@@ -14,6 +14,8 @@ __all__ = ['cookie_security_policy']
 
 log = logging.getLogger(__name__)
 
+Owner = 'system.Owner'
+
 
 def cookie_security_policy(settings):
     cfg = {
@@ -84,17 +86,17 @@ class AmnesiaSecurityPolicy:
         return self.acl.permits(context, principals, permission)
 
     def effective_principals(self, request, context):
-        principals = [Everyone]
+        principals = {Everyone}
         user = self.identity(request)
 
         if user is not None:
-            principals.append(Authenticated)
-            principals.append(str(user.id))
+            principals.add(Authenticated)
+            principals.add(f'u:{user.id}')
 
             for role in user.roles:
                 if role.virtual:
-                    principals.append(role.name)
+                    principals.add(role.name)
                 else:
-                    principals.append('role:{}'.format(role.name))
+                    principals.add(f'r:{role.name}')
 
-        return principals
+        return list(principals)

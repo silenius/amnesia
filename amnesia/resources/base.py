@@ -16,7 +16,7 @@ class Resource:
         self.request = request
 
     def __acl__(self):
-        yield Allow, 'role:Manager', ALL_PERMISSIONS
+        yield Allow, 'r:Manager', ALL_PERMISSIONS
 
         from amnesia.modules.account.security import get_global_acl
 
