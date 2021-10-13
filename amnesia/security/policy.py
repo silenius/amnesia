@@ -34,11 +34,7 @@ class AmnesiaAuthTktCookieHelper(AuthTktCookieHelper):
 
     def userid(self, request):
         identity = self.identify(request)
-
-        if identity is None:
-            return None
-
-        return identity['userid']
+        return None if identity is None else identity['userid']
 
 
 class AmnesiaSecurityPolicy:
@@ -69,11 +65,7 @@ class AmnesiaSecurityPolicy:
         """ Return a string ID for the user. """
 
         identity = self.identity(request)
-
-        if identity is None:
-            return None
-
-        return str(identity.id)
+        return None if identity is None else str(identity.id)
 
     def remember(self, request, userid, **kwargs):
         return self.helper.remember(request, userid, **kwargs)
