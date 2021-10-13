@@ -3,7 +3,6 @@ import logging
 from itertools import groupby
 
 from sqlalchemy import sql
-from sqlalchemy import orm
 from sqlalchemy.types import Integer
 
 from amnesia.modules.folder import Folder
@@ -103,7 +102,12 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
         root, root.c.id == Folder.id
     ).add_columns(
         root.c.level.label('level')
-    ).order_by(
+    )
+
+    if WITH_TRANSLATION:
+        (stmt, lang_partition) = with_current_translations(stmt, Folder)
+
+    stmt = stmt.order_by(
         root.c.level, root.c.container_id, root.c.weight.desc()
     )
 

@@ -23,9 +23,20 @@ def cookie_security_policy(settings):
         'secret': settings['auth.secret'],
     }
 
-    helper = AuthTktCookieHelper(**cfg)
+    helper = AmnesiaAuthTktCookieHelper(**cfg)
 
     return AmnesiaSecurityPolicy(helper)
+
+
+class AmnesiaAuthTktCookieHelper(AuthTktCookieHelper):
+
+    def userid(self, request):
+        identity = self.identify(request)
+
+        if identity is None:
+            return None
+
+        return identity['userid']
 
 
 class AmnesiaSecurityPolicy:
@@ -36,19 +47,18 @@ class AmnesiaSecurityPolicy:
         self.acl = ACLHelper()
 
     def load_user(self, request):
-        from amnesia.modules.account import Account
-        identity = self.helper.identify(request)
+        userid = self.helper.userid(request)
 
-        if identity is None:
-            return None
+        if userid:
+            from amnesia.modules.account import Account
 
-        userid = identity['userid']
+            user = request.dbsession.execute(
+                sql.select(Account).filter_by(id=userid, enabled=True)
+            ).scalar_one_or_none()
 
-        user = request.dbsession.execute(
-            sql.select(Account).filter_by(id=userid, enabled=True)
-        ).scalar_one_or_none()
+            return user
 
-        return user
+        return None
 
     def identity(self, request):
         return self.identity_cache.get_or_create(request)

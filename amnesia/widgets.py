@@ -4,19 +4,16 @@ import logging
 
 from calendar import monthrange
 from datetime import date
-from itertools import groupby
 
 from pyramid.renderers import render
 from pyramid.settings import aslist
 
 from sqlalchemy import orm
 from sqlalchemy import sql
-from sqlalchemy.types import Integer
 
 from amnesia.utils import itermonths
 from amnesia.utils import polymorphic_ids
 from amnesia.modules.content import Content
-from amnesia.modules.folder import Folder
 from amnesia.modules.document import Document
 from amnesia.modules.event import Event
 from amnesia.modules.content_type import ContentType
