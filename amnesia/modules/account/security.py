@@ -2,6 +2,8 @@
 
 import logging
 
+from pyramid.authorization import Everyone
+from pyramid.authorization import Authenticated
 from pyramid.traversal import lineage
 
 from sqlalchemy import sql
@@ -25,49 +27,26 @@ def get_principals(userid, request):
 
     return None
 
-# FIXME: add orm.contains_eager
-
-def get_global_acl(request, strict=False):
-    dbsession = request.dbsession
-
-    acl_query = sql.select(GlobalACL)
-
-    if not strict:
-        stmt = acl_query.order_by(GlobalACL.weight.desc())
-        return dbsession.execute(stmt).scalars().all()
-
-    user = request.user
-    principals = request.effective_principals
-
-    # Virtual roles which are in principals
-    virtual = sql.and_(
-        Role.virtual == True,
-        Role.name.in_(principals)
-    )
-
-    # Select ACL for those virtual roles
-    acl = acl_query.join(
+def get_global_acl(dbsession, identity=None):
+    stmt = sql.select(
+        GlobalACL
+    ).join(
         GlobalACL.role
     ).options(
         orm.contains_eager(GlobalACL.role)
-    ).filter(
-        virtual
     )
 
-    if user:
-        user_roles = sql.select(
-            AccountRole.role_id
-        ).filter_by(
-            account_id=user.id
-        )
+    if identity:
+        filters = sql.or_(
+            Role.accounts.any(account_id=identity.id),
+            GlobalACL.role.has(Role.name.in_([Authenticated, Everyone])),
+         )
+    else:
+        filters = GlobalACL.role.has(name=Everyone)
 
-        acl = acl.union(
-            acl_query.filter(
-                ContentACL.role_id.in_(user_roles)
-            )
-        )
+    stmt = stmt.filter(filters).order_by(GlobalACL.weight.desc())
 
-    return acl.order_by(GlobalACL.weight.desc()).all()
+    return dbsession.execute(stmt).scalars().all()
 
 def get_content_acl(request, entity, recursive=False, with_global_acl=True):
     dbsession = request.dbsession

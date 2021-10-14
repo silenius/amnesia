@@ -20,7 +20,7 @@ class Resource:
 
         from amnesia.modules.account.security import get_global_acl
 
-        for acl in get_global_acl(self.request):
+        for acl in get_global_acl(self.dbsession, self.request.identity):
             yield from self.__acl_adapter__(acl.to_pyramid_acl())
 
         # Note: if there's no explicit permission, the default is to DENY so in
