@@ -14,8 +14,6 @@ __all__ = ['cookie_security_policy']
 
 log = logging.getLogger(__name__)
 
-Owner = 'system.Owner'
-
 
 def cookie_security_policy(settings):
     cfg = {
@@ -90,5 +88,14 @@ class AmnesiaSecurityPolicy:
                     principals.add(role.name)
                 else:
                     principals.add(f'r:{role.name}')
+
+        if hasattr(context, '__effective_principals__'):
+            context_principals = context.__effective_principals__
+
+            if callable(context_principals):
+                context_principals = context_principals()
+
+            if context_principals:
+                principals.update(context_principals)
 
         return list(principals)
