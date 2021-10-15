@@ -48,9 +48,7 @@ def get_global_acl(dbsession, identity=None):
 
     return dbsession.execute(stmt).scalars().all()
 
-def get_content_acl(request, entity, recursive=False, with_global_acl=True):
-    dbsession = request.dbsession
-
+def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
     # We want ACL for this entity only
     if not recursive:
         # Content ACL only

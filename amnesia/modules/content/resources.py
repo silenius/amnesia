@@ -6,6 +6,7 @@ import operator
 from pyramid.security import Allow
 from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
+from amnesia.security import Owner
 
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
@@ -63,42 +64,33 @@ class Entity(Resource):
 
         return self.request.root
 
-    def __acl__(self):
-        yield Allow, 'r:Manager', ALL_PERMISSIONS
+    def __effective_principals__(self):
+        if self.entity.owner is self.request.identity:
+            return [Owner]
 
-        if self.entity.owner is self.request.user:
-            yield Allow, f'u:{self.request.user.id}', ALL_PERMISSIONS
+    def __acl__(self):
+        # XXX update permission set name=split_part(name, '_content', 1);
+        yield Allow, 'r:Manager', ALL_PERMISSIONS
+        yield Allow, Owner, ALL_PERMISSIONS
 
         if not hasattr(self.request, '_cached_acls'):
             # FIXME: circular imports
             from amnesia.modules.account.security import get_content_acl
             self.request._cached_acls = get_content_acl(
-                self.request, self.entity, recursive=True,
+                self.dbsession, self.entity, recursive=True,
                 with_global_acl=True
             )
 
         for acl in self.request._cached_acls:
             if acl.resource.name == 'CONTENT' and acl.content is self.entity:
-                yield from self.__acl_adapter__(acl.to_pyramid_acl())
-            if acl.resource.name == 'GLOBAL':
-                yield from self.__acl_adapter__(acl.to_pyramid_acl())
+                yield acl.to_pyramid_acl()
 
         if not self.entity.inherits_parent_acl:
+            for acl in self.request._cached_acls:
+                if acl.resource.name == 'GLOBAL':
+                    yield acl.to_pyramid_acl()
+
             yield DENY_ALL
-
-    def __acl_adapter__(self, ace):
-        (allow_deny, principal, permission) = ace
-
-        try:
-            _op, _ctx = permission.split('_', 1)
-        except (AttributeError, ValueError):
-            yield allow_deny, principal, permission
-        else:
-            if (_ctx == 'content' or (_ctx == 'own_content' and
-                                      self.entity.owner is self.request.user)):
-                yield allow_deny, principal, _op
-            else:
-                yield allow_deny, principal, permission
 
     def update(self, data):
         """ Update an entity """

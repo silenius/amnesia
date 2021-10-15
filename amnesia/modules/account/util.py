@@ -20,11 +20,7 @@ def bcrypt_check_password(pw, hashed_pw):
 def to_pyramid_acl(acl):
     permission = acl.permission.name
     allow_or_deny = Allow if acl.allow else Deny
-
-    if acl.role.virtual:
-        role = acl.role.name
-    else:
-        role = f'r:{acl.role.name}'
+    role = acl.role.name if acl.role.virtual else f'r:{acl.role.name}'
 
     if permission == 'ALL_PERMISSIONS':
         permission = ALL_PERMISSIONS
