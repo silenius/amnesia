@@ -70,7 +70,7 @@ class Entity(Resource):
         if self.entity.owner is self.request.identity:
             return [Owner]
 
-    def load_content_acl(self):
+    def load_content_acl(self, request):
         from amnesia.modules.account.security import get_content_acl
         return get_content_acl(
             self.dbsession, self.entity, recursive=True,
