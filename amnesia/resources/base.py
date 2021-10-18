@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
+from pyramid.request import RequestLocalCache
 from pyramid.security import Allow
 from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import DENY_ALL
@@ -14,13 +13,16 @@ class Resource:
 
     def __init__(self, request):
         self.request = request
+        self.global_acl_cache = RequestLocalCache(self.load_global_acl)
+
+    def load_global_acl(self):
+        from amnesia.modules.account.security import get_global_acl
+        return get_global_acl(self.dbsession, self.request.identity)
 
     def __acl__(self):
         yield Allow, 'r:Manager', ALL_PERMISSIONS
 
-        from amnesia.modules.account.security import get_global_acl
-
-        for acl in get_global_acl(self.dbsession, self.request.identity):
+        for acl in self.global_acl_cache.get_or_create(self.request):
             yield acl.to_pyramid_acl()
 
         # Note: if there's no explicit permission, the default is to DENY so in

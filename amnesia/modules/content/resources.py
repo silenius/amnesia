@@ -3,6 +3,7 @@
 import logging
 import operator
 
+from pyramid.request import RequestLocalCache
 from pyramid.security import Allow
 from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
@@ -26,6 +27,7 @@ class Entity(Resource):
         super().__init__(request)
         self.entity = entity
         self.parent = parent
+        self.content_acl_cache = RequestLocalCache(self.load_content_acl)
 
     def __getitem__(self, path):
         # FIXME: circular imports
@@ -68,25 +70,23 @@ class Entity(Resource):
         if self.entity.owner is self.request.identity:
             return [Owner]
 
+    def load_content_acl(self):
+        from amnesia.modules.account.security import get_content_acl
+        return get_content_acl(
+            self.dbsession, self.entity, recursive=True,
+            with_global_acl=True
+        )
+
     def __acl__(self):
-        # XXX update permission set name=split_part(name, '_content', 1);
         yield Allow, 'r:Manager', ALL_PERMISSIONS
         yield Allow, Owner, ALL_PERMISSIONS
 
-        if not hasattr(self.request, '_cached_acls'):
-            # FIXME: circular imports
-            from amnesia.modules.account.security import get_content_acl
-            self.request._cached_acls = get_content_acl(
-                self.dbsession, self.entity, recursive=True,
-                with_global_acl=True
-            )
-
-        for acl in self.request._cached_acls:
+        for acl in self.content_acl_cache.get_or_create(self.request):
             if acl.resource.name == 'CONTENT' and acl.content is self.entity:
                 yield acl.to_pyramid_acl()
 
         if not self.entity.inherits_parent_acl:
-            for acl in self.request._cached_acls:
+            for acl in self.content_acl_cache.get_or_create(self.request):
                 if acl.resource.name == 'GLOBAL':
                     yield acl.to_pyramid_acl()
 
