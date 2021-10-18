@@ -15,7 +15,7 @@ class Resource:
         self.request = request
         self.global_acl_cache = RequestLocalCache(self.load_global_acl)
 
-    def load_global_acl(self):
+    def load_global_acl(self, request):
         from amnesia.modules.account.security import get_global_acl
         return get_global_acl(self.dbsession, self.request.identity)
 
