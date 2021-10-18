@@ -86,7 +86,7 @@ class Entity(Resource):
                 yield acl.to_pyramid_acl()
 
         if not self.entity.inherits_parent_acl:
-            for acl in self.content_acl_cache.get_or_create(self.request):
+            for acl in self.content_acl_cache.get(self.request):
                 if acl.resource.name == 'GLOBAL':
                     yield acl.to_pyramid_acl()
 
