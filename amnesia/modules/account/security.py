@@ -99,7 +99,7 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
     ).filter(
         Content.id == entity.id
     ).cte(
-        name='all_content', recursive=True
+        name=f'content_acl_{entity.id}', recursive=True
     )
 
     contents_join = sql.select(
