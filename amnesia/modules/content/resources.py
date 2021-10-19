@@ -48,7 +48,7 @@ class Entity(Resource):
 
         for extra_path, factory in self.extra_paths.items():
             if extra_path == path:
-                return factory(self.request, content=self.entity, parent=self)
+                return factory(self.request, entity=self.entity, parent=self)
 
         raise KeyError
 

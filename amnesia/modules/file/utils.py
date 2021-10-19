@@ -22,7 +22,7 @@ def save_to_disk(request, entity, data):
     dirname = settings['file_storage_dir']
     salt = settings['amnesia.hashid_file_salt']
 
-    if entity.id and input_file:
+    if entity.content_id and input_file:
         log.debug('===>>> save_file: %s', entity.path_name)
         hid = entity.get_hashid(salt=salt)
 

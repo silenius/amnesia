@@ -90,9 +90,9 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
     contents = sql.select(
         Content, sql.literal(1, type_=Integer).label('level')
     ).filter(
-        Content.id == entity.id
+        Content.id == entity.content_id
     ).cte(
-        name=f'content_acl_{entity.id}', recursive=True
+        name=f'content_acl_{entity.content_id}', recursive=True
     )
 
     contents_join = sql.select(

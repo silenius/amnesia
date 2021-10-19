@@ -9,7 +9,7 @@ class FolderForm(ContentForm):
     def __init__(self, request, template=None):
         super().__init__(request, template)
 
-    def render(self, data=None, errors=None):
+    def render(self, data=None, errors=None, **kwargs):
         if data is None:
             data = {}
 
@@ -20,4 +20,4 @@ class FolderForm(ContentForm):
         if 'default_order' not in data:
             data['default_order'] = []
 
-        return super().render(data, errors)
+        return super().render(data, errors, **kwargs)

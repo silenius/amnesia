@@ -63,12 +63,14 @@ class FolderSchema(ContentSchema):
             data['default_order'] = json.loads(data['default_order'])
         except (ValueError, TypeError):
             del data['default_order']
+        except KeyError:
+            data['default_order'] = []
 
         return data
 
     @post_load
     def post_load_adapt_polymorphic(self, data, **kwargs):
-        if data['polymorphic_loading']:
+        if data.get('polymorphic_loading', None):
             pc = data.get('polymorphic_children_ids', [])
             if pc:
                 stmt_pc = sql.select(ContentType).filter(
