@@ -134,6 +134,7 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
         stmt = sql.select(
             au
         ).order_by(
+            # First content ACLS, then global ACLS.
             acls.c.level.nullslast(),
             acls.c.weight.desc()
         )

@@ -54,8 +54,7 @@ class Entity(Resource):
 
     def __str__(self):
         try:
-            return "{} <{}:{}>".format(self.__class__.__name__, self.entity.id,
-                                       self.entity.title)
+            return f'{self.__class__.__name__} <{self.entity.id}>'
         except:
             return self.__class__.__name__
 
