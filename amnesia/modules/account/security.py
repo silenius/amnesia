@@ -20,13 +20,6 @@ from amnesia.modules.account import Role
 log = logging.getLogger(__name__)
 
 
-def get_principals(userid, request):
-    if userid and hasattr(request, 'user') and request.user:
-        for role in request.user.roles:
-            yield f'r:{role.role.name}'
-
-    return None
-
 def get_global_acl(dbsession, identity=None):
     stmt = sql.select(
         GlobalACL
