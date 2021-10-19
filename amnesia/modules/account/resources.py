@@ -43,7 +43,11 @@ class AuthResource(Resource):
 
     def __init__(self, request, parent):
         super().__init__(request)
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def __acl__(self):
         yield Allow, Everyone, 'login'
