@@ -189,8 +189,7 @@ class FolderCRUD(ContentCRUD):
     request_method='POST',
     context=FolderEntity,
     name='bulk_delete',
-    renderer='json',
-    effective_principals=Authenticated
+    renderer='json'
 )
 def delete(context, request):
     can_bulk_delete = request.has_permission('bulk_delete')

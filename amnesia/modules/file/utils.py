@@ -6,7 +6,7 @@ import shutil
 import magic
 
 from amnesia.modules.file.events import FileSavedToDisk
-from amnesia.modules.mime import Mime
+from amnesia.modules.mime.utils import fetch_mime
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def save_to_disk(request, entity, data):
         major, minor = mime_type.split('/')
 
         # Fetch mime from database
-        mime_obj = Mime.q_major_minor(request.dbsession, major, minor)
+        mime_obj = fetch_mime(request.dbsession, major, minor)
 
         entity.mime = mime_obj
 
