@@ -5,18 +5,20 @@ import shutil
 
 import magic
 
+from webob.compat import cgi_FieldStorage
+
 from amnesia.modules.file.events import FileSavedToDisk
 from amnesia.modules.mime.utils import fetch_mime
 
 log = logging.getLogger(__name__)
 
 
-def save_to_disk(request, entity, data):
+def save_to_disk(request, entity, src: cgi_FieldStorage):
     settings = request.registry.settings
 
-    input_file = data['content'].file
+    input_file = src.file
     # IE sends an absolute file *path* as the filename.
-    input_file_name = pathlib.Path(data['content'].filename).name
+    input_file_name = pathlib.Path(src.filename).name
     entity.original_name = input_file_name
 
     dirname = settings['file_storage_dir']

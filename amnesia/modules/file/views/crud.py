@@ -117,7 +117,7 @@ class FileCRUD(ContentCRUD):
         new_entity = self.context.create(File, data)
 
         if new_entity:
-            file_utils.save_to_disk(self.request, new_entity, data)
+            file_utils.save_to_disk(self.request, new_entity, data['content'])
             location = self.request.resource_url(new_entity)
             http_code = data['on_success']
             if http_code == 201:
@@ -193,7 +193,8 @@ class FileCRUD(ContentCRUD):
             evt = FileUpdated(self.request, self.entity)
             self.request.registry.notify(evt)
             if isinstance(data['content'], cgi_FieldStorage):
-                file_utils.save_to_disk(self.request, updated_entity, data)
+                file_utils.save_to_disk(self.request, updated_entity,
+                    data['content'])
 
             return HTTPFound(location=self.request.resource_url(updated_entity))
 
