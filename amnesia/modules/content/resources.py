@@ -9,6 +9,7 @@ from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
 from amnesia.security import Owner
 
+from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
@@ -117,7 +118,9 @@ class Entity(Resource):
     def change_weight(self, new_weight: int):
         """ Change the weight of the entity within it's container. """
 
-        obj = self.dbsession.get(Content, self.entity.id, with_for_update=True)
+        obj = self.dbsession.get(
+            Content, self.entity.id, [orm.lazyload('*')], with_for_update=True
+        )
 
         (min_weight, max_weight) = sorted((new_weight, obj.weight))
 
