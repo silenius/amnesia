@@ -1,3 +1,5 @@
+import re
+
 from urllib.parse import urljoin
 
 from pyramid.threadlocal import get_current_registry
@@ -29,13 +31,13 @@ def get_locale_url(lang, request=None):
     if not request:
         request = get_current_request()
 
-    location = urljoin(
-        request.resource_url(
-            request.root
-        ).rsplit(
-            request.locale_name, 1
-        )[0],
-        lang
+    location = re.split(
+        f'(?:/{re.escape(request.locale_name)}(?=(/?$)|(/)))',
+        request.script_name,
+        1
     )
 
-    return location
+    return urljoin(
+        request.host_url,
+        f'{location[0]}/{lang}'
+    )
