@@ -13,8 +13,6 @@ from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
-from zope.sqlalchemy import invalidate
-
 from amnesia.modules.content import Content
 from amnesia.resources import Resource
 
@@ -158,13 +156,6 @@ class Entity(Resource):
 
         try:
             updated = self.dbsession.execute(stmt)
-
-            # XXX: temporary
-            # see https://github.com/zopefoundation/zope.sqlalchemy/issues/67
-            # The ORM-enabled UPDATE and DELETE features bypass ORM
-            # unit-of-work automation.
-            invalidate(self.dbsession)
-
             return updated.rowcount
         except DatabaseError:
             return None
