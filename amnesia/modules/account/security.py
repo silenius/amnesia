@@ -20,13 +20,6 @@ from amnesia.modules.account import Role
 log = logging.getLogger(__name__)
 
 
-def get_principals(userid, request):
-    if userid and hasattr(request, 'user') and request.user:
-        for role in request.user.roles:
-            yield f'r:{role.role.name}'
-
-    return None
-
 def get_global_acl(dbsession, identity=None):
     stmt = sql.select(
         GlobalACL
@@ -97,9 +90,9 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
     contents = sql.select(
         Content, sql.literal(1, type_=Integer).label('level')
     ).filter(
-        Content.id == entity.id
+        Content.id == entity.content_id
     ).cte(
-        name='all_content', recursive=True
+        name=f'content_acl_{entity.content_id}', recursive=True
     )
 
     contents_join = sql.select(
@@ -134,6 +127,7 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
         stmt = sql.select(
             au
         ).order_by(
+            # First content ACLS, then global ACLS.
             acls.c.level.nullslast(),
             acls.c.weight.desc()
         )

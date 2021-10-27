@@ -5,24 +5,26 @@ import shutil
 
 import magic
 
+from webob.compat import cgi_FieldStorage
+
 from amnesia.modules.file.events import FileSavedToDisk
-from amnesia.modules.mime import Mime
+from amnesia.modules.mime.utils import fetch_mime
 
 log = logging.getLogger(__name__)
 
 
-def save_to_disk(request, entity, data):
+def save_to_disk(request, entity, src: cgi_FieldStorage):
     settings = request.registry.settings
 
-    input_file = data['content'].file
+    input_file = src.file
     # IE sends an absolute file *path* as the filename.
-    input_file_name = pathlib.Path(data['content'].filename).name
+    input_file_name = pathlib.Path(src.filename).name
     entity.original_name = input_file_name
 
     dirname = settings['file_storage_dir']
     salt = settings['amnesia.hashid_file_salt']
 
-    if entity.id and input_file:
+    if entity.content_id and input_file:
         log.debug('===>>> save_file: %s', entity.path_name)
         hid = entity.get_hashid(salt=salt)
 
@@ -55,7 +57,7 @@ def save_to_disk(request, entity, data):
         major, minor = mime_type.split('/')
 
         # Fetch mime from database
-        mime_obj = Mime.q_major_minor(request.dbsession, major, minor)
+        mime_obj = fetch_mime(request.dbsession, major, minor)
 
         entity.mime = mime_obj
 

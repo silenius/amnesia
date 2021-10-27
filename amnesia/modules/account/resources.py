@@ -20,8 +20,6 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import sql
 
-from zope.sqlalchemy import invalidate
-
 from amnesia.resources import Resource
 from .model import Account
 from .model import Role
@@ -43,7 +41,11 @@ class AuthResource(Resource):
 
     def __init__(self, request, parent):
         super().__init__(request)
-        self.__parent__ = parent
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
 
     def __acl__(self):
         yield Allow, Everyone, 'login'
@@ -351,8 +353,6 @@ class RoleMember(Resource):
 
         try:
             result = self.dbsession.execute(stmt)
-            invalidate(self.dbsession)
-
             return result.rowcount
         except DatabaseError:
             return False
@@ -387,7 +387,6 @@ class RoleMemberEntity(Resource):
 
         try:
             deleted = self.dbsession.execute(stmt)
-            invalidate(self.dbsession)
             return deleted.rowcount
         except DatabaseError:
             return False
@@ -550,7 +549,6 @@ class ACLEntity(Resource):
         try:
             # The UPDATE statement
             updated = self.dbsession.execute(stmt)
-            invalidate(self.dbsession)
             return updated.rowcount
         except DatabaseError:
             return None
@@ -619,7 +617,6 @@ class ContentACLEntity(Resource):
 
         try:
             deleted = self.dbsession.execute(stmt)
-            invalidate(self.dbsession)
             return deleted.rowcount
         except DatabaseError:
             return False
@@ -690,7 +687,6 @@ class ContentACLEntity(Resource):
         try:
             # The UPDATE statement
             updated = self.dbsession.execute(stmt)
-            invalidate(self.dbsession)
             return updated.rowcount
         except DatabaseError:
             return None

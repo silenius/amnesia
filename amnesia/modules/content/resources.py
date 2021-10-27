@@ -9,15 +9,23 @@ from pyramid.security import DENY_ALL
 from pyramid.security import ALL_PERMISSIONS
 from amnesia.security import Owner
 
+from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
-
-from zope.sqlalchemy import invalidate
 
 from amnesia.modules.content import Content
 from amnesia.resources import Resource
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
+
+
+@RequestLocalCache()
+def load_content_acl(request):
+    from amnesia.modules.account.security import get_content_acl
+    return get_content_acl(
+        request.dbsession, request.context.entity, recursive=True,
+        with_global_acl=True
+    )
 
 
 class Entity(Resource):
@@ -27,7 +35,6 @@ class Entity(Resource):
         super().__init__(request)
         self.entity = entity
         self.parent = parent
-        self.content_acl_cache = RequestLocalCache(self.load_content_acl)
 
     def __getitem__(self, path):
         # FIXME: circular imports
@@ -40,14 +47,13 @@ class Entity(Resource):
 
         for extra_path, factory in self.extra_paths.items():
             if extra_path == path:
-                return factory(self.request, content=self.entity, parent=self)
+                return factory(self.request, entity=self.entity, parent=self)
 
         raise KeyError
 
     def __str__(self):
         try:
-            return "{} <{}:{}>".format(self.__class__.__name__, self.entity.id,
-                                       self.entity.title)
+            return f'{self.__class__.__name__} <{self.entity.id}>'
         except:
             return self.__class__.__name__
 
@@ -70,23 +76,16 @@ class Entity(Resource):
         if self.entity.owner is self.request.identity:
             return [Owner]
 
-    def load_content_acl(self, request):
-        from amnesia.modules.account.security import get_content_acl
-        return get_content_acl(
-            self.dbsession, self.entity, recursive=True,
-            with_global_acl=True
-        )
-
     def __acl__(self):
         yield Allow, 'r:Manager', ALL_PERMISSIONS
-        yield Allow, Owner, ALL_PERMISSIONS
+        #yield Allow, Owner, ALL_PERMISSIONS
 
-        for acl in self.content_acl_cache.get_or_create(self.request):
+        for acl in load_content_acl(self.request):
             if acl.resource.name == 'CONTENT' and acl.content is self.entity:
                 yield acl.to_pyramid_acl()
 
         if not self.entity.inherits_parent_acl:
-            for acl in self.content_acl_cache.get(self.request):
+            for acl in load_content_acl(self.request):
                 if acl.resource.name == 'GLOBAL':
                     yield acl.to_pyramid_acl()
 
@@ -117,7 +116,9 @@ class Entity(Resource):
     def change_weight(self, new_weight: int):
         """ Change the weight of the entity within it's container. """
 
-        obj = self.dbsession.get(Content, self.entity.id, with_for_update=True)
+        obj = self.dbsession.get(
+            Content, self.entity.id, [orm.lazyload('*')], with_for_update=True
+        )
 
         (min_weight, max_weight) = sorted((new_weight, obj.weight))
 
@@ -155,13 +156,6 @@ class Entity(Resource):
 
         try:
             updated = self.dbsession.execute(stmt)
-
-            # XXX: temporary
-            # see https://github.com/zopefoundation/zope.sqlalchemy/issues/67
-            # The ORM-enabled UPDATE and DELETE features bypass ORM
-            # unit-of-work automation.
-            invalidate(self.dbsession)
-
             return updated.rowcount
         except DatabaseError:
             return None

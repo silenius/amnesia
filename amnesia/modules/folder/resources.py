@@ -4,8 +4,6 @@ from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.exc import InternalError
 
-from zope.sqlalchemy import invalidate
-
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.content import Content
@@ -32,13 +30,6 @@ class FolderEntity(Entity):
 
         try:
             updated = self.dbsession.execute(stmt)
-
-            # XXX: temporary
-            # see https://github.com/zopefoundation/zope.sqlalchemy/issues/67
-            # The ORM-enabled UPDATE and DELETE features bypass ORM
-            # unit-of-work automation.
-            invalidate(self.dbsession)
-
             return updated.rowcount
         except InternalError:
             raise PasteError(self.entity)
