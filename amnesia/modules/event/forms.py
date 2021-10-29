@@ -19,4 +19,4 @@ class EventForm(ContentForm):
                 sql.select(Country).order_by(Country.name)
             ).scalars().all()
 
-        return super().render(data, errors)
+        return super().render(data, errors, meta)
