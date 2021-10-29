@@ -10,7 +10,7 @@ class EventForm(ContentForm):
     def __init__(self, request, template=None):
         super().__init__(request, template)
 
-    def render(self, data=None, errors=None):
+    def render(self, data=None, errors=None, meta=None):
         if data is None:
             data = {}
 

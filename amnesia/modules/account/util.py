@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import bcrypt
 
-from pyramid.security import Deny
-from pyramid.security import Allow
-from pyramid.security import ALL_PERMISSIONS
+from pyramid.authorization import Deny
+from pyramid.authorization import Allow
+from pyramid.authorization import ALL_PERMISSIONS
 
 
 def bcrypt_hash_password(pw):
