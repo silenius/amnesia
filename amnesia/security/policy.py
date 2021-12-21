@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 def cookie_security_policy(settings):
     cfg = {
-        #'debug': asbool(settings.get('auth.debug', 'false')),
         'http_only': asbool(settings.get('auth.http_only', 'true')),
         'secure': asbool(settings.get('auth.secure', 'false')),
         'secret': settings['auth.secret'],

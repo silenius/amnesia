@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from amnesia.modules.content import Content
 from amnesia.modules.content import EntityManager
 from amnesia.modules.content import SessionResource
