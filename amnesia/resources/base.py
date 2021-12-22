@@ -1,9 +1,9 @@
 import logging
 
 from pyramid.request import RequestLocalCache
-from pyramid.security import Allow
-from pyramid.security import ALL_PERMISSIONS
-from pyramid.security import DENY_ALL
+from pyramid.authorization import Allow
+from pyramid.authorization import ALL_PERMISSIONS
+from pyramid.authorization import DENY_ALL
 
 log = logging.getLogger(__name__)
 

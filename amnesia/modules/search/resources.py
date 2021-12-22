@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-
-# pylint: disable=E1101
-
 from collections import namedtuple
 from datetime import date
 
-from pyramid.security import Allow
-from pyramid.security import Everyone
+from pyramid.authorization import Allow
+from pyramid.authorization import Everyone
 
 from sqlalchemy import orm
 from sqlalchemy import sql

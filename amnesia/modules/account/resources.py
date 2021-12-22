@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
-
-# pylint: disable=E1101
-
 import logging
 import os
 import operator
 
 from binascii import hexlify
 
-from pyramid.security import DENY_ALL
-from pyramid.security import Everyone
-from pyramid.security import Allow
+from pyramid.authorization import DENY_ALL
+from pyramid.authorization import Everyone
+from pyramid.authorization import Allow
 from pyramid.settings import asbool
 
 from pyramid_mailer.message import Message

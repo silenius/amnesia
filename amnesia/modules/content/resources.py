@@ -4,9 +4,9 @@ import logging
 import operator
 
 from pyramid.request import RequestLocalCache
-from pyramid.security import Allow
-from pyramid.security import DENY_ALL
-from pyramid.security import ALL_PERMISSIONS
+from pyramid.authorization import Allow
+from pyramid.authorization import DENY_ALL
+from pyramid.authorization import ALL_PERMISSIONS
 from amnesia.security import Owner
 
 from sqlalchemy import orm
