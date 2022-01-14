@@ -8,7 +8,7 @@ from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 from amnesia.modules.content import Content
 from amnesia.modules.folder import Folder
-from amnesia.modules.folder.events import RAddToFolder
+from amnesia.modules.folder.events import FolderAddObjectEvent
 from amnesia.modules.folder.exc import PasteError
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -37,8 +37,10 @@ class FolderEntity(Entity):
     def create(self, cls, data):
         owner = self.request.user
         new_entity = cls(owner=owner, parent=self.entity, **data)
-        #event = RAddToFolder(self.request, self.entity, new_entity)
-        #self.request.registry.notify(event)
+
+        self.request.registry.notify(
+            FolderAddObjectEvent(new_entity, self.entity, self.request)
+        )
 
         try:
             self.dbsession.add(new_entity)

@@ -1,6 +1,13 @@
-class RAddToFolder:
+import logging
 
-    def __init__(self, request, folder, content):
-        self.request = request
+from amnesia.events import ObjectEvent
+
+log = logging.getLogger(__name__)
+
+
+class FolderAddObjectEvent(ObjectEvent):
+    """Object is added to a Folder"""
+
+    def __init__(self, obj, folder, request=None):
         self.folder = folder
-        self.entity = content
+        super(FolderAddObjectEvent).__init__(obj, request)
