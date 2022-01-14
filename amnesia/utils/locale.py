@@ -31,8 +31,10 @@ def get_locale_url(lang, request=None):
     if not request:
         request = get_current_request()
 
+    locale_name = re.escape(request.locale_name)
+
     location = re.split(
-        f'(?:/{re.escape(request.locale_name)}(?=(/?$)|(/)))',
+        f'(?:/{locale_name}(?=(/?$)|(/)))',
         request.script_name,
         1
     )

@@ -21,8 +21,8 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 def includeme(config):
     ''' Pyramid includeme func'''
-    config.scan(__name__)
-
+    config.scan(__name__, categories=('pyramid', 'amnesia'))
+    #config.scan(__name__)
 
 class DocumentCRUD(ContentCRUD):
     ''' Document CRUD '''

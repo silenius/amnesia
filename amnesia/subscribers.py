@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from pyramid.events import BeforeRender
@@ -12,7 +10,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def includeme(config):
-    config.scan(__name__)
+    config.scan(__name__, categories=('pyramid', 'amnesia'))
 
 
 @subscriber(BeforeRender)
