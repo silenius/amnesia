@@ -117,6 +117,7 @@ def include_amnesia(config):
     config.include('amnesia.subscribers')
     config.include('amnesia.renderers')
     config.include('amnesia.db')
+    config.include('amnesia.events')
 
     config.include(include_cms_modules)
     config.include(include_entity_resource_mapping)

@@ -1,13 +1,17 @@
+import logging
+
 from datetime import datetime
 
+from pyramid.events import subscriber
 from pyramid.threadlocal import get_current_registry
 
 from pytz import timezone
 
-from sqlalchemy import event
+import sqlalchemy.event
 from sqlalchemy import sql
 from sqlalchemy import orm
 
+from amnesia.events import ObjectUpdateEvent
 from amnesia.modules.content import Content
 from amnesia.modules.account import Account
 from amnesia.modules.state import State
@@ -16,25 +20,30 @@ from amnesia.modules.tag import Tag
 from amnesia.modules.folder import Folder
 from amnesia.db import mapper_registry
 
+log = logging.getLogger(__name__)
 
-@event.listens_for(Content, 'before_update', propagate=True)
-def updated_listener(mapper, connection, target):
-    registry = get_current_registry()
 
-    if registry and registry.settings:
-        tz = registry.settings.get('timezone', 'UTC')
-    else:
-        tz = 'UTC'
+@subscriber(ObjectUpdateEvent)
+def updated_listener(event):
+    obj = event.obj
 
-    target.updated = datetime.now(timezone(tz))
+    if isinstance(obj, Content):
+        registry = get_current_registry()
+
+        if registry and registry.settings:
+            tz = registry.settings.get('timezone', 'UTC')
+        else:
+            tz = 'UTC'
+
+        obj.updated = datetime.now(timezone(tz))
 
 
 PGSQL_FTS_WEIGHTS = frozenset(('a', 'b', 'c', 'd'))
 PGSQL_FTS_DEFAULT_WEIGHT = 'd'
 
 
-@event.listens_for(Content, 'before_update', propagate=True)
-@event.listens_for(Content, 'before_insert', propagate=True)
+@sqlalchemy.event.listens_for(Content, 'before_update', propagate=True)
+@sqlalchemy.event.listens_for(Content, 'before_insert', propagate=True)
 def update_fts_listener(mapper, connection, target):
     """ Set the 'fts' column (full text search) """
 
@@ -65,6 +74,7 @@ def includeme(config):
     config.include('amnesia.modules.content_type.mapper')
     config.include('amnesia.modules.tag.mapper')
     config.include('amnesia.modules.language.mapper')
+    config.scan(__name__, categories=('pyramid', 'amnesia'))
 
     _count_alias = tables['content'].alias('_count_children')
 

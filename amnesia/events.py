@@ -42,6 +42,7 @@ def _before_flush(session, flush_context, instances):
 
 
 def includeme(config):
+    config.include('amnesia.db')
     dbsession = config.registry['dbsession_factory']
 
     sqlalchemy.event.listen(dbsession, 'before_flush', _before_flush)
