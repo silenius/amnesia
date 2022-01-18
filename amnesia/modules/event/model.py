@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -11,7 +9,7 @@ from amnesia.modules.content import Content
 class Event(Content):
 
     def __init__(self, **kwargs):
-        super(Event, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def finished(self):

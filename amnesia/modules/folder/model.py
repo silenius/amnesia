@@ -18,7 +18,7 @@ PolymorphicConfig = namedtuple(
 class Folder(Content):
 
     def __init__(self, **kwargs):
-        super(Folder, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def feed(self, **kwargs):
         # Those columns must be loaded at first.
