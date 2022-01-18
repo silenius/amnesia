@@ -10,4 +10,4 @@ class FolderAddObjectEvent(ObjectEvent):
 
     def __init__(self, obj, folder, request=None):
         self.folder = folder
-        super(FolderAddObjectEvent).__init__(obj, request)
+        super().__init__(obj, request)
