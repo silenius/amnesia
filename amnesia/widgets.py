@@ -82,14 +82,17 @@ class Tabs(Widget):
     def __init__(self, request, root_id=None, **kwargs):
         super().__init__(request)
 
-        self.kwargs = kwargs
+        self.current = kwargs.get('current')
+
         if 'template' in kwargs:
             self.template = kwargs['template']
+
+        max_depth = kwargs.get('max_depth')
 
         self.root_id = root_id
 
         tabs = get_children_containers(
-            self.dbsession, root_id, max_depth=1
+            self.dbsession, root_id, max_depth=max_depth
         ).per_container()
 
         self.grouped_tabs = {i[0]: tuple(i[1]) for i in tabs}
