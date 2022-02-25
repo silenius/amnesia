@@ -14,7 +14,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
 
 install_requires = [
     'plaster_pastedeploy',
-    'pyramid',
+    'pyramid~=2.0',
     'Chameleon',
     'pyramid_chameleon',
     'pyramid_beaker',
