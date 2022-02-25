@@ -38,11 +38,11 @@ class FolderEntity(Entity):
         owner = self.request.user
         notify = self.request.registry.notify
         new_entity = cls(owner=owner, parent=self.entity, **data)
+        notify(FolderAddObjectEvent(new_entity, self.entity, self.request))
 
         try:
             self.dbsession.add(new_entity)
             self.dbsession.flush()
-            notify(FolderAddObjectEvent(new_entity, self.entity, self.request))
             return new_entity
         except DatabaseError:
             return False
