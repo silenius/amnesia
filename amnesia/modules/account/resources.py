@@ -101,7 +101,7 @@ class DatabaseAuthResource(AuthResource):
         stmt = sql.select(Account).filter_by(lost_token=token)
 
         try:
-            return self.dbsession.execulet(stmt).scalar_one()
+            return self.dbsession.execute(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
 
