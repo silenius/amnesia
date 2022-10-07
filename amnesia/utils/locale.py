@@ -34,7 +34,7 @@ def get_locale_url(lang, request=None):
     locale_name = re.escape(request.locale_name)
 
     location = re.split(
-        f'(?:/{locale_name}(?=(/?$)|(/)))',
+        f'(?:(?<!^)/{locale_name}(?=(/?$)|(/)))',
         request.script_name,
         1
     )

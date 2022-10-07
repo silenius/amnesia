@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # pylint: disable=E1101
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -20,6 +18,16 @@ class Account(Base):
     @hybrid_property
     def full_name(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
+
+
+class AccountAuditLogin(Base):
+
+    def __init__(self, account, ip, success, ts=None, info=None):
+        self.account = account
+        self.ts = ts
+        self.ip = ip
+        self.success = success
+        self.info = info
 
 
 class Role(Base):

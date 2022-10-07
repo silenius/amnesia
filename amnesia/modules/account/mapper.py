@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy import event
 from sqlalchemy import orm
 from sqlalchemy import sql
@@ -11,6 +9,7 @@ from amnesia.db.ext import pg_json_property
 from amnesia.modules.content import Content
 
 from .model import Account
+from .model import AccountAuditLogin
 from .model import Role
 from .model import AccountRole
 from .model import Permission
@@ -40,6 +39,27 @@ def includeme(config):
             'account_roles': orm.relationship(
                 AccountRole,
                 back_populates="account"
+            ),
+
+            'audit_logins': orm.relationship(
+                AccountAuditLogin,
+                back_populates='account',
+                cascade='all, delete-orphan'
+            ),
+
+        }
+    )
+
+
+    # ACCOUNT AUDIT LOGINS
+
+    mapper_registry.map_imperatively(
+        AccountAuditLogin,
+        tables['account_audit_login'],
+        properties={
+            'account': orm.relationship(
+                Account,
+                back_populates='audit_logins'
             )
         }
     )

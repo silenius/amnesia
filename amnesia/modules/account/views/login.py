@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from marshmallow import ValidationError
 from marshmallow import EXCLUDE
 
@@ -12,6 +10,9 @@ from amnesia.utils.forms import render_form
 
 from amnesia.modules.account.validation import LoginSchema
 from amnesia.modules.account import AuthResource
+from amnesia.modules.account.events import LoginAttemptEvent
+from amnesia.modules.account.events import LoginFailureEvent
+from amnesia.modules.account.events import LoginSuccessEvent
 from amnesia.views import BaseView
 
 
@@ -35,6 +36,7 @@ class Login(BaseView):
     @view_config(request_method='POST')
     def post(self):
         params = self.request.POST.mixed()
+        notify = self.request.registry.notify
 
         try:
             data = LoginSchema(unknown=EXCLUDE).load(params)
@@ -47,16 +49,20 @@ class Login(BaseView):
         user = self.context.find_login(login)
 
         if user:
+            notify(LoginAttemptEvent(user, self.request))
+
             if not user.enabled:
                 errors = {'login': 'Error: login must be enabled by an administrator'}
             elif self.context.check_user_password(user, password):
                 headers = remember(self.request, str(user.id))
                 location = self.request.application_url
+                notify(LoginSuccessEvent(user, self.request))
                 return HTTPFound(location=location, headers=headers)
             else:
+                notify(LoginFailureEvent(user, self.request))
                 errors = {'password': "Password doesn't match"}
         else:
-            errors = {'login': 'Login failed'}
+            errors = {'login': 'Login failed (unknown user)'}
 
         form = self.form(data, errors)
 

@@ -102,6 +102,7 @@ def app_request(app, tm, dbsession):
 
         yield request
 
+@pytest.fixture
 def dummy_request(tm, dbsession, request):
     """
     A lightweight dummy request.

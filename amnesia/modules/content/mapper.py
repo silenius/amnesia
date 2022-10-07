@@ -41,7 +41,7 @@ def updated_listener(event):
 PGSQL_FTS_WEIGHTS = frozenset(('a', 'b', 'c', 'd'))
 PGSQL_FTS_DEFAULT_WEIGHT = 'd'
 
-
+# FIXME: doesn't work with amnesia_translation package
 @sqlalchemy.event.listens_for(Content, 'before_update', propagate=True)
 @sqlalchemy.event.listens_for(Content, 'before_insert', propagate=True)
 def update_fts_listener(mapper, connection, target):

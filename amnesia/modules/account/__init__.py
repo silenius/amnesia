@@ -1,4 +1,5 @@
 from .model import Account
+from .model import AccountAuditLogin
 from .model import Role
 from .model import Permission
 from .model import AccountRole
@@ -26,3 +27,4 @@ def includeme(config):
 
     config.include('.mapper')
     config.include('.views')
+    config.include('.subscribers')
