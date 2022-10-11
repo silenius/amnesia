@@ -1,0 +1,3 @@
+class TooManyAuthenticationFailure(Exception):
+    pass
+
