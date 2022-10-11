@@ -17,9 +17,9 @@ def reset(dbsession, account=None, ip=None, reset_failure=True,
 
     if not all((reset_failure, reset_success)):
         if reset_failure:
-            stmt = stmt.where(AccountAuditLogin.success == True)
-        elif reset_success:
             stmt = stmt.where(AccountAuditLogin.success == False)
+        elif reset_success:
+            stmt = stmt.where(AccountAuditLogin.success == True)
 
     dbsession.execute(stmt)
 

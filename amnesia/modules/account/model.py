@@ -2,9 +2,9 @@
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from amnesia.modules.account.util import to_pyramid_acl
+from amnesia.modules.account.utils import to_pyramid_acl
 
-from .util import bcrypt_hash_password
+from .utils import bcrypt_hash_password
 
 from .. import Base
 

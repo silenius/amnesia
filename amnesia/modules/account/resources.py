@@ -25,8 +25,8 @@ from .model import ContentACL
 from .model import GlobalACL
 from .model import AccountRole
 
-from .util import bcrypt_hash_password
-from .util import bcrypt_check_password
+from .utils import bcrypt_hash_password
+from .utils import bcrypt_check_password
 
 log = logging.getLogger(__name__)
 
