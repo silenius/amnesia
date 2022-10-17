@@ -22,6 +22,7 @@ from amnesia.modules.folder.services import get_children_containers
 from amnesia.modules.folder.services import get_lineage
 
 from amnesia.utils.widgets import widget_config
+from amnesia.utils.request import RequestMixin
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -30,20 +31,12 @@ def includeme(config):
     config.scan(__name__, categories=('pyramid', 'amnesia'))
 
 
-class Widget(object):
+class Widget(RequestMixin):
 
     template = None
 
     def __init__(self, request):
         self.request = request
-
-    @property
-    def dbsession(self):
-        return self.request.dbsession
-
-    @property
-    def settings(self):
-        return self.request.registry.settings
 
     def __str__(self):
         return render(self.template, {'widget': self}, request=self.request)

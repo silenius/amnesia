@@ -191,7 +191,7 @@ class FileCRUD(ContentCRUD):
 
         if updated_entity:
             evt = FileUpdated(self.request, self.entity)
-            self.request.registry.notify(evt)
+            self.notify(evt)
             if isinstance(data['content'], cgi_FieldStorage):
                 file_utils.save_to_disk(self.request, updated_entity,
                     data['content'])

@@ -26,10 +26,6 @@ class ContentCRUD(BaseView):
         return self.context.entity
 
     @property
-    def dbsession(self):
-        return self.request.dbsession
-
-    @property
     def session(self):
         return self.request.session
 

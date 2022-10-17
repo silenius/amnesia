@@ -36,9 +36,8 @@ class FolderEntity(Entity):
 
     def create(self, cls, data):
         owner = self.request.user
-        notify = self.request.registry.notify
         new_entity = cls(owner=owner, parent=self.entity, **data)
-        notify(FolderAddObjectEvent(new_entity, self.entity, self.request))
+        self.notify(FolderAddObjectEvent(new_entity, self.entity, self.request))
 
         try:
             self.dbsession.add(new_entity)

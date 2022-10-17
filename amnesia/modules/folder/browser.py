@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # pylint: disable=E1101
 
 import logging
@@ -11,6 +9,7 @@ from sqlalchemy import orm
 from sqlalchemy import sql
 
 from amnesia.modules.content_type import ContentType
+from amnesia.utils.request import RequestMixin
 
 try:
     from amnesia_multilingual.utils import with_current_translations
@@ -25,12 +24,11 @@ FolderBrowserResult = namedtuple(
     ['query', 'sort', 'count']
 )
 
-class FolderBrowser:
+class FolderBrowser(RequestMixin):
 
     def __init__(self, request, folder):
         self.request = request
         self.folder = folder
-        self.dbsession = request.dbsession
 
     def query(self, sort_by=(), offset=0, limit=None, deferred=(),
               undeferred=(), sort_folder_first=False, count=True,
@@ -167,7 +165,7 @@ class FolderBrowser:
 
         if sort_by:
             if WITH_TRANSLATION:
-                trans_cols = self.request.registry['amnesia.translations']['attrs']
+                trans_cols = self.registry['amnesia.translations']['attrs']
                 sort_by = [o.to_sql(lang_partition) if (o.src in trans_cols and o.prop in trans_cols[o.src]) else o.to_sql(entity) for o in sort_by]
             else:
                 sort_by = [o.to_sql(entity) for o in sort_by]

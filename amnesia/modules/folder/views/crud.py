@@ -125,7 +125,7 @@ class FolderCRUD(ContentCRUD):
     def read(self):
         pl_cfg = self.entity.polymorphic_config
         entity = orm.with_polymorphic(pl_cfg.base_mapper.entity, pl_cfg.cls)
-        orders = self.request.registry.settings['amnesia:orders']
+        orders = self.registry.settings['amnesia:orders']
         all_orders = order.for_entity(entity, orders)
 
         context = {
