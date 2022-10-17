@@ -5,6 +5,8 @@ from pyramid.authorization import Allow
 from pyramid.authorization import ALL_PERMISSIONS
 from pyramid.authorization import DENY_ALL
 
+from amnesia.utils.request import RequestMixin
+
 log = logging.getLogger(__name__)
 
 
@@ -14,7 +16,7 @@ def load_global_acl(request):
     return get_global_acl(request.dbsession, request.identity)
 
 
-class Resource:
+class Resource(RequestMixin):
     ''' Base resource class. All other resources should inherit from it. '''
 
     def __init__(self, request):
@@ -35,16 +37,6 @@ class Resource:
     @property
     def extra_paths(self):
         try:
-            return self.request.registry.cms_resource_paths[self.__class__]
+            return self.registry.cms_resource_paths[self.__class__]
         except (KeyError, AttributeError):
             return {}
-
-    @property
-    def dbsession(self):
-        ''' Database session '''
-        return self.request.dbsession
-
-    @property
-    def settings(self):
-        ''' Pyramid registry settings '''
-        return self.request.registry.settings

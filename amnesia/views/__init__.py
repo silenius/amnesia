@@ -2,6 +2,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
 from amnesia.utils.locale import get_locale_url
+from amnesia.utils.request import RequestMixin
 
 def includeme(config):
     config.include('.haproxy')
@@ -11,15 +12,11 @@ def includeme(config):
     config.scan(__name__)
 
 
-class BaseView(object):
+class BaseView(RequestMixin):
 
     def __init__(self, context, request):
         self.context = context
         self.request = request
-
-    @property
-    def dbsession(self):
-        return self.request.dbsession
 
 
 @view_config(name='change_locale')

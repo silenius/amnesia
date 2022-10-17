@@ -39,7 +39,6 @@ class Login(BaseView):
     @view_config(request_method='POST')
     def post(self):
         params = self.request.POST.mixed()
-        notify = self.request.registry.notify
 
         try:
             data = LoginSchema(unknown=EXCLUDE).load(params)
@@ -53,7 +52,7 @@ class Login(BaseView):
 
         if user:
             try:
-                notify(LoginAttemptEvent(user, self.request))
+                self.notify(LoginAttemptEvent(user, self.request))
             except TooManyAuthenticationFailure:
                 errors = {'login': 'Account is blocked, too many authentication failures.'}
             else:
@@ -62,10 +61,10 @@ class Login(BaseView):
                 elif self.context.check_user_password(user, password):
                     headers = remember(self.request, str(user.id))
                     location = self.request.application_url
-                    notify(LoginSuccessEvent(user, self.request))
+                    self.notify(LoginSuccessEvent(user, self.request))
                     return HTTPFound(location=location, headers=headers)
                 else:
-                    notify(LoginFailureEvent(user, self.request))
+                    self.notify(LoginFailureEvent(user, self.request))
                     errors = {'password': "Password doesn't match"}
         else:
             errors = {'login': 'Login failed (unknown user)'}
