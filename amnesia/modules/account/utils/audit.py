@@ -35,9 +35,7 @@ def reset(dbsession, account=None, ip=None, reset_failure=True,
             )
         )
 
-    print(stmt)
-
-    #dbsession.execute(stmt)
+    dbsession.execute(stmt)
 
 reset_failures = partial(reset, reset_failure=True, reset_success=False)
 
