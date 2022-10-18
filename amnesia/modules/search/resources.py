@@ -42,7 +42,7 @@ class SearchResource(Resource):
 
         stmt = sql.select(search_for)
 
-        if 'amnesia.translations' in self.request.registry:
+        if 'amnesia.translations' in self.registry:
             stmt, lang_partition = with_current_translations(stmt, search_for)
             src = lang_partition.c
         else:
