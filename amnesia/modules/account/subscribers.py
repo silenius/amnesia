@@ -10,8 +10,10 @@ from .events import LoginAttemptEvent
 from .exc import TooManyAuthenticationFailure
 
 from . import AccountAuditLogin
+
 from .utils.audit import get_count_failures
 from .utils.audit import reset_failures
+from .utils.audit import reset_success
 
 
 def includeme(config):
@@ -20,43 +22,50 @@ def includeme(config):
 
 @subscriber(LoginSuccessEvent)
 def add_success_login_entry(event):
-    settings = event.request.registry.settings
+    settings = event.settings
+    dbsession = event.dbsession
+    ip = event.request.client_addr
 
     log_success = asbool(settings.get('audit.account.log_success', True))
+    keep = int(settings.get('audit.account.log_success_keep', 0))
 
     if log_success:
-        entry = AccountAuditLogin(
-            event.account, event.request.client_addr, True
-        )
+        entry = AccountAuditLogin(event.account, ip, True)
+        dbsession.add(entry)
 
-        event.request.dbsession.add(entry)
+    if keep:
+        reset_success(dbsession, event.account, ip, keep_last=keep)
 
-    reset_failures = asbool(settings.get('audit.account.reset_failures_on_success', False))
+    rf = asbool(
+        settings.get('audit.account.reset_failures_on_success', False)
+    )
 
-    if reset_failures:
-        reset_failures(event.account, event.request.client_addr)
+    if rf:
+        reset_failures(dbsession, event.account, ip)
 
 
 @subscriber(LoginFailureEvent)
 def add_failed_login_entry(event):
-    settings = event.request.registry.settings
+    settings = event.settings
+    dbsession = event.dbsession
+    ip = event.request.client_addr
 
     log_failure = asbool(settings.get('audit.account.log_failure', True))
+    keep = int(settings.get('audit.account.log_failure_keep', 0))
 
     if log_failure:
-        entry = AccountAuditLogin(
-            event.account, event.request.client_addr, False
-        )
+        entry = AccountAuditLogin(event.account, ip, False)
+        dbsession.add(entry)
 
-        event.request.dbsession.add(entry)
+    if keep:
+        reset_failures(dbsession, event.account, ip, keep_last=keep)
 
 
 @subscriber(LoginAttemptEvent)
 def login_attempt(event):
-    request = event.request
-    settings = request.registry.settings
-    dbsession = request.dbsession
-    ip = request.client_addr
+    settings = event.settings
+    dbsession = event.dbsession
+    ip = event.request.client_addr
     account = event.account
 
     failure_limit = int(settings.get('audit.account.failure_limit'))

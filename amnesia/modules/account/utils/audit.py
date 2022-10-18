@@ -33,6 +33,8 @@ def reset(dbsession, account=None, ip=None, reset_failure=True,
                     keep_last
                 )
             )
+        ).execution_options(
+            synchronize_session=False
         )
 
     dbsession.execute(stmt)

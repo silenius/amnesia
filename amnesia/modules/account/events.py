@@ -1,6 +1,9 @@
+from amnesia.utils.request import RequestMixin
+
 from pyramid.threadlocal import get_current_request
 
-class LoginEvent:
+
+class LoginEvent(RequestMixin):
 
     def __init__(self, account, request=None):
         self.account = account

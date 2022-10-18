@@ -9,9 +9,10 @@ class RequestMixin:
         return self.request.registry
 
     @property
+    def settings(self):
+        return self.registry.settings
+
+    @property
     def notify(self):
         return self.registry.notify
 
-    @property
-    def settings(self):
-        return self.registry.settings
