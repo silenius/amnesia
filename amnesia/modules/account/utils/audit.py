@@ -6,8 +6,11 @@ from ..model import AccountAuditLogin
 
 
 def reset(dbsession, account=None, ip=None, reset_failure=True,
-        reset_success=True):
-    stmt = sql.delete(AccountAuditLogin)
+        reset_success=True, keep_last=None):
+    if keep_last:
+        stmt = sql.select(AccountAuditLogin.id)
+    else:
+        stmt = sql.delete(AccountAuditLogin)
 
     if account:
         stmt = stmt.where(AccountAuditLogin.account == account)
@@ -21,7 +24,20 @@ def reset(dbsession, account=None, ip=None, reset_failure=True,
         elif reset_success:
             stmt = stmt.where(AccountAuditLogin.success == True)
 
-    dbsession.execute(stmt)
+    if keep_last:
+        stmt = sql.delete(AccountAuditLogin).where(
+            AccountAuditLogin.id.in_(
+                stmt.order_by(
+                    AccountAuditLogin.ts.desc()
+                ).offset(
+                    keep_last
+                )
+            )
+        )
+
+    print(stmt)
+
+    #dbsession.execute(stmt)
 
 reset_failures = partial(reset, reset_failure=True, reset_success=False)
 
