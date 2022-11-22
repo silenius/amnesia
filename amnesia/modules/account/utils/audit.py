@@ -7,6 +7,8 @@ from ..model import AccountAuditLogin
 
 def reset(dbsession, account=None, ip=None, reset_failure=True,
         reset_success=True, keep_last=None):
+    """Reset account audit logs"""
+
     if keep_last:
         stmt = sql.select(AccountAuditLogin.id)
     else:
