@@ -36,12 +36,10 @@ def includeme(config):
 # BROWSE #
 ##########
 
-@view_defaults(context=RoleResource, name='browse', permission='browse')
+@view_defaults(context=RoleResource, name='browse', )
 class RoleBrowserView(BaseView):
 
-    @view_config(request_method='GET', accept='application/xml',
-                 renderer='amnesia:templates/role/_browse.xml')
-    def browse_xml(self):
+    def browse(self):
         params = self.request.GET.mixed()
         schema = BrowseRoleSchema(context={'request': self.request})
 
@@ -65,6 +63,21 @@ class RoleBrowserView(BaseView):
             'offset': data['offset']
         }
 
+
+    @view_config(
+        request_method='GET', accept='application/xml',
+        renderer='amnesia:templates/role/_browse.xml'
+    )
+    def browse_xml(self):
+        return self.browse()
+
+    @view_config(
+        request_method='GET', accept='application/json', renderer='json'
+    )
+    def browse_json(self):
+        data = self.browse()
+        data['roles'] = [RoleSchema().dump(role) for role in data['roles']]
+        return data
 
 @view_defaults(context=RoleResource, name='')
 class RolesCRUD(BaseView):
@@ -93,7 +106,7 @@ class RolesCRUD(BaseView):
             raise HTTPBadRequest(error.messages)
 
         role = self.context.create(
-            name=data['role'], description=data['description']
+            name=data['name'], description=data['description']
         )
 
         if not role:

@@ -248,7 +248,7 @@ class RoleResource(Resource):
         if offset is not None:
             stmt = stmt.offset(offset)
 
-        result = self.dbsession.execute(stmt).scalars()
+        result = self.dbsession.execute(stmt).scalars().all()
 
         return result
 

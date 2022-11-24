@@ -4,7 +4,7 @@ from marshmallow import Schema
 from marshmallow import EXCLUDE
 from marshmallow import post_load
 from marshmallow import ValidationError
-from marshmallow.fields import String
+from marshmallow.fields import DateTime, String
 from marshmallow.fields import Email
 from marshmallow.fields import Integer
 from marshmallow.fields import Boolean
@@ -49,8 +49,11 @@ class AccountSchema(Schema):
 
 
 class RoleSchema(Schema):
-    role = String(required=True, validate=[Length(min=4)])
+    name = String(required=True, validate=[Length(min=4)])
     description = String()
+    created = DateTime(dump_only=True)
+    enabled = Boolean()
+    locked = Boolean()
 
 
 class ForgotPasswordSchema(Schema):
