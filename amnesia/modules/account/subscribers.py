@@ -68,7 +68,7 @@ def login_attempt(event):
     ip = event.request.client_addr
     account = event.account
 
-    failure_limit = int(settings.get('audit.account.failure_limit'))
+    failure_limit = int(settings.get('audit.account.failure_limit', 0))
     if failure_limit > 0:
         if get_count_failures(dbsession, account, ip=ip) >= failure_limit:
             raise TooManyAuthenticationFailure(account, ip)
