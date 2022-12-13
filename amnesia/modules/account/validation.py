@@ -51,9 +51,11 @@ class AccountSchema(Schema):
 class RoleSchema(Schema):
     name = String(required=True, validate=[Length(min=4)])
     description = String()
+    id = Integer(dump_only=True)
     created = DateTime(dump_only=True)
     enabled = Boolean()
     locked = Boolean()
+    virtual = Boolean(dump_only=True)
 
 
 class ForgotPasswordSchema(Schema):
