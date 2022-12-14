@@ -237,20 +237,7 @@ class RoleResource(Resource):
         return result
 
     def query(self, order_by=None, limit=None, offset=None):
-        stmt = sql.select(Role)
-
-        if order_by is not None:
-            stmt = stmt.order_by(order_by)
-
-        if limit is not None:
-            stmt = stmt.limit(limit)
-
-        if offset is not None:
-            stmt = stmt.offset(offset)
-
-        result = self.dbsession.execute(stmt).scalars().all()
-
-        return result
+        return sql.select(Role)
 
     def create(self, name, description):
         role = Role(name=name, description=description)

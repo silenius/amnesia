@@ -48,35 +48,48 @@ class RoleBrowserView(BaseView):
         except ValidationError as error:
             raise HTTPBadRequest(error.messages)
 
-        roles = self.context.query(
-            order_by = Role.locked.desc(),
-            limit = data['limit'],
-            offset = data['offset']
-        )
+        roles = self.dbsession.execute(
+            self.context.query()
+            .order_by(
+                Role.virtual.desc(),
+                Role.locked.desc())
+            .limit(data['limit'])
+            .offset(data['offset'])
+        ).scalars().all()
 
         count = self.context.count()
 
         return {
-            'roles': roles,
-            'count': count,
-            'limit': data['limit'],
-            'offset': data['offset']
+            'data': {
+                'roles': roles
+            },
+            'meta': {
+                'count': count,
+                'limit': data['limit'],
+                'offset': data['offset']
+            }
         }
 
 
     @view_config(
-        request_method='GET', accept='application/xml',
+        request_method='GET',
+        accept='application/xml',
         renderer='amnesia:templates/role/_browse.xml'
     )
     def browse_xml(self):
         return self.browse()
 
     @view_config(
-        request_method='GET', accept='application/json', renderer='json'
+        request_method='GET',
+        accept='application/json',
+        renderer='json'
     )
     def browse_json(self):
         data = self.browse()
-        data['roles'] = [RoleSchema().dump(role) for role in data['roles']]
+        data['data']['roles'] = [
+            RoleSchema().dump(role) for role in data['data']['roles']
+        ]
+
         return data
 
 @view_defaults(context=RoleResource, name='')
