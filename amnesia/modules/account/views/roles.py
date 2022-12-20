@@ -49,12 +49,15 @@ class RoleBrowserView(BaseView):
             raise HTTPBadRequest(error.messages)
 
         roles = self.dbsession.execute(
-            self.context.query()
-            .order_by(
+            self.context.query().order_by(
                 Role.virtual.desc(),
-                Role.locked.desc())
-            .limit(data['limit'])
-            .offset(data['offset'])
+                Role.locked.desc(),
+                Role.name
+            ).limit(
+                data['limit']
+            ).offset(
+                data['offset']
+            )
         ).scalars().all()
 
         count = self.context.count()
