@@ -147,14 +147,29 @@ class RoleEntityCRUD(BaseView):
     # GET #
     #######
 
-    @view_config(request_method='GET', permission='read', accept='text/html',
-                 renderer='amnesia:templates/role/show.pt')
+    @view_config(
+        request_method='GET',
+        permission='read',
+        accept='text/html',
+        renderer='amnesia:templates/role/show.pt'
+    )
     def get(self):
         role = self.context.role
 
         return {
             'role': role
         }
+
+    @view_config(
+        request_method='GET', 
+        permission='read', 
+        accept='application/json',
+        renderer='json'
+    )
+    def get_json(self):
+        role = self.context.role
+
+        return RoleSchema().dump(role)
 
     ##########
     # DELETE #

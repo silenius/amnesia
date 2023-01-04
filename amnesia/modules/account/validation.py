@@ -53,8 +53,8 @@ class RoleSchema(Schema):
     description = String()
     id = Integer(dump_only=True)
     created = DateTime(dump_only=True)
-    enabled = Boolean()
-    locked = Boolean()
+    enabled = Boolean(dump_only=True)
+    locked = Boolean(dump_only=True)
     virtual = Boolean(dump_only=True)
 
 

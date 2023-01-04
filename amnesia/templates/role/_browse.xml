@@ -2,7 +2,7 @@
 <?python
 import json
 ?>
-<response xmlns:tal="http://xml.zope.org/namespaces/tal" xmlns:metal="http://xml.zope.org/namespaces/metal" tal:define="page_total (count / limit if count % limit == 0 else count / limit + 1) ; page_current (offset / limit + 1);">
+<response xmlns:tal="http://xml.zope.org/namespaces/tal" xmlns:metal="http://xml.zope.org/namespaces/metal" tal:define="page_total (meta.count / meta.limit if meta.count % meta.limit == 0 else meta.count / meta.limit + 1) ; page_current (meta.offset / meta.limit + 1);">
 
     <meta>
         <requested tal:condition="req">${json.dumps(request.GET.mixed())}</requested>
@@ -14,7 +14,7 @@ import json
     <components tal:define="components components | ('main', 'pagination')">
 
         <main tal:condition="'main' in components" xmlns="http://www.w3.org/1999/xhtml">
-            <tr data-obj="${h.dump_obj(content, 'json', include_columns=['id'], include_relations=False)}" tal:repeat="content roles">
+            <tr data-obj="${h.dump_obj(content, 'json', include_columns=['id'], include_relations=False)}" tal:repeat="content data.roles">
                 <td>
                     <input type="checkbox" data-purpose="select_object" />
                 </td>
@@ -50,8 +50,8 @@ import json
             </tr>
         </main>
 
-        <pagination tal:condition="'pagination' in components" xmlns="http://www.w3.org/1999/xhtml" count="${count}" limit="${limit}" offset="${offset}" page_total="${page_total}" page_current="${page_current}">
-            <metal:block use-macro="load: amnesia:templates/_pagination.pt" tal:define="offset offset; limit limit" />
+        <pagination tal:condition="'pagination' in components" xmlns="http://www.w3.org/1999/xhtml" count="${meta.count}" limit="${meta.limit}" offset="${meta.offset}" page_total="${page_total}" page_current="${page_current}">
+            <metal:block use-macro="load: amnesia:templates/_pagination.pt" tal:define="offset meta.offset; count meta.count; limit meta.limit" />
         </pagination>
 
     </components>
