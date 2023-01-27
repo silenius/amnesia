@@ -1,3 +1,4 @@
+from argparse import Namespace
 import logging
 import os
 import operator
@@ -274,6 +275,20 @@ class RoleEntity(Resource):
             return RoleMember(self.request, role=self.role, parent=self)
 
         raise KeyError
+
+    def update(self, name, description=None):
+        if self.role.locked or self.role.virtual:
+            return False    
+
+        self.role.name = name
+        self.role.description = description
+
+        try:
+            self.dbsession.add(self.role)
+            self.dbsession.flush()
+            return self.role
+        except DatabaseError:
+            return False
 
     def delete(self):
         try:

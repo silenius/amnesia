@@ -9,6 +9,7 @@ from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.httpexceptions import HTTPCreated
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPFound
 
 from marshmallow import ValidationError
 from sqlalchemy import sql
@@ -140,6 +141,10 @@ def new(context, request):
     return {}
 
 
+##############################################################################
+### ROLE ENTITY 
+##############################################################################
+
 @view_defaults(context=RoleEntity, name='')
 class RoleEntityCRUD(BaseView):
 
@@ -170,6 +175,34 @@ class RoleEntityCRUD(BaseView):
         role = self.context.role
 
         return RoleSchema().dump(role)
+
+    #######
+    # PUT #
+    #######
+
+    @view_config(request_method='PUT', permission='update')
+    def put(self):
+        params = self.request.POST.mixed()
+        schema = RoleSchema()
+
+        try:
+            data = schema.load(params)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
+
+        role = self.context.update(
+            name=data['name'],
+            description=data['description']
+        )
+
+        if not role:
+            raise HTTPInternalServerError()
+
+        location = self.request.resource_url(self.context)
+
+        return HTTPNoContent(location=location)
+
+
 
     ##########
     # DELETE #
