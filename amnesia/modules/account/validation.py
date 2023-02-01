@@ -57,6 +57,9 @@ class RoleSchema(Schema):
     locked = Boolean(dump_only=True)
     virtual = Boolean(dump_only=True)
 
+    class Meta:
+        unknown = EXCLUDE
+
 
 class ForgotPasswordSchema(Schema):
     email = Email(required=True)

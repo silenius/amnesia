@@ -1,4 +1,3 @@
-from argparse import Namespace
 import logging
 import os
 import operator
@@ -69,9 +68,19 @@ class DatabaseAuthResource(AuthResource):
 
         raise KeyError
 
-    @property
     def query(self):
         return sql.select(Account)
+
+    def count(self):
+        stmt = sql.select(
+            sql.func.count('*')
+        ).select_from(
+            Account
+        )
+
+        result = self.dbsession.execute(stmt).scalar_one()
+
+        return result
 
     def get_user(self, user_id):
         return self.dbsession.get(Account, user_id)

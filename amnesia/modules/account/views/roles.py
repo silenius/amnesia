@@ -23,6 +23,7 @@ from amnesia.modules.account import RoleEntity
 from amnesia.modules.account import RoleMember
 from amnesia.modules.account import RoleMemberEntity
 from amnesia.modules.account.validation import BrowseAccountSchema
+from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import BrowseRoleSchema
 from amnesia.modules.account.validation import RoleSchema
 
@@ -180,6 +181,7 @@ class RoleEntityCRUD(BaseView):
     # PUT #
     #######
 
+    # TODO: forbid name==system.
     @view_config(request_method='PUT', permission='update')
     def put(self):
         params = self.request.POST.mixed()
@@ -202,8 +204,6 @@ class RoleEntityCRUD(BaseView):
 
         return HTTPNoContent(location=location)
 
-
-
     ##########
     # DELETE #
     ##########
@@ -222,6 +222,15 @@ class RoleMemberView(BaseView):
     #######
     # GET #
     #######
+
+    @view_config(
+        request_method='GET',
+        accept='application/json',
+        renderer='json'
+    )
+    def get_json(self):
+        members = self.context.get_members()
+        return AccountSchema().dump(members, many=True)
 
     @view_config(request_method='GET', accept='text/html',
                  renderer='amnesia:templates/role/members.pt')
