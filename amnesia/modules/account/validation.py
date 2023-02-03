@@ -24,6 +24,7 @@ class LoginSchema(Schema):
 
 
 class AccountSchema(Schema):
+    id = Integer(dump_only=True)
     login = String(required=True, validate=Length(min=4))
     password = String(required=True, load_only=True, validate=Length(min=4))
     password_repeat = String(required=True, load_only=True,
