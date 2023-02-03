@@ -232,6 +232,20 @@ class RoleMemberView(BaseView):
         members = self.context.get_members()
         return AccountSchema().dump(members, many=True)
 
+    @view_config(
+        request_method='GET',
+        accept='application/json',
+        renderer='json',
+        name="all"
+    )
+    def get_all_json(self):
+        members = self.context.get_members(only=False)
+
+        return [ 
+            AccountSchema().dump(member[0]) | { 'member': member[1] } 
+            for member in members
+        ]
+
     @view_config(request_method='GET', accept='text/html',
                  renderer='amnesia:templates/role/members.pt')
     def get_html(self):

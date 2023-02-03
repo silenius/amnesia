@@ -337,12 +337,19 @@ class RoleMember(Resource):
             AccountRole == self.role
         )
 
-    def get_members(self):
-        stmt = sql.select(Account).filter(
-            Account.account_roles.any(role=self.role)
-        )
+    def get_members(self, only=True):
+        if only:
+            stmt = sql.select(Account).filter(
+                Account.account_roles.any(role=self.role)
+            )
 
-        return self.dbsession.execute(stmt).scalars().all()
+            return self.dbsession.execute(stmt).scalars().all()
+        else:
+            stmt = sql.select(Account).add_columns(
+                Account.account_roles.any(role=self.role)
+            )
+
+            return self.dbsession.execute(stmt).all()
 
     def add_member(self, account):
         try:
