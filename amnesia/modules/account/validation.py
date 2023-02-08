@@ -31,6 +31,8 @@ class AccountSchema(Schema):
                              validate=Length(min=4))
     last_name = String(required=True)
     first_name = String(required=True)
+    full_name = String(dump_only=True)
+    enabled = Boolean(dump_only=True)
     email = Email(required=True)
     captcha_token = String(required=True, data_key='g-recaptcha-response',
                            validate=[Length(min=1, error='captcha missing')])

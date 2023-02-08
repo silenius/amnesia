@@ -467,6 +467,30 @@ class ACLEntity(Resource):
         except (NoResultFound, DatabaseError):
             return False
 
+    def get_permissions2(self):
+
+        #select p.*, a.allow, a.weight, coalesce(a.lol, false) as set from permission p left join lateral (select *, true as lol from acl where permission_id=p.id and resource_id=1 and role_id=4) a ON p.id=a.permission_id and a.role_id=4 and a.resource_id=1 order by a.weight desc nulls last;
+        
+        acls = sql.select(GlobalACL).where(
+            GlobalACL.role==self.role
+        ).lateral()
+
+        q = sql.select(
+            Permission, acls.c.allow, acls.c.weight
+        ).outerjoin(
+            acls
+        ).order_by(
+            acls.c.weight.desc()
+        ).nullslast()
+
+        #q = sql.select(Permission).add_columns(
+        #    Permission.acls.of_type(GlobalACL).any(role=self.role)
+        #)
+
+        result = self.dbsession.execute(q).all()
+
+        return result
+
     def get_permissions(self, order_by=None):
         stmt = sql.select(Permission)
 

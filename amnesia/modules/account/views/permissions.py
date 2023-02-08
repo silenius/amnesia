@@ -38,6 +38,18 @@ class ACLView(BaseView):
     # GET #
     #######
 
+    @view_config(
+        request_method='GET',
+        accept='application/json',
+        renderer='json',
+        name="list_permissions"
+    )
+    def get_all_json(self):
+        # TODO
+        members = self.context.get_permissions2()
+
+
+
     @view_config(request_method='GET',
                  permission='list_permissions',
                  accept='text/html',
