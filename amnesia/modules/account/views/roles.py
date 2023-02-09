@@ -26,6 +26,7 @@ from amnesia.modules.account.validation import BrowseAccountSchema
 from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import BrowseRoleSchema
 from amnesia.modules.account.validation import RoleSchema
+from amnesia.modules.account.validation import PermissionSchema
 
 log = logging.getLogger(__name__)
 
@@ -143,7 +144,7 @@ def new(context, request):
 
 
 ##############################################################################
-### ROLE ENTITY 
+### ROLE ENTITY
 ##############################################################################
 
 @view_defaults(context=RoleEntity, name='')
@@ -167,8 +168,8 @@ class RoleEntityCRUD(BaseView):
         }
 
     @view_config(
-        request_method='GET', 
-        permission='read', 
+        request_method='GET',
+        permission='read',
         accept='application/json',
         renderer='json'
     )
@@ -215,6 +216,26 @@ class RoleEntityCRUD(BaseView):
 
         raise HTTPInternalServerError()
 
+@view_defaults(
+    context=RoleEntity,
+)
+class RoleEntityPermission(BaseView):
+
+    # TODO
+    @view_config(
+        request_method='GET',
+        accept='application/json',
+        name='global-permissions',
+        renderer='json'
+    )
+    def global_permissions(self):
+        permissions = self.context.get_global_permissions()
+
+        return [PermissionSchema().dump(permission[0]) | {
+            'allow': permission[1],
+            'weight': permission[2]
+        } for permission in permissions]
+
 
 @view_defaults(context=RoleMember)
 class RoleMemberView(BaseView):
@@ -241,8 +262,8 @@ class RoleMemberView(BaseView):
     def get_all_json(self):
         members = self.context.get_members(only=False)
 
-        return [ 
-            AccountSchema().dump(member[0]) | { 'member': member[1] } 
+        return [
+            AccountSchema().dump(member[0]) | { 'member': member[1] }
             for member in members
         ]
 

@@ -63,6 +63,16 @@ class RoleSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
+class PermissionSchema(Schema):
+    id = Integer(dump_only=True)
+    name = String(required=True, validate=[Length(min=4)])
+    description = String()
+    created = DateTime(dump_only=True)
+    enabled = Boolean(dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+
 
 class ForgotPasswordSchema(Schema):
     email = Email(required=True)
