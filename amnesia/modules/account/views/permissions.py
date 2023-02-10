@@ -34,6 +34,7 @@ def includeme(config):
 
 @view_defaults(
     context=GlobalACLEntity,
+    permission='manage_acl',
     name=''
 )
 class GlobalACLCRUD(BaseView):
@@ -44,7 +45,6 @@ class GlobalACLCRUD(BaseView):
 
     @view_config(
         request_method='DELETE',
-        permission='manage_acl',
         renderer='json'
     )
     def delete(self):
@@ -52,6 +52,31 @@ class GlobalACLCRUD(BaseView):
             return HTTPNoContent()
 
         raise HTTPInternalServerError()
+
+    #########
+    # PATCH #
+    #########
+
+    @view_config(
+        request_method='PATCH',
+        renderer='json'
+    )
+    def patch(self):
+        form_data = self.request.POST.mixed()
+        schema = ACLSchema(context={
+            'request': self.request
+        })
+
+        try:
+            data = schema.load(form_data, partial=True)
+        except ValidationError as errors:
+            raise HTTPBadRequest('Validation error')
+
+        if 'allow' in data:
+            self.context.entity.allow = data['allow']
+        
+        return True
+
 
 
 @view_defaults(context=ACLEntity, name='')

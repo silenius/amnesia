@@ -761,6 +761,7 @@ class GlobalACLEntity(Resource):
     def __parent__(self):
         return self.parent
 
+    @property
     def __name__(self):
         return self.entity.id
 
