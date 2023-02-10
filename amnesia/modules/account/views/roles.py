@@ -232,8 +232,9 @@ class RoleEntityPermission(BaseView):
         permissions = self.context.get_global_permissions()
 
         return [PermissionSchema().dump(permission[0]) | {
-            'allow': permission[1],
-            'weight': permission[2]
+            'acl_id': permission[1],
+            'allow': permission[2],
+            'weight': permission[3]
         } for permission in permissions]
 
 

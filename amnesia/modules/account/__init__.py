@@ -12,6 +12,8 @@ from .resources import AuthResource
 from .resources import DatabaseAuthResource
 from .resources import AccountEntity
 from .resources import ACLEntity
+from .resources import GlobalACLEntity
+from .resources import ACLBaseResource
 from .resources import ContentACLEntity
 from .resources import RoleResource
 from .resources import RoleEntity

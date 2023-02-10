@@ -15,7 +15,6 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import sql
-from sqlalchemy import orm
 
 from amnesia.resources import Resource
 from .model import Account
@@ -24,6 +23,7 @@ from .model import Permission
 from .model import ACLResource
 from .model import ContentACL
 from .model import GlobalACL
+from .model import ACL
 from .model import AccountRole
 
 from .utils import bcrypt_hash_password
@@ -292,7 +292,7 @@ class RoleEntity(Resource):
         ).lateral()
 
         q = sql.select(
-            Permission, acls.c.allow, acls.c.weight
+            Permission, acls.c.id, acls.c.allow, acls.c.weight
         ).outerjoin(
             acls
         ).order_by(
@@ -725,3 +725,49 @@ class ContentACLEntity(Resource):
             return None
 
 
+class ACLBaseResource(Resource):
+    
+    __name__ = 'acls'
+    __acl__ = ()
+
+    def __init__(self, request, parent):
+        super().__init__(request)
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
+
+    def __getitem__(self, path):
+        if path.isdigit():
+            entity = self.dbsession.get(ACL, path)
+            if entity:
+                if entity.resource.name == 'GLOBAL':
+                    return GlobalACLEntity(
+                        self.request, entity, self
+                    )
+
+        raise KeyError
+
+
+class GlobalACLEntity(Resource):
+
+    def __init__(self, request, entity, parent):
+        super().__init__(request)
+        self.entity = entity 
+        self.parent = parent
+
+    @property
+    def __parent__(self):
+        return self.parent
+
+    def __name__(self):
+        return self.entity.id
+
+    def delete(self):
+        try:
+            self.dbsession.delete(self.entity)
+            self.dbsession.flush()
+            return True
+        except DatabaseError:
+            return False

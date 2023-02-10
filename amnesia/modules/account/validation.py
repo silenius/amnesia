@@ -103,7 +103,7 @@ class BrowseRoleSchema(Schema):
 
 
 class ACLSchema(Schema, PyramidContextMixin):
-    id = Integer(validate=Range(min=1))
+    id = Integer(validate=Range(min=1), dump_only=True)
     permission_id = Integer(validate=Range(min=1))
     weight = Integer(validation=Range(min=1))
     allow = Boolean()

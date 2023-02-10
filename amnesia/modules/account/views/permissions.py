@@ -13,6 +13,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from marshmallow import ValidationError
 
 from sqlalchemy import sql
+from amnesia.modules.account.resources import GlobalACLEntity
 
 from amnesia.views import BaseView
 from amnesia.modules.account import Role
@@ -29,6 +30,28 @@ log = logging.getLogger(__name__)
 
 def includeme(config):
     config.scan(__name__)
+
+
+@view_defaults(
+    context=GlobalACLEntity,
+    name=''
+)
+class GlobalACLCRUD(BaseView):
+
+    ##########
+    # DELETE #
+    ##########
+
+    @view_config(
+        request_method='DELETE',
+        permission='manage_acl',
+        renderer='json'
+    )
+    def delete(self):
+        if self.context.delete():
+            return HTTPNoContent()
+
+        raise HTTPInternalServerError()
 
 
 @view_defaults(context=ACLEntity, name='')
@@ -85,7 +108,9 @@ class ACLView(BaseView):
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        new_entity = self.context.create(data['permission'], data['allow'])
+        new_entity = self.context.create(
+            data['permission'], data['allow']
+        )
 
         if new_entity:
             location = self.request.resource_url(self.context, new_entity.id)
