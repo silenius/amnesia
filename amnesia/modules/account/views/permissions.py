@@ -73,7 +73,9 @@ class GlobalACLCRUD(BaseView):
             raise HTTPBadRequest('Validation error')
 
         if 'allow' in data:
-            self.context.entity.allow = data['allow']
+            self.context.acl.allow = data['allow']
+        if 'weight' in data:
+            self.context.update_weight(data['weight'])
         
         return True
 

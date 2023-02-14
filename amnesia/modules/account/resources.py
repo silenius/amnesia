@@ -750,11 +750,11 @@ class ACLBaseResource(Resource):
         raise KeyError
 
 
-class GlobalACLEntity(Resource):
+class ACLBaseEntity(Resource):
 
-    def __init__(self, request, entity, parent):
+    def __init__(self, request, acl, parent):
         super().__init__(request)
-        self.entity = entity 
+        self.acl = acl
         self.parent = parent
 
     @property
@@ -763,12 +763,83 @@ class GlobalACLEntity(Resource):
 
     @property
     def __name__(self):
-        return self.entity.id
+        return self.acl.id
+
+    @property
+    def role(self):
+        return self.acl.role
+
+    @property
+    def permission(self):
+        return self.acl.permission
 
     def delete(self):
         try:
-            self.dbsession.delete(self.entity)
+            self.dbsession.delete(self.acl)
             self.dbsession.flush()
             return True
         except DatabaseError:
             return False
+
+
+class GlobalACLEntity(ACLBaseEntity):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def update_weight(self, weight):
+        """ Change the weight of a permission. """
+
+        (min_weight, max_weight) = sorted((weight, self.acl.weight))
+
+        # Do we move downwards or upwards ?
+        if weight - self.acl.weight > 0:
+            operation = operator.sub
+            whens = {min_weight: max_weight}
+        else:
+            operation = operator.add
+            whens = {max_weight: min_weight}
+
+        # Select all the rows between the current weight and the new weight
+
+        # Note: The polymorphic identity WHERE criteria is not included for
+        # single- or joined- table updates - this must be added manually, even
+        # for single table inheritance.
+
+        # See Caveats section at
+        # https://docs.sqlalchemy.org/en/14/orm/session_basics.html#orm-expression-update-delete
+        global_resource = sql.select(
+            ACLResource.id
+        ).filter_by(
+            name='GLOBAL'
+        ).subquery()
+
+        filters = sql.and_(
+            GlobalACL.weight.between(min_weight, max_weight),
+            GlobalACL.resource_id == global_resource.c.id
+        )
+
+        # Swap min_weight/max_weight, or increment/decrement by one depending
+        # on whether one moves up or down
+        weight = sql.case(
+            value=GlobalACL.weight, whens=whens,
+            else_=operation(GlobalACL.weight, 1)
+        )
+
+        stmt = sql.update(
+            GlobalACL
+        ).filter(
+            filters
+        ).values(
+            weight=weight
+        ).execution_options(
+            synchronize_session=False
+        )
+
+        try:
+            # The UPDATE statement
+            updated = self.dbsession.execute(stmt)
+            return updated.rowcount
+        except DatabaseError:
+            return None
+
