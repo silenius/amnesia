@@ -788,7 +788,7 @@ class GlobalACLEntity(ACLBaseEntity):
         super().__init__(*args, **kwargs)
 
     def update_weight(self, weight):
-        """ Change the weight of a permission. """
+        """ Change the weight of a Global ACL. """
 
         (min_weight, max_weight) = sorted((weight, self.acl.weight))
 

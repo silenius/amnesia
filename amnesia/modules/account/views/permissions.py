@@ -80,7 +80,6 @@ class GlobalACLCRUD(BaseView):
         return True
 
 
-
 @view_defaults(context=ACLEntity, name='')
 class ACLView(BaseView):
 
