@@ -76,7 +76,7 @@ class GlobalACLCRUD(BaseView):
             self.context.acl.allow = data['allow']
         if 'weight' in data:
             self.context.update_weight(data['weight'])
-        
+
         return True
 
 
@@ -148,9 +148,11 @@ class ACLView(BaseView):
     # PATCH #
     #########
 
-    @view_config(request_method='PATCH',
-                 permission='manage_acl',
-                 renderer='json')
+    @view_config(
+        request_method='PATCH',
+        permission='manage_acl',
+        renderer='json'
+    )
     def patch(self):
         form_data = self.request.POST.mixed()
         schema = ACLSchema(context={

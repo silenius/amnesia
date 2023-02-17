@@ -18,8 +18,12 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_defaults(context=AuthResource, name='register', permission='register',
-               renderer='amnesia:templates/account/register.pt')
+@view_defaults(
+    context=AuthResource,
+    name='register',
+    permission='register',
+    renderer='amnesia:templates/account/register.pt'
+)
 class Register(BaseView):
 
     form_tmpl = 'amnesia:templates/account/_form_register.pt'

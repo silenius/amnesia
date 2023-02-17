@@ -200,6 +200,15 @@ class AccountEntity(Resource):
     def __name__(self):
         return self.entity.id
 
+    def delete(self):
+        try:
+            self.dbsession.delete(self.entity)
+            self.dbsession.flush()
+            return True
+        except DatabaseError:
+            return False
+
+
 
 ###############################################################################
 # ROLE                                                                        #
@@ -726,7 +735,7 @@ class ContentACLEntity(Resource):
 
 
 class ACLBaseResource(Resource):
-    
+
     __name__ = 'acls'
     __acl__ = ()
 

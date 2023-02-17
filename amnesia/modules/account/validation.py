@@ -32,7 +32,7 @@ class AccountSchema(Schema):
     last_name = String(required=True)
     first_name = String(required=True)
     full_name = String(dump_only=True)
-    enabled = Boolean(dump_only=True)
+    enabled = Boolean()
     email = Email(required=True)
     captcha_token = String(required=True, data_key='g-recaptcha-response',
                            validate=[Length(min=1, error='captcha missing')])

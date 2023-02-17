@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 def includeme(config):
     config.include('.login')
     config.include('.logout')
@@ -10,3 +7,4 @@ def includeme(config):
     config.include('.browse')
     config.include('.roles')
     config.include('.permissions')
+    config.include('.crud')

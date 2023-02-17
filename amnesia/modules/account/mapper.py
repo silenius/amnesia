@@ -38,7 +38,8 @@ def includeme(config):
 
             'account_roles': orm.relationship(
                 AccountRole,
-                back_populates="account"
+                back_populates="account",
+                cascade='all, delete-orphan'
             ),
 
             'audit_logins': orm.relationship(
