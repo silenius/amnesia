@@ -29,8 +29,12 @@ def includeme(config):
 @view_defaults(context=FolderEntity)
 class FolderBrowserView(BaseView):
 
-    @view_config(request_method='GET', renderer='json',
-                 name='browse', accept='application/json')
+    @view_config(
+        request_method='GET',
+        renderer='json',
+        name='browse',
+        accept='application/json'
+    )
     def browse_json(self):
         params = self.request.GET.mixed()
         schema = FolderBrowserSchema(context={
@@ -45,6 +49,12 @@ class FolderBrowserView(BaseView):
 
         browser = FolderBrowser(self.request, self.context.entity)
         result = browser.query(**data)
+
+        from amnesia.modules.content.validation import ContentSchema
+
+        return ContentSchema().dump(result.query.all(), many=True)
+
+
         return {
             'results': schema.dump(result.query.all(), many=True)
         }

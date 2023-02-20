@@ -56,6 +56,9 @@ class Register(BaseView):
         if errors:
             return {'form': self.form(form_data, errors)}
 
+        if (not self.request.has_permission('manage_roles')):
+            result.pop('enabled', None)
+
         new_account = self.context.register(result)
 
         if not new_account:
