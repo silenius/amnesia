@@ -34,6 +34,7 @@ from amnesia.modules.tag import Tag
 from amnesia.modules.state import State
 from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
+from amnesia.modules.account.validation import AccountSchema
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +54,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     weight = Integer(dump_only=True)
     content_type_id = Integer(dump_only=True)
     type = Nested(ContentTypeSchema, dump_only=True)
+    owner = Nested(AccountSchema, dump_only=True)
     container_id = Integer(dump_only=True)
     owner_id = Integer(dump_only=True)
     state_id = Integer(dump_only=True)

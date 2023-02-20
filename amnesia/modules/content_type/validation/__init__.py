@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from marshmallow import Schema
 from marshmallow.fields import Integer
 from marshmallow.fields import String
+from marshmallow.fields import Dict
 
 
 class ContentTypeSchema(Schema):
@@ -11,3 +10,4 @@ class ContentTypeSchema(Schema):
     name = String()
     icon = String()
     description = String()
+    icons = Dict()
