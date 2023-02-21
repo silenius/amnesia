@@ -33,7 +33,11 @@ class ContentCRUD(BaseView):
     # READ                                                                  #
     #########################################################################
 
-    @view_config(request_method='GET', permission='read', accept='text/html')
+    @view_config(
+        request_method='GET',
+        permission='read',
+        accept='text/html'
+    )
     def read(self):
         context = {
             'content': self.entity

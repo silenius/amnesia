@@ -115,6 +115,15 @@ class FolderCRUD(ContentCRUD):
     #########################################################################
     # C(R)UD - READ                                                         #
     #########################################################################
+    @view_config(
+        context=FolderEntity,
+        request_method='GET',
+        permission='read',
+        accept='application/json',
+        renderer='json'
+    )
+    def read_json(self):
+        return FolderSchema().dump(self.entity)
 
     @view_config(
         context=FolderEntity,
