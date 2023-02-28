@@ -147,7 +147,10 @@ def new(context, request):
 ### ROLE ENTITY
 ##############################################################################
 
-@view_defaults(context=RoleEntity, name='')
+@view_defaults(
+    context=RoleEntity, 
+    name=''
+)
 class RoleEntityCRUD(BaseView):
 
     #######
@@ -183,7 +186,10 @@ class RoleEntityCRUD(BaseView):
     #######
 
     # TODO: forbid name==system.
-    @view_config(request_method='PUT', permission='update')
+    @view_config(
+        request_method='PUT',
+        permission='manage_roles'
+    )
     def put(self):
         params = self.request.POST.mixed()
         schema = RoleSchema()

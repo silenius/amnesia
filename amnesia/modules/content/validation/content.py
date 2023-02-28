@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # pylint: disable=invalid-name,no-member
 
 import logging
@@ -47,8 +45,8 @@ class ContentSchema(Schema, PyramidContextMixin):
     updated = DateTime(dump_only=True)
     title = String()
     description = String(missing=None)
-    effective = DateTime()
-    expiration = DateTime()
+    effective = DateTime(missing=None)
+    expiration = DateTime(missing=None)
     exclude_nav = Boolean(missing=False)
     is_fts = Boolean(missing=False)
     weight = Integer(dump_only=True)
@@ -67,20 +65,6 @@ class ContentSchema(Schema, PyramidContextMixin):
 
     props = JSON(missing=None, default=None)
 
-    # XXX: remvoe this and use ISO format
-    effective_year = Integer(load_only=True, required=False, allow_none=True)
-    effective_month = Integer(load_only=True, required=False, allow_none=True)
-    effective_day = Integer(load_only=True, required=False, allow_none=True)
-    effective_hour = Integer(load_only=True, required=False, allow_none=True)
-    effective_minute = Integer(load_only=True, required=False, allow_none=True)
-
-    # XXX: remvoe this and use ISO format
-    expiration_year = Integer(load_only=True, required=False, allow_none=True)
-    expiration_month = Integer(load_only=True, required=False, allow_none=True)
-    expiration_day = Integer(load_only=True, required=False, allow_none=True)
-    expiration_hour = Integer(load_only=True, required=False, allow_none=True)
-    expiration_minute = Integer(load_only=True, required=False, allow_none=True)
-
     class Meta:
         unknown = EXCLUDE
 
@@ -91,18 +75,6 @@ class ContentSchema(Schema, PyramidContextMixin):
     @pre_load
     def pre_load_process(self, data, **kwargs):
         _data = {k: None if v == '' else v for k, v in data.items()}
-
-        # Starts / Ends
-        for part in ('effective', 'expiration'):
-            date_col = (part + '_year', part + '_month', part + '_day')
-            time_col = (part + '_hour', part + '_minute')
-
-            if all((_data.get(i) for i in date_col)):
-                col = [int(_data[i]) for i in date_col]
-                if all((_data.get(i) for i in time_col)):
-                    col.extend([int(_data[i]) for i in time_col])
-
-                _data[part] = datetime(*col).isoformat()
 
         # Tags
         try:
@@ -139,30 +111,6 @@ class ContentSchema(Schema, PyramidContextMixin):
                     del item[k]
 
         return item
-
-    ########
-    # DUMP #
-    ########
-
-    @post_dump(pass_original=True)
-    def post_dump_process(self, data, orig, **kwargs):
-        # Effective / Expiration dates
-        date_col = ('year', 'month', 'day')
-        datetime_col = ('year', 'month', 'day', 'hour', 'minute')
-
-        for col in ('effective', 'expiration'):
-            value = getattr(orig, col, None)
-            if isinstance(value, datetime):
-                for i in datetime_col:
-                    data['{}_{}'.format(col, i)] = getattr(value, i)
-            elif isinstance(value, date):
-                for i in date_col:
-                    data['{}_{}'.format(col, i)] = getattr(value, i)
-
-        #data['tags_id'] = [i['id'] for i in data['tags']]
-
-        return data
-
 
 class IdListSchema(Schema):
     ids = List(Integer(validate=Range(min=1)), required=True)

@@ -9,9 +9,11 @@ from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPInternalServerError
 from pyramid.httpexceptions import HTTPCreated
 from pyramid.httpexceptions import HTTPSeeOther
+from pyramid.httpexceptions import HTTPNoContent
 from pyramid.renderers import render_to_response
 from pyramid.security import Authenticated
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 
 from sqlalchemy import orm
 from sqlalchemy import sql
@@ -33,11 +35,14 @@ def includeme(config):
     config.scan(__name__)
 
 
+@view_defaults(
+    context=FolderEntity,
+    name=''
+)
 class FolderCRUD(ContentCRUD):
     """ Folder CRUD """
 
     @view_config(
-        context=FolderEntity,
         request_method='GET',
         name='edit',
         renderer='amnesia:templates/folder/edit.pt',
@@ -58,7 +63,6 @@ class FolderCRUD(ContentCRUD):
         request_method='GET',
         name='add_folder',
         renderer='amnesia:templates/folder/edit.pt',
-        context=FolderEntity,
         permission='create'
     )
     def new(self):
@@ -78,7 +82,6 @@ class FolderCRUD(ContentCRUD):
     @view_config(
         request_method='POST',
         renderer='amnesia:templates/folder/edit.pt',
-        context=FolderEntity,
         name='add_folder',
         permission='create'
     )
@@ -115,8 +118,8 @@ class FolderCRUD(ContentCRUD):
     #########################################################################
     # C(R)UD - READ                                                         #
     #########################################################################
+
     @view_config(
-        context=FolderEntity,
         request_method='GET',
         permission='read',
         accept='application/json',
@@ -126,7 +129,6 @@ class FolderCRUD(ContentCRUD):
         return FolderSchema().dump(self.entity)
 
     @view_config(
-        context=FolderEntity,
         request_method='GET',
         permission='read',
         accept='text/html'
@@ -164,7 +166,6 @@ class FolderCRUD(ContentCRUD):
     @view_config(
         request_method='POST',
         renderer='amnesia:templates/folder/edit.pt',
-        context=FolderEntity,
         permission='edit'
     )
     def update(self):
@@ -190,6 +191,34 @@ class FolderCRUD(ContentCRUD):
         if updated_entity:
             location = self.request.resource_url(updated_entity)
             return HTTPFound(location=location)
+
+    #######
+    # PUT #
+    #######
+
+    @view_config(
+        request_method='PUT',
+        renderer='json',
+        permission='edit'
+    )
+    def update(self):
+        form_data = self.request.POST.mixed()
+        schema = FolderSchema(
+            context={'request': self.request, 'entity': self.context.entity})
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
+
+        folder = self.context.update(data)
+
+        if not folder:
+            raise HTTPInternalServerError()
+
+        location = self.request.resource_url(folder)
+
+        return HTTPNoContent(location=location)
 
 
 # Bulk delete
