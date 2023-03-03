@@ -47,16 +47,15 @@ class FolderEntity(Entity):
             return False
 
     def bulk_delete(self, ids, owner=None):
-        filters = [Content.id.in_(ids), Content.parent == self.entity]
+        q = sql.select(Content).where(
+            Content.id.in_(ids), 
+            Content.parent == self.entity
+        )
 
         if owner:
-            filters.append(Content.owner == owner)
+            q = q.where(Content.owner == owner)
 
-        filters = sql.and_(*filters)
-
-        stmt = sql.select(Content).filter(filters)
-
-        items = self.dbsession.execute(stmt).scalars()
+        items = self.dbsession.execute(q).scalars()
 
         for item in items:
             self.dbsession.delete(item)

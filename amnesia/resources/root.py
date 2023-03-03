@@ -10,6 +10,7 @@ from amnesia.modules.account import RoleResource
 from amnesia.modules.account import ACLBaseResource
 from amnesia.modules.search import SearchResource
 from amnesia.modules.tag import TagResource
+from amnesia.modules.content_type import ContentTypeResource
 
 from amnesia.resources import Resource
 
@@ -25,7 +26,8 @@ _tree = {
     'search': SearchResource,
     'tag': TagResource,
     'roles': RoleResource,
-    'acls': ACLBaseResource
+    'acls': ACLBaseResource,
+    'content-type': ContentTypeResource
 }
 
 

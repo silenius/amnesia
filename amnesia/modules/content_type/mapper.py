@@ -1,5 +1,3 @@
-from sqlalchemy import orm
-
 from amnesia.db import mapper_registry
 
 from .model import ContentType

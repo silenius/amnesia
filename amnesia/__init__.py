@@ -94,6 +94,7 @@ def include_cms_modules(config):
     config.include('amnesia.modules.tag')
     config.include('amnesia.modules.state')
     config.include('amnesia.modules.search')
+    config.include('amnesia.modules.content_type')
     config.include('amnesia.modules.content.views')
 
 
