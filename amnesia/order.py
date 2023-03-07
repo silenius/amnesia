@@ -77,8 +77,12 @@ class EntityOrder:
         else:
             if value in ('first', 'last'):
                 self._nulls = value
-            else:
-                self._nulls = None
+        finally:
+            if self._nulls is None:
+                if self.direction == 'asc':
+                    self._nulls = 'last'
+                elif self.direction == 'desc':
+                    self._nulls = 'first'
 
     # DOC
 
