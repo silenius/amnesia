@@ -29,6 +29,30 @@ class ContentCRUD(BaseView):
     def session(self):
         return self.request.session
 
+    def schema(self, factory, exclude=None):
+        perms = {
+            ('acls', 'manage_acl'),
+            ('default_order', 'manage_folder_order')
+        }
+
+        fields = {
+            field for (field, permission) in perms
+            if not self.request.has_permission(permission)
+        }
+
+        context={
+            'request': self.request, 
+            'entity': self.context.entity
+        }
+
+        if exclude:
+            fields |= exclude
+
+        return factory(
+            context=context,
+            exclude=fields
+        )
+
     #########################################################################
     # READ                                                                  #
     #########################################################################

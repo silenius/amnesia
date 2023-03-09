@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name,no-member
 
+import json
 import logging
 
 from datetime import date
@@ -33,6 +34,7 @@ from amnesia.modules.state import State
 from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
 from amnesia.modules.account.validation import AccountSchema
+from amnesia.modules.account.validation import ContentACLSchema
 
 log = logging.getLogger(__name__)
 
@@ -61,6 +63,8 @@ class ContentSchema(Schema, PyramidContextMixin):
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
 
+    acls = Nested(ContentACLSchema, many=True)
+
     inherits_parent_acl = Boolean(missing=True)
 
     props = JSON(missing=None, default=None)
@@ -75,6 +79,12 @@ class ContentSchema(Schema, PyramidContextMixin):
     @pre_load
     def pre_load_process(self, data, **kwargs):
         _data = {k: None if v == '' else v for k, v in data.items()}
+
+        # ACLS
+        if 'acls' in self.exclude:
+            del(_data['acls'])
+        else:
+            _data['acls'] = json.loads(_data['acls'])
 
         # Tags
         try:

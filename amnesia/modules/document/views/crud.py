@@ -76,9 +76,7 @@ class DocumentCRUD(ContentCRUD):
         ''' Create a new Document '''
 
         form_data = self.request.POST.mixed()
-        schema = DocumentSchema(context={
-            'request': self.request
-        })
+        schema = self.schema(DocumentSchema)
 
         try:
             data = schema.load(form_data)

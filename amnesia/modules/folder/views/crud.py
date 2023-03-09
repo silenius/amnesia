@@ -75,9 +75,9 @@ class FolderCRUD(ContentCRUD):
             'form_action': action
         }
 
-    #########################################################################
-    # (C)RUD - CREATE                                                       #
-    #########################################################################
+    ########
+    # POST #
+    ########
 
     @view_config(
         request_method='POST',
@@ -87,7 +87,7 @@ class FolderCRUD(ContentCRUD):
     )
     def create(self):
         form_data = self.request.POST.mixed()
-        schema = FolderSchema(context={'request': self.request})
+        schema = self.schema(FolderSchema)
 
         try:
             data = schema.load(form_data)
@@ -115,6 +115,35 @@ class FolderCRUD(ContentCRUD):
 
         raise HTTPInternalServerError()
 
+    #######
+    # PUT #
+    #######
+
+    @view_config(
+        request_method='PUT',
+        renderer='json',
+        permission='edit'
+    )
+    def put(self):
+        form_data = self.request.POST.mixed()
+        schema = self.schema(FolderSchema, exclude={'acls'})
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
+
+        folder = self.context.update(data)
+
+        if not folder:
+            raise HTTPInternalServerError()
+
+        location = self.request.resource_url(folder)
+
+        return HTTPNoContent(location=location)
+
+
+
     #########################################################################
     # C(R)UD - READ                                                         #
     #########################################################################
@@ -126,7 +155,7 @@ class FolderCRUD(ContentCRUD):
         renderer='json'
     )
     def read_json(self):
-        return FolderSchema().dump(self.entity)
+        return self.schema().dump(self.entity)
 
     @view_config(
         request_method='GET',
@@ -170,10 +199,7 @@ class FolderCRUD(ContentCRUD):
     )
     def update(self):
         form_data = self.request.POST.mixed()
-        schema = FolderSchema(
-            context={'request': self.request, 'entity': self.context.entity},
-            exclude=('container_id', )
-        )
+        schema = self.schema(exclude={'container_id', 'acls'})
 
         try:
             data = schema.load(form_data)
@@ -191,35 +217,6 @@ class FolderCRUD(ContentCRUD):
         if updated_entity:
             location = self.request.resource_url(updated_entity)
             return HTTPFound(location=location)
-
-    #######
-    # PUT #
-    #######
-
-    @view_config(
-        request_method='PUT',
-        renderer='json',
-        permission='edit'
-    )
-    def update(self):
-        form_data = self.request.POST.mixed()
-        schema = FolderSchema(
-            context={'request': self.request, 'entity': self.context.entity})
-
-        try:
-            data = schema.load(form_data)
-        except ValidationError as error:
-            raise HTTPBadRequest(error.messages)
-
-        folder = self.context.update(data)
-
-        if not folder:
-            raise HTTPInternalServerError()
-
-        location = self.request.resource_url(folder)
-
-        return HTTPNoContent(location=location)
-
 
 # Bulk delete
 
