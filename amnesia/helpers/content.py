@@ -2,12 +2,11 @@
 
 from sqlalchemy import orm
 
-from saexts import Serializer
 from amnesia.modules.content import Content
 
 
-def dump_obj(obj, format, **kwargs):
-    return getattr(Serializer(obj), format)(**kwargs)
+#def dump_obj(obj, format, **kwargs):
+#    return getattr(Serializer(obj), format)(**kwargs)
 
 
 def polymorphic_hierarchy(cls=Content):

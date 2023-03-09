@@ -21,7 +21,7 @@ install_requires = [
     'alembic',
     'pyramid_tm',
     'pyramid_mailer',
-    'SQLAlchemy~=1.4',
+    'SQLAlchemy~=2.0',
     'transaction',
     'zope.sqlalchemy>=1.6',
     'psycopg2',
@@ -30,7 +30,6 @@ install_requires = [
     'marshmallow',
     'bcrypt',
     'file-magic',
-    'saexts',
     'hashids',
 ]
 

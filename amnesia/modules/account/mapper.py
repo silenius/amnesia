@@ -30,9 +30,12 @@ def includeme(config):
         properties={
             'count_content': orm.column_property(
                 sql.select(
-                    [sql.func.count()],
+                    sql.func.count()
+                ).where(
                     tables['account'].c.id == tables['content'].c.owner_id
-                ).label('count_content'),
+                ).label(
+                    'count_content'
+                ),
                 deferred=True
             ),
 

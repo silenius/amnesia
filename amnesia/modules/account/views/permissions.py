@@ -193,7 +193,11 @@ class ACLView(BaseView):
         raise HTTPInternalServerError()
 
 
-@view_defaults(context=ContentACLEntity, name='', permission='manage_acl')
+@view_defaults(
+    context=ContentACLEntity, 
+    name='', 
+    permission='manage_acl'
+)
 class ContentACLView(BaseView):
 
     #######
@@ -219,12 +223,34 @@ class ContentACLView(BaseView):
     def get_xml(self):
         self.request.response.content_type='application/xml'
 
-        acls = self.context.query(order_by=ACL.weight.desc())
+        q = self.context.query().order_by(
+            ACL.weight.desc()
+        )
+
+        acls = self.dbsession.execute(q).scalars().all()
 
         return {
             'extra_cols': {'role'},
             'permissions': acls
         }
+
+    @view_config(
+        request_method='GET',
+        accept='application/json',
+        renderer='json'
+    )
+    def get_json(self):
+        schema = ContentACLSchema(context={
+            'request': self.request
+        })
+
+        q = self.context.query().order_by(
+            ACL.weight.desc()
+        )
+
+        acls = self.dbsession.execute(q).scalars().all()
+
+        return schema.dump(acls, many=True)
 
     ########
     # POST #

@@ -8,6 +8,7 @@ from marshmallow.fields import DateTime, String
 from marshmallow.fields import Email
 from marshmallow.fields import Integer
 from marshmallow.fields import Boolean
+from marshmallow.fields import Nested
 
 from marshmallow.validate import Length
 from marshmallow.validate import Range
@@ -104,34 +105,19 @@ class BrowseRoleSchema(Schema):
 
 class ACLSchema(Schema, PyramidContextMixin):
     id = Integer(validate=Range(min=1), dump_only=True)
-    permission_id = Integer(validate=Range(min=1))
+    permission = Nested(PermissionSchema, dump_only=True)
+    permission_id = Integer(validate=Range(min=1), load_only=True)
+    role_id = Integer(load_only=True, validate=Range(min=1))
+    role = Nested(RoleSchema, dump_only=True)
     weight = Integer(validation=Range(min=1))
     allow = Boolean()
 
     class Meta:
         unknown = EXCLUDE
 
-    @post_load
-    def permission(self, item, **kwargs):
-        if 'permission_id' in item:
-            item['permission'] = self.dbsession.get(
-                Permission, item['permission_id']
-            )
-
-        return item
 
 class ContentACLSchema(ACLSchema):
-    role_id = Integer(validate=Range(min=1))
-    weight = Integer(validation=Range(min=1))
     inherits_parent_acl = Boolean()
-    allow = Boolean()
 
     class Meta:
         unknown = EXCLUDE
-
-    @post_load
-    def role(self, item, **kwargs):
-        if 'role_id' in item:
-            item['role'] = self.dbsession.get(Role, item['role_id'])
-
-        return item

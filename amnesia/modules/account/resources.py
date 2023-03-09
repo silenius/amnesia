@@ -611,19 +611,12 @@ class ContentACLEntity(Resource):
     def __parent__(self):
         return self.parent
 
-    def query(self, order_by=None):
-        stmt = sql.select(
+    def query(self):
+        return sql.select(
             ContentACL
         ).filter_by(
             content=self.content
         )
-
-        if order_by is not None:
-            stmt = stmt.order_by(order_by)
-
-        result = self.dbsession.execute(stmt).scalars()
-
-        return result
 
     def get_permissions(self, order_by=None):
         stmt = sql.select(Permission)

@@ -10,8 +10,6 @@ from sqlalchemy.types import Interval
 from sqlalchemy.types import DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from saexts import Serializer
-
 from .. import Base
 
 
@@ -28,9 +26,9 @@ class Content(Base):
     def __repr__(self):
         return u'<{0}:{1}>'.format(self.__class__.__name__, self.id)
 
-    def format(self, format, **kwargs):
-        serializer = Serializer(self)
-        return getattr(serializer, format)(**kwargs)
+#    def format(self, format, **kwargs):
+#        serializer = Serializer(self)
+#        return getattr(serializer, format)(**kwargs)
 
     __str__ = __repr__
 
