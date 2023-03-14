@@ -172,7 +172,11 @@ def includeme(config):
 @event.listens_for(orm.mapper, 'before_configured', once=True)
 def _content_callback():
     orm.class_mapper(Content).add_properties({
-        'acls': orm.relationship(ContentACL, back_populates='content'),
+        'acls': orm.relationship(
+            ContentACL,
+            order_by=ContentACL.weight.desc(),
+            back_populates='content'
+        ),
     })
 
 

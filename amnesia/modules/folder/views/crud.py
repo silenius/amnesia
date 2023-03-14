@@ -155,7 +155,7 @@ class FolderCRUD(ContentCRUD):
         renderer='json'
     )
     def read_json(self):
-        return self.schema().dump(self.entity)
+        return self.schema(FolderSchema).dump(self.entity)
 
     @view_config(
         request_method='GET',

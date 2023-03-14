@@ -15,6 +15,7 @@ from .resources import ACLEntity
 from .resources import GlobalACLEntity
 from .resources import ACLBaseResource
 from .resources import ContentACLEntity
+from .resources import ContentACLResource
 from .resources import RoleResource
 from .resources import RoleEntity
 from .resources import RoleMember

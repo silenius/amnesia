@@ -115,6 +115,25 @@ class ACLSchema(Schema, PyramidContextMixin):
     class Meta:
         unknown = EXCLUDE
 
+    @post_load
+    def load_permission(self, item, **kwargs):
+        if 'permission_id' in item:
+            item['permission'] = self.dbsession.get(
+                Permission, item['permission_id']
+            )
+
+        return item
+
+    @post_load
+    def load_role(self, item, **kwargs):
+        if 'role_id' in item:
+            item['role'] = self.dbsession.get(
+                Role, item['role_id']
+            )
+
+        return item
+
+
 
 class ContentACLSchema(ACLSchema):
     inherits_parent_acl = Boolean()

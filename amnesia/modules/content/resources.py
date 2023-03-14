@@ -38,10 +38,10 @@ class Entity(Resource):
 
     def __getitem__(self, path):
         # FIXME: circular imports
-        from amnesia.modules.account.resources import ContentACLEntity
+        from amnesia.modules.account.resources import ContentACLResource
 
         if path == 'acl':
-            return ContentACLEntity(
+            return ContentACLResource(
                 self.request, content=self.entity, parent=self
             )
 

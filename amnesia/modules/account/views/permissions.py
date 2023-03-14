@@ -21,6 +21,7 @@ from amnesia.modules.account import Permission
 from amnesia.modules.account import ACL
 from amnesia.modules.account import ACLEntity
 from amnesia.modules.account import ContentACLEntity
+from amnesia.modules.account import ContentACLResource
 from amnesia.modules.account import ACLResource
 from amnesia.modules.account.validation import ACLSchema
 from amnesia.modules.account.validation import ContentACLSchema
@@ -170,31 +171,10 @@ class ACLView(BaseView):
 
         return {'updated': updated}
 
-    ##########
-    # DELETE #
-    ##########
-
-    @view_config(request_method='DELETE',
-                 permission='manage_acl', renderer='json')
-    def delete(self):
-        form_data = self.request.POST.mixed()
-        schema = ACLSchema(context={
-            'request': self.request
-        })
-
-        try:
-            data = schema.load(form_data)
-        except ValidationError as errors:
-            raise HTTPBadRequest('Validation error')
-
-        if self.context.delete_permission(**data):
-            return HTTPNoContent()
-
-        raise HTTPInternalServerError()
 
 
 @view_defaults(
-    context=ContentACLEntity, 
+    context=ContentACLResource, 
     name='', 
     permission='manage_acl'
 )
@@ -203,36 +183,6 @@ class ContentACLView(BaseView):
     #######
     # GET #
     #######
-
-    @view_config(request_method='GET', accept='text/html',
-                 renderer='amnesia:templates/content/permissions.pt')
-    def get_html(self):
-        content = self.context.content
-        all_permissions = self.context.get_permissions(
-            order_by=Permission.name
-        )
-
-        return {
-            'content': content,
-            'permissions': all_permissions
-        }
-
-    @view_config(request_method='GET',
-                 accept='application/xml',
-                 renderer='amnesia:templates/permissions/_browse.xml')
-    def get_xml(self):
-        self.request.response.content_type='application/xml'
-
-        q = self.context.query().order_by(
-            ACL.weight.desc()
-        )
-
-        acls = self.dbsession.execute(q).scalars().all()
-
-        return {
-            'extra_cols': {'role'},
-            'permissions': acls
-        }
 
     @view_config(
         request_method='GET',
@@ -256,7 +206,10 @@ class ContentACLView(BaseView):
     # POST #
     ########
 
-    @view_config(request_method='POST', renderer='json')
+    @view_config(
+        request_method='POST',
+        renderer='json'
+    )
     def post(self):
         form_data = self.request.POST.mixed()
         schema = ContentACLSchema(context={
@@ -312,22 +265,18 @@ class ContentACLView(BaseView):
 
         return HTTPNoContent()
 
-    ##########
-    # DELETE #
-    ##########
 
-    @view_config(request_method='DELETE', renderer='json')
+@view_defaults(
+    context=ContentACLEntity,
+    permission='manage_acl',
+    name=''
+)
+class ContentACLCRUD(BaseView):
+    @view_config(
+        request_method='DELETE', 
+        renderer='json'
+    )
     def delete(self):
-        form_data = self.request.POST.mixed()
-        schema = ContentACLSchema(context={
-            'request': self.request
-        })
+        return self.context.delete()
 
-        try:
-            data = schema.load(form_data)
-        except ValidationError as errors:
-            raise HTTPBadRequest('Validation error')
 
-        deleted = self.context.delete_permission(data['id'])
-
-        return deleted

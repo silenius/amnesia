@@ -94,8 +94,6 @@ class DatabaseAuthResource(AuthResource):
         except (NoResultFound, MultipleResultsFound):
             return None
 
-        return None
-
     def find_email(self, email):
         stmt = sql.select(Account).filter(
             sql.func.lower(email) == sql.func.lower(Account.email)
@@ -105,8 +103,6 @@ class DatabaseAuthResource(AuthResource):
             return self.dbsession.execute(stmt).scalar_one()
         except (NoResultFound, MultipleResultsFound):
             return None
-
-        return None
 
     def find_token(self, token):
         stmt = sql.select(Account).filter_by(lost_token=token)
@@ -184,8 +180,6 @@ The Belgian Biodiversity Platform'''.format(
             return True
         except DatabaseError:
             return False
-
-        return False
 
 
 class AccountEntity(Resource):
@@ -464,7 +458,9 @@ class ACLEntity(Resource):
         return result
 
     def create(self, permission, allow):
-        acl = GlobalACL(role=self.role, permission=permission, allow=allow)
+        acl = GlobalACL(
+            role=self.role, permission=permission, allow=allow
+        )
 
         try:
             self.dbsession.add(acl)
@@ -574,7 +570,8 @@ class ACLEntity(Resource):
         # Swap min_weight/max_weight, or increment/decrement by one depending
         # on whether one moves up or down
         weight = sql.case(
-            value=GlobalACL.weight, whens=whens,
+            whens,
+            value=GlobalACL.weight,
             else_=operation(GlobalACL.weight, 1)
         )
 
@@ -596,7 +593,7 @@ class ACLEntity(Resource):
             return None
 
 
-class ContentACLEntity(Resource):
+class ContentACLResource(Resource):
     ''' Manage ACL for a Content based entity '''
 
     __name__ = 'acl'
@@ -630,7 +627,7 @@ class ContentACLEntity(Resource):
 
     def create(self, role, permission, allow):
         acl = ContentACL(
-            content=self.content, role=role, permission=permission,
+            content=self.content, role=role, permission=permission, 
             allow=allow
         )
 
@@ -638,21 +635,6 @@ class ContentACLEntity(Resource):
             self.dbsession.add(acl)
             self.dbsession.flush()
             return acl
-        except DatabaseError:
-            return False
-
-    def delete_permission(self, acl_id):
-        stmt = sql.delete(
-            ContentACL
-        ).filter_by(
-            content=self.content
-        ).filter_by(
-            id=acl_id
-        )
-
-        try:
-            deleted = self.dbsession.execute(stmt)
-            return deleted.rowcount
         except DatabaseError:
             return False
 
@@ -705,7 +687,8 @@ class ContentACLEntity(Resource):
         # Swap min_weight/max_weight, or increment/decrement by one depending
         # on whether one moves up or down
         weight = sql.case(
-            value=ContentACL.weight, whens=whens,
+            whens,
+            value=ContentACL.weight,
             else_=operation(ContentACL.weight, 1)
         )
 
@@ -728,6 +711,7 @@ class ContentACLEntity(Resource):
 
 
 class ACLBaseResource(Resource):
+    """ /acls """
 
     __name__ = 'acls'
     __acl__ = ()
@@ -742,11 +726,15 @@ class ACLBaseResource(Resource):
 
     def __getitem__(self, path):
         if path.isdigit():
-            entity = self.dbsession.get(ACL, path)
-            if entity:
-                if entity.resource.name == 'GLOBAL':
+            acl = self.dbsession.get(ACL, path)
+            if acl:
+                if acl.resource.name == 'GLOBAL':
                     return GlobalACLEntity(
-                        self.request, entity, self
+                        self.request, acl, self
+                    )
+                elif acl.resource.name == 'CONTENT':
+                    return ContentACLEntity(
+                        self.request, acl, self
                     )
 
         raise KeyError
@@ -785,9 +773,7 @@ class ACLBaseEntity(Resource):
 
 
 class GlobalACLEntity(ACLBaseEntity):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """/acls/456"""
 
     def update_weight(self, weight):
         """ Change the weight of a Global ACL. """
@@ -824,12 +810,66 @@ class GlobalACLEntity(ACLBaseEntity):
         # Swap min_weight/max_weight, or increment/decrement by one depending
         # on whether one moves up or down
         weight = sql.case(
-            value=GlobalACL.weight, whens=whens,
+            whens,
+            value=GlobalACL.weight,
             else_=operation(GlobalACL.weight, 1)
         )
 
         stmt = sql.update(
             GlobalACL
+        ).filter(
+            filters
+        ).values(
+            weight=weight
+        ).execution_options(
+            synchronize_session=False
+        )
+
+        try:
+            # The UPDATE statement
+            updated = self.dbsession.execute(stmt)
+            return updated.rowcount
+        except DatabaseError:
+            return None
+
+
+class ContentACLEntity(ACLBaseEntity):
+    """/acls/123"""    
+
+    @property
+    def content(self):
+        return self.acl.content
+
+    def update_weight(self, weight):
+        """ Change the weight of a ContentACL. """
+
+        (min_weight, max_weight) = sorted((weight, self.acl.weight))
+
+        # Do we move downwards or upwards ?
+        if weight - self.acl.weight > 0:
+            operation = operator.sub
+            whens = {min_weight: max_weight}
+        else:
+            operation = operator.add
+            whens = {max_weight: min_weight}
+
+        # Select all the rows between the current weight and the new weight
+
+        filters = sql.and_(
+            ContentACL.content == self.content,
+            ContentACL.weight.between(min_weight, max_weight),
+        )
+
+        # Swap min_weight/max_weight, or increment/decrement by one depending
+        # on whether one moves up or down
+        weight = sql.case(
+            whens,
+            value=ContentACL.weight,
+            else_=operation(ContentACL.weight, 1)
+        )
+
+        stmt = sql.update(
+            ContentACL
         ).filter(
             filters
         ).values(
