@@ -175,7 +175,8 @@ def _content_callback():
         'acls': orm.relationship(
             ContentACL,
             order_by=ContentACL.weight.desc(),
-            back_populates='content'
+            back_populates='content',
+            cascade='all, delete-orphan'
         ),
     })
 
