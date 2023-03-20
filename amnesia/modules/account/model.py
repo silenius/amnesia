@@ -59,10 +59,8 @@ class ACLResource(Base):
 
 class ACL(Base):
 
-    def __init__(self, role, permission, allow):
-        self.role = role
-        self.permission = permission
-        self.allow = allow
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def to_pyramid_acl(self):
         return to_pyramid_acl(self)
@@ -76,6 +74,5 @@ class GlobalACL(ACL):
 
 class ContentACL(ACL):
 
-    def __init__(self, content, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.content = content

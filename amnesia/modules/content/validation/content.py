@@ -83,7 +83,7 @@ class ContentSchema(Schema, PyramidContextMixin):
         # ACLS
         if 'acls' in self.exclude:
             del(_data['acls'])
-        else:
+        elif 'acls' in _data:
             _data['acls'] = json.loads(_data['acls'])
 
         # Tags

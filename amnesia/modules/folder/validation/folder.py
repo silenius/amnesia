@@ -35,7 +35,7 @@ class FolderSchema(ContentSchema):
 
     content_id = Integer(dump_only=True)
     index_content_id = Integer(missing=None)
-    polymorphic_loading = Boolean(missing=False)
+    polymorphic_loading = Boolean(missing=False, allow_none=True)
 
     polymorphic_children = Nested(ContentTypeSchema, dump_only=True, many=True)
     polymorphic_children_ids = List(Integer, load_only=True)

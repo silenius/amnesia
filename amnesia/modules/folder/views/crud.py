@@ -27,6 +27,7 @@ from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.folder.forms import FolderForm
+from amnesia.modules.account import ContentACL
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -42,46 +43,13 @@ def includeme(config):
 class FolderCRUD(ContentCRUD):
     """ Folder CRUD """
 
-    @view_config(
-        request_method='GET',
-        name='edit',
-        renderer='amnesia:templates/folder/edit.pt',
-        permission='edit'
-    )
-    def edit(self):
-        schema = FolderSchema(context={'request': self.request})
-        data = schema.dump(self.entity)
-        form = FolderForm(self.request)
-        action = self.request.resource_path(self.context)
-
-        return {
-            'form': form.render(data),
-            'form_action': action
-        }
-
-    @view_config(
-        request_method='GET',
-        name='add_folder',
-        renderer='amnesia:templates/folder/edit.pt',
-        permission='create'
-    )
-    def new(self):
-        data = self.request.GET.mixed()
-        form = FolderForm(self.request)
-        action = self.request.resource_path(self.context, '@@add_folder')
-
-        return {
-            'form': form.render(data),
-            'form_action': action
-        }
-
     ########
     # POST #
     ########
 
     @view_config(
         request_method='POST',
-        renderer='amnesia:templates/folder/edit.pt',
+        renderer='json',
         name='add_folder',
         permission='create'
     )
@@ -93,15 +61,14 @@ class FolderCRUD(ContentCRUD):
             data = schema.load(form_data)
         except ValidationError as error:
             self.request.response.status_int = 400
-            form = FolderForm(self.request)
-            form_action = self.request.resource_path(
-                self.context, '@@add_folder'
-            )
+            return error.normalized_messages()
 
-            return {
-                'form': form.render(form_data, error.messages),
-                'form_action': form_action
-            }
+        if 'acls' in data:
+            data['acls'] = [
+                ContentACL(allow=x['allow'], role_id=x['role_id'],
+                           permission_id=x['permission_id'], weight=weight)
+                for weight, x in enumerate(reversed(data['acls']), 1)
+            ]
 
         new_entity = self.context.create(Folder, data)
 
