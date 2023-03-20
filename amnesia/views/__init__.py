@@ -18,6 +18,18 @@ class BaseView(RequestMixin):
         self.context = context
         self.request = request
 
+    def schema(self, factory, **kwargs):
+        context={
+            'request': self.request, 
+            'context': self.context
+        }
+
+        return factory(
+            context=context,
+            **kwargs
+        )
+
+
 
 @view_config(name='change_locale')
 def change_locale(request):

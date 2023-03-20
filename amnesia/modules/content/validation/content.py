@@ -35,6 +35,7 @@ from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
 from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import ContentACLSchema
+from amnesia.modules.account import ContentACL
 
 log = logging.getLogger(__name__)
 
@@ -106,6 +107,13 @@ class ContentSchema(Schema, PyramidContextMixin):
 
         stmt_state = sql.select(State).filter_by(name='published')
         item['state'] = self.dbsession.execute(stmt_state).scalar_one()
+
+        if 'acls' in item:
+            item['acls'] = [
+                ContentACL(allow=x['allow'], role_id=x['role_id'], 
+                           permission_id=x['permission_id'], weight=weight)
+                for weight, x in enumerate(reversed(item['acls']), 1)
+            ]
 
         entity = self.context.get('entity')
         has_permission = self.context['request'].has_permission

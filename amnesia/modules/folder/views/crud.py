@@ -63,13 +63,6 @@ class FolderCRUD(ContentCRUD):
             self.request.response.status_int = 400
             return error.normalized_messages()
 
-        if 'acls' in data:
-            data['acls'] = [
-                ContentACL(allow=x['allow'], role_id=x['role_id'],
-                           permission_id=x['permission_id'], weight=weight)
-                for weight, x in enumerate(reversed(data['acls']), 1)
-            ]
-
         new_entity = self.context.create(Folder, data)
 
         if new_entity:
@@ -193,7 +186,7 @@ class FolderCRUD(ContentCRUD):
     name='bulk_delete',
     renderer='json'
 )
-def delete(context, request):
+def bulk_delete(context, request):
     can_bulk_delete = request.has_permission('bulk_delete')
     can_bulk_delete_own = request.has_permission('bulk_delete_own')
 

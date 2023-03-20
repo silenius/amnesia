@@ -64,9 +64,7 @@ class GlobalACLCRUD(BaseView):
     )
     def patch(self):
         form_data = self.request.POST.mixed()
-        schema = ACLSchema(context={
-            'request': self.request
-        })
+        schema = self.schema(ACLSchema)
 
         try:
             data = schema.load(form_data, partial=True)
@@ -190,9 +188,7 @@ class ContentACLView(BaseView):
         renderer='json'
     )
     def get_json(self):
-        schema = ContentACLSchema(context={
-            'request': self.request
-        })
+        schema = self.schema(ContentACLSchema)
 
         q = self.context.query().order_by(
             ACL.weight.desc()
@@ -212,18 +208,14 @@ class ContentACLView(BaseView):
     )
     def post(self):
         form_data = self.request.POST.mixed()
-        schema = ContentACLSchema(context={
-            'request': self.request
-        })
+        schema = self.schema(ContentACLSchema)
 
         try:
             data = schema.load(form_data)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        new_acl = self.context.create(
-            data['role'], data['permission'], data['allow']
-        )
+        new_acl = self.context.create(data)
 
         if new_acl:
             location = self.request.resource_url(self.context, new_acl.id)
@@ -239,9 +231,7 @@ class ContentACLView(BaseView):
                  renderer='json')
     def patch(self):
         form_data = self.request.POST.mixed()
-        schema = ContentACLSchema(context={
-            'request': self.request
-        })
+        schema = self.schema(ContentACLSchema)
 
         try:
             data = schema.load(form_data, partial=True)
@@ -256,7 +246,7 @@ class ContentACLView(BaseView):
                 raise HTTPInternalServerError()
 
         # Change ACL weight
-        if all(k in data for k in ('permission', 'role', 'weight')):
+        if all(k in data for k in ('permission_id', 'role_id', 'weight')):
             if not self.context.update_permission_weight(
                     role=data['role'], permission=data['permission'],
                     weight=data['weight']
@@ -272,11 +262,41 @@ class ContentACLView(BaseView):
     name=''
 )
 class ContentACLCRUD(BaseView):
+    
+    ##########
+    # DELETE #
+    ##########
+
     @view_config(
         request_method='DELETE', 
         renderer='json'
     )
     def delete(self):
         return self.context.delete()
+
+
+    #########
+    # PATCH #
+    #########
+
+    @view_config(
+        request_method='PATCH',
+        renderer='json'
+    )
+    def patch(self):
+        form_data = self.request.POST.mixed()
+        schema = self.schema(ACLSchema, only=('allow', 'weight'))
+
+        try:
+            data = schema.load(form_data, partial=True)
+        except ValidationError as errors:
+            raise HTTPBadRequest('Validation error')
+
+        if 'allow' in data:
+            self.context.acl.allow = data['allow']
+        if 'weight' in data:
+            self.context.update_weight(data['weight'])
+
+        return True
 
 

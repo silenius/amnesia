@@ -3,6 +3,7 @@ import os
 import operator
 
 from binascii import hexlify
+from typing import Optional
 
 from pyramid.authorization import DENY_ALL
 from pyramid.authorization import Everyone
@@ -625,11 +626,8 @@ class ContentACLResource(Resource):
 
         return result
 
-    def create(self, role, permission, allow):
-        acl = ContentACL(
-            content=self.content, role=role, permission=permission, 
-            allow=allow
-        )
+    def create(self, data):
+        acl = ContentACL(content=self.content, **data)
 
         try:
             self.dbsession.add(acl)
@@ -647,67 +645,6 @@ class ContentACLResource(Resource):
             return True
         except DatabaseError:
             return False
-
-    def update_permission_weight(self, role, permission, weight):
-        """ Change the weight of a permission. """
-        filters = sql.and_(
-            ContentACL.content == self.content,
-            ContentACL.permission == permission,
-            ContentACL.role == role
-        )
-
-        stmt = sql.select(
-            ContentACL
-        ).filter(
-            filters
-        ).with_for_update()
-
-        try:
-            obj = self.dbsession.execute(stmt).scalar_one()
-        except NoResultFound:
-            return False
-
-        (min_weight, max_weight) = sorted((weight, obj.weight))
-
-        # Do we move downwards or upwards ?
-        if weight - obj.weight > 0:
-            operation = operator.sub
-            whens = {min_weight: max_weight}
-        else:
-            operation = operator.add
-            whens = {max_weight: min_weight}
-
-        # Select all the rows between the current weight and the new weight
-
-        filters = sql.and_(
-            ContentACL.content == self.content,
-            ContentACL.weight.between(min_weight, max_weight),
-        )
-
-        # Swap min_weight/max_weight, or increment/decrement by one depending
-        # on whether one moves up or down
-        weight = sql.case(
-            whens,
-            value=ContentACL.weight,
-            else_=operation(ContentACL.weight, 1)
-        )
-
-        stmt = sql.update(
-            ContentACL
-        ).filter(
-            filters
-        ).values(
-            weight=weight
-        ).execution_options(
-            synchronize_session=False
-        )
-
-        try:
-            # The UPDATE statement
-            updated = self.dbsession.execute(stmt)
-            return updated.rowcount
-        except DatabaseError:
-            return None
 
 
 class ACLBaseResource(Resource):
@@ -775,7 +712,7 @@ class ACLBaseEntity(Resource):
 class GlobalACLEntity(ACLBaseEntity):
     """/acls/456"""
 
-    def update_weight(self, weight):
+    def update_weight(self, weight: int) -> Optional[int]:
         """ Change the weight of a Global ACL. """
 
         (min_weight, max_weight) = sorted((weight, self.acl.weight))
@@ -840,8 +777,12 @@ class ContentACLEntity(ACLBaseEntity):
     def content(self):
         return self.acl.content
 
-    def update_weight(self, weight):
-        """ Change the weight of a ContentACL. """
+    def update_weight(self, weight: int) -> Optional[int]:
+        """ 
+        Change the weight of a ContentACL. 
+
+        FIXME: FOR UPDATE?
+        """
 
         (min_weight, max_weight) = sorted((weight, self.acl.weight))
 
