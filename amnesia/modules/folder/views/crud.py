@@ -66,12 +66,8 @@ class FolderCRUD(ContentCRUD):
         new_entity = self.context.create(Folder, data)
 
         if new_entity:
-            location = self.request.resource_url(new_entity)
-            http_code = data['on_success']
-            if http_code == 201:
-                return HTTPCreated(location=location)
-            if http_code == 303:
-                return HTTPSeeOther(location=location)
+            self.request.response.status_int = 201
+            return schema.dump(new_entity)
 
         raise HTTPInternalServerError()
 

@@ -284,7 +284,7 @@ class RoleEntity(Resource):
 
     def __getitem__(self, path):
         if path == 'acls':
-            return ACLEntity(self.request, role=self.role, parent=self)
+            return RoleACLResource(self.request, role=self.role, parent=self)
         if path == 'members' and not self.role.virtual:
             return RoleMember(self.request, role=self.role, parent=self)
 
@@ -433,7 +433,7 @@ class RoleMemberEntity(Resource):
 # ACCESS CONTROL LIST (ACL)                                                   #
 ###############################################################################
 
-class ACLEntity(Resource):
+class RoleACLResource(Resource):
     ''' Manage ACL for a role '''
 
     __name__ = 'acls'
@@ -448,20 +448,11 @@ class ACLEntity(Resource):
     def __parent__(self):
         return self.parent
 
-    def query(self, order_by=None):
-        stmt = sql.select(GlobalACL).filter_by(role=self.role)
+    def query(self):
+        return sql.select(GlobalACL).filter_by(role=self.role)
 
-        if order_by is not None:
-            stmt = stmt.order_by(order_by)
-
-        result = self.dbsession.execute(stmt).scalars()
-
-        return result
-
-    def create(self, permission, allow):
-        acl = GlobalACL(
-            role=self.role, permission=permission, allow=allow
-        )
+    def create(self, **kwargs):
+        acl = GlobalACL(role=self.role, **kwargs)
 
         try:
             self.dbsession.add(acl)
@@ -616,16 +607,6 @@ class ContentACLResource(Resource):
             content=self.content
         )
 
-    def get_permissions(self, order_by=None):
-        stmt = sql.select(Permission)
-
-        if order_by is not None:
-            stmt = stmt.order_by(order_by)
-
-        result = self.dbsession.execute(stmt).scalars()
-
-        return result
-
     def create(self, data):
         acl = ContentACL(content=self.content, **data)
 
@@ -689,7 +670,7 @@ class ACLBaseEntity(Resource):
         return self.parent
 
     @property
-    def __name__(self):
+    def __name__(self) -> int:
         return self.acl.id
 
     @property
@@ -700,7 +681,7 @@ class ACLBaseEntity(Resource):
     def permission(self):
         return self.acl.permission
 
-    def delete(self):
+    def delete(self) -> bool:
         try:
             self.dbsession.delete(self.acl)
             self.dbsession.flush()

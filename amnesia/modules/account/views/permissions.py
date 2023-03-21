@@ -19,7 +19,7 @@ from amnesia.views import BaseView
 from amnesia.modules.account import Role
 from amnesia.modules.account import Permission
 from amnesia.modules.account import ACL
-from amnesia.modules.account import ACLEntity
+from amnesia.modules.account import RoleACLResource
 from amnesia.modules.account import ContentACLEntity
 from amnesia.modules.account import ContentACLResource
 from amnesia.modules.account import ACLResource
@@ -79,41 +79,8 @@ class GlobalACLCRUD(BaseView):
         return True
 
 
-@view_defaults(context=ACLEntity, name='')
+@view_defaults(context=RoleACLResource, name='')
 class ACLView(BaseView):
-
-    #######
-    # GET #
-    #######
-
-    @view_config(request_method='GET',
-                 permission='list_permissions',
-                 accept='text/html',
-                 renderer='amnesia:templates/role/permissions.pt')
-    def get_html(self):
-        role = self.context.role
-        all_permissions = self.context.get_permissions(
-            order_by=Permission.name
-        )
-
-        return {
-            'role': role,
-            'permissions': all_permissions
-        }
-
-    @view_config(request_method='GET',
-                 permission='list_permissions',
-                 accept='application/xml',
-                 renderer='amnesia:templates/permissions/_browse.xml')
-    def get_xml(self):
-        self.request.response.content_type='application/xml'
-
-        acls = self.context.query(order_by=ACL.weight.desc())
-
-        return {
-            'extra_cols': (),
-            'permissions': acls
-        }
 
     ########
     # POST #
@@ -124,18 +91,14 @@ class ACLView(BaseView):
                  renderer='json')
     def post(self):
         form_data = self.request.POST.mixed()
-        schema = ACLSchema(context={
-            'request': self.request
-        })
+        schema = self.schema(ACLSchema)
 
         try:
             data = schema.load(form_data)
         except ValidationError as errors:
             raise HTTPBadRequest('Validation error')
 
-        new_entity = self.context.create(
-            data['permission'], data['allow']
-        )
+        new_entity = self.context.create(**data)
 
         if new_entity:
             location = self.request.resource_url(self.context, new_entity.id)
