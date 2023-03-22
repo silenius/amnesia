@@ -24,7 +24,7 @@ from amnesia.modules.account import ContentACLEntity
 from amnesia.modules.account import ContentACLResource
 from amnesia.modules.account import ACLResource
 from amnesia.modules.account.validation import ACLSchema
-from amnesia.modules.account.validation import ContentACLSchema
+from amnesia.modules.content.validation.content import ContentACLSchema
 
 log = logging.getLogger(__name__)
 

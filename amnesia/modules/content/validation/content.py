@@ -34,7 +34,7 @@ from amnesia.modules.state import State
 from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
 from amnesia.modules.account.validation import AccountSchema
-from amnesia.modules.account.validation import ContentACLSchema
+from amnesia.modules.account.validation import ACLSchema
 from amnesia.modules.account import ContentACL
 
 log = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     tags_id = List(Integer(), load_only=True)
     tags = Nested(TagSchema, many=True, dump_only=True)
 
-    acls = Nested(ContentACLSchema, many=True)
+    acls = Nested('ContentACLSchema', exclude=('content', ), many=True)
 
     inherits_parent_acl = Boolean(missing=True)
 
@@ -130,6 +130,7 @@ class ContentSchema(Schema, PyramidContextMixin):
 
         return item
 
+
 class IdListSchema(Schema):
     ids = List(Integer(validate=Range(min=1)), required=True)
 
@@ -141,3 +142,11 @@ class IdListSchema(Schema):
             data['ids'] = []
 
         return data
+
+
+class ContentACLSchema(ACLSchema):
+    inherits_parent_acl = Boolean()
+    content = Nested(ContentSchema, dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE

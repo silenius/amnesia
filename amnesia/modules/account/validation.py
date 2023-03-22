@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from marshmallow import Schema
 from marshmallow import EXCLUDE
 from marshmallow import post_load
@@ -13,11 +11,7 @@ from marshmallow.fields import Nested
 from marshmallow.validate import Length
 from marshmallow.validate import Range
 
-from amnesia.modules.account import Role
-from amnesia.modules.account import Permission
-
 from amnesia.utils.validation import PyramidContextMixin
-
 
 class LoginSchema(Schema):
     login = String(required=True, validate=Length(min=4))
@@ -103,21 +97,19 @@ class BrowseRoleSchema(Schema):
         unknown = EXCLUDE
 
 
+class ResourceSchema(Schema):
+    id = Integer(validate=Range(min=1), dump_only=True)
+    name = String()
+
 class ACLSchema(Schema, PyramidContextMixin):
     id = Integer(validate=Range(min=1), dump_only=True)
     permission = Nested(PermissionSchema, dump_only=True)
     permission_id = Integer(validate=Range(min=1), load_only=True)
     role_id = Integer(load_only=True, validate=Range(min=1))
     role = Nested(RoleSchema, dump_only=True)
+    resource = Nested(ResourceSchema, dump_only=True)
     weight = Integer(validation=Range(min=1))
     allow = Boolean()
-
-    class Meta:
-        unknown = EXCLUDE
-
-
-class ContentACLSchema(ACLSchema):
-    inherits_parent_acl = Boolean()
 
     class Meta:
         unknown = EXCLUDE

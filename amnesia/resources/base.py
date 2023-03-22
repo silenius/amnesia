@@ -22,17 +22,19 @@ class Resource(RequestMixin):
     def __init__(self, request):
         self.request = request
 
-    def __acl__(self):
-        yield Allow, 'r:Manager', ALL_PERMISSIONS
+    def __acl__(self, raw=False):
+        if not raw:
+            yield Allow, 'r:Manager', ALL_PERMISSIONS
 
         for acl in load_global_acl(self.request):
-            yield acl.to_pyramid_acl()
+            yield acl if raw else acl.to_pyramid_acl()
 
         # Note: if there's no explicit permission, the default is to DENY so in
         # theory there is no need for a yield DENY_ALL (but keep it just to be
         # sure)
 
-        yield DENY_ALL
+        if not raw:
+            yield DENY_ALL
 
     @property
     def extra_paths(self):

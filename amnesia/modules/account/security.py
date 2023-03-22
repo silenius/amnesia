@@ -145,7 +145,7 @@ def get_parent_acl(resource):
     parent_acl = []
 
     for res in lineage(resource):
-        for ace in res.__acl__():
-            parent_acl.append((res, ace))
+        for ace in res.__acl__(raw=True):
+            parent_acl.append(ace)
 
     return parent_acl

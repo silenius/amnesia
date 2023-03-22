@@ -76,20 +76,22 @@ class Entity(Resource):
         if self.entity.owner is self.request.identity:
             return [Owner]
 
-    def __acl__(self):
-        yield Allow, 'r:Manager', ALL_PERMISSIONS
+    def __acl__(self, raw=False):
+        if not raw:
+            yield Allow, 'r:Manager', ALL_PERMISSIONS
         #yield Allow, Owner, ALL_PERMISSIONS
 
         for acl in load_content_acl(self.request):
             if acl.resource.name == 'CONTENT' and acl.content is self.entity:
-                yield acl.to_pyramid_acl()
+                yield acl if raw else acl.to_pyramid_acl()
 
         if not self.entity.inherits_parent_acl:
             for acl in load_content_acl(self.request):
                 if acl.resource.name == 'GLOBAL':
-                    yield acl.to_pyramid_acl()
+                    yield acl if raw else acl.to_pyramid_acl()
 
-            yield DENY_ALL
+            if not raw:
+                yield DENY_ALL
 
     def update(self, data):
         """ Update an entity """
