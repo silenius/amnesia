@@ -57,8 +57,10 @@ class ContentSchema(Schema, PyramidContextMixin):
     type = Nested(ContentTypeSchema, dump_only=True)
     owner = Nested(AccountSchema, dump_only=True)
     container_id = Integer(dump_only=True)
+    parent = Nested('ContentSchema', exclude=('parent', ), dump_only=True)
     owner_id = Integer(dump_only=True)
     state_id = Integer(dump_only=True)
+    inherits_parent_acl = Boolean()
     on_success = Integer(default=201, missing=201, validate=OneOf((201, 303)))
 
     tags_id = List(Integer(), load_only=True)
@@ -145,7 +147,6 @@ class IdListSchema(Schema):
 
 
 class ContentACLSchema(ACLSchema):
-    inherits_parent_acl = Boolean()
     content = Nested(ContentSchema, dump_only=True)
 
     class Meta:

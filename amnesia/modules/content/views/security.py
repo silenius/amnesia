@@ -22,7 +22,6 @@ def includeme(config):
 def acls(context, request):
     return [
         ContentACLSchema(exclude=('content.acls',)).dump(acl) 
-        if isinstance(acl, ContentACL)
-        else ACLSchema().dump(acl)
+        if isinstance(acl, ContentACL) else ACLSchema().dump(acl)
         for acl in get_parent_acl(context)
     ]
