@@ -54,11 +54,6 @@ class FolderBrowserView(BaseView):
 
         return ContentSchema().dump(result.query.all(), many=True)
 
-
-        return {
-            'results': schema.dump(result.query.all(), many=True)
-        }
-
     @view_config(request_method='GET', name='browse')
     def browse(self, **kwargs):
         params = self.request.GET.mixed()

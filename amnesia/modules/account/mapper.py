@@ -1,11 +1,9 @@
 from sqlalchemy import event
 from sqlalchemy import orm
 from sqlalchemy import sql
-from sqlalchemy import Boolean
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from amnesia.db import mapper_registry
-from amnesia.db.ext import pg_json_property
 from amnesia.modules.content import Content
 
 from .model import Account

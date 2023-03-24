@@ -113,37 +113,6 @@ class FolderCRUD(ContentCRUD):
     def read_json(self):
         return self.schema(FolderSchema).dump(self.entity)
 
-    @view_config(
-        request_method='GET',
-        permission='read',
-        accept='text/html'
-    )
-    def read(self):
-        pl_cfg = self.entity.polymorphic_config
-        entity = orm.with_polymorphic(pl_cfg.base_mapper.entity, pl_cfg.cls)
-        orders = self.registry.settings['amnesia:orders']
-        all_orders = order.for_entity(entity, orders)
-
-        context = {
-            'content': self.entity,
-            'orders': all_orders,
-        }
-
-        if self.request.has_permission('create'):
-            stmt = sql.select(ContentType).order_by(ContentType.name)
-            result = self.dbsession.execute(stmt).scalars().all()
-            context['content_types'] = result
-
-        try:
-            template = self.entity.props['template_show']
-        except (TypeError, KeyError):
-            template = 'amnesia:templates/folder/show/default.pt'
-
-        try:
-            return render_to_response(template, context, request=self.request)
-        except (FileNotFoundError, ValueError):
-            raise HTTPNotFound()
-
     #########################################################################
     # CR(U)D - UPDATE                                                       #
     #########################################################################

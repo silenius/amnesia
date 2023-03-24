@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
+import logging
 
-from pyramid.events import subscriber
-from pyramid.events import ApplicationCreated
-
-from sqlalchemy import sql
 from sqlalchemy import orm
-from sqlalchemy.event import listen
+from sqlalchemy import event
 from sqlalchemy.types import Integer
 
 from amnesia.db import mapper_registry
@@ -15,6 +11,8 @@ from amnesia.modules.content import Content
 from amnesia.modules.document import Document
 from amnesia.modules.content_type.utils import get_type_id
 from amnesia.modules.content_type import ContentType
+
+log = logging.getLogger(__name__)
 
 
 def includeme(config):
@@ -60,11 +58,10 @@ def includeme(config):
         }
     )
 
-    listen(Folder, 'mapper_configured', default_limit)
-
-def default_limit(mapper, class_):
+@event.listens_for(Folder, 'mapper_configured')
+def add_json_props(mapper, class_):
     class_.default_limit = pg_json_property(
-        'props', 'default_limit', Integer, default=10
+        'props', 'default_limit', Integer, default=50
     )
 
 #@subscriber(ApplicationCreated)

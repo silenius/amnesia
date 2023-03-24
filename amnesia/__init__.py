@@ -6,6 +6,7 @@ from pyramid.config import Configurator
 from amnesia.security.policy import cookie_security_policy
 from amnesia.traversal import AmnesiaResourceURL
 from amnesia.resources import get_root
+from amnesia.modules.content import Content
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
@@ -62,20 +63,15 @@ def include_entry_points(config):
 
 
 def include_config_directives(config):
-    config.add_directive(
+    for directive in {
         'cms_register_frontend_asset',
-        'amnesia.lib.configurator.cms_register_frontend_asset'
-    )
-
-    config.add_directive(
         'cms_add_entity_resource',
-        'amnesia.lib.configurator.cms_add_entity_resource'
-    )
-
-    config.add_directive(
         'cms_add_resource_path',
-        'amnesia.lib.configurator.cms_add_resource_path'
-    )
+        'cms_add_content_prop'
+    }:
+        config.add_directive(
+            directive, f'amnesia.lib.configurator.{directive}'
+        )
 
 
 def include_request_methods(config):
@@ -106,6 +102,14 @@ def include_entity_resource_mapping(config):
     config.cms_add_entity_resource(File, FileEntity)
 
 
+#def include_content_props(config):
+#    for entry in (
+#        (Content, 'breadcrumb', Boolean, True),
+#        (Folder, 'default_limit', Integer, 50)
+#    ):
+#        config.cms_add_content_prop(*entry)
+#
+
 def include_amnesia(config):
     config.include(include_config_directives)
     config.include(include_request_methods)
@@ -121,6 +125,7 @@ def include_amnesia(config):
 
     config.include(include_cms_modules)
     config.include(include_entity_resource_mapping)
+#    config.include(include_content_props)
     config.include(include_security_policy)
 
     config.include('amnesia.views')

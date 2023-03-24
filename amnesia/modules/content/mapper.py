@@ -7,9 +7,11 @@ from pyramid.threadlocal import get_current_registry
 
 from pytz import timezone
 
-import sqlalchemy.event
+from sqlalchemy import event
 from sqlalchemy import sql
 from sqlalchemy import orm
+from sqlalchemy.types import Boolean
+from sqlalchemy.types import Integer
 
 from amnesia.events import ObjectUpdateEvent
 from amnesia.modules.content import Content
@@ -19,6 +21,7 @@ from amnesia.modules.content_type import ContentType
 from amnesia.modules.tag import Tag
 from amnesia.modules.folder import Folder
 from amnesia.db import mapper_registry
+from amnesia.db.ext import pg_json_property
 
 log = logging.getLogger(__name__)
 
@@ -42,8 +45,8 @@ PGSQL_FTS_WEIGHTS = frozenset(('a', 'b', 'c', 'd'))
 PGSQL_FTS_DEFAULT_WEIGHT = 'd'
 
 # FIXME: doesn't work with amnesia_translation package
-@sqlalchemy.event.listens_for(Content, 'before_update', propagate=True)
-@sqlalchemy.event.listens_for(Content, 'before_insert', propagate=True)
+@event.listens_for(Content, 'before_update', propagate=True)
+@event.listens_for(Content, 'before_insert', propagate=True)
 def update_fts_listener(mapper, connection, target):
     """ Set the 'fts' column (full text search) """
 
@@ -64,6 +67,17 @@ def update_fts_listener(mapper, connection, target):
             fts = _fts if fts is None else fts.op('||')(_fts)
 
     target.fts = fts
+
+
+@event.listens_for(Content, 'mapper_configured')
+def add_json_props(mapper, class_):
+    class_.breadcrumb = pg_json_property(
+        'props', 'breadcrumb', Boolean, default=True
+    )
+
+    class_.banner_image = pg_json_property(
+        'props', 'banner_image', Integer, default=None
+    )
 
 
 def includeme(config):
