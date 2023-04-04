@@ -1,25 +1,19 @@
 import json
 
-from random import choice
-
 from marshmallow import ValidationError
-
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_defaults
 from pyramid.view import view_config
-from pyramid.renderers import render_to_response
-from pyramid.httpexceptions import HTTPBadRequest
-
-from sqlalchemy import sql
 
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderBrowser
-from amnesia.modules.folder.validation import FolderBrowserSchema
-from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.folder.services import get_lineage
 from amnesia.modules.folder.services import get_children_containers
 from amnesia.modules.file import File
 from amnesia.modules.file.validation.file import FileSchema
+from amnesia.modules.folder.validation import FolderBrowserSchema
+from amnesia.modules.folder.validation import FolderSchema
 from amnesia.views import BaseView
 
 
@@ -63,33 +57,6 @@ class FolderBrowserView(BaseView):
         ]
 
         return ContentSchema().dump(result.query.all(), many=True)
-
-    @view_config(request_method='GET', name='browse')
-    def browse(self, **kwargs):
-        params = self.request.GET.mixed()
-        schema = FolderBrowserSchema(context={
-            'request': self.request,
-            'folder': self.context.entity
-        })
-
-        try:
-            data = schema.load(params)
-        except ValidationError as error:
-            raise HTTPBadRequest(error.messages)
-
-        browser = FolderBrowser(self.request, self.context.entity)
-        result = browser.query(**data)
-
-        data.update(result._asdict())
-        data.update(kwargs)
-        data['content'] = self.context.entity
-        data['options'] = ()
-
-        response = render_to_response('amnesia:templates/folder/_browse.xml',
-                                      data, request=self.request)
-        response.content_type = 'application/xml'
-
-        return response
 
     @view_config(request_method='GET', name='children',
                  accept='application/json')
