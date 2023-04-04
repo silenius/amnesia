@@ -19,6 +19,7 @@ from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.folder.services import get_lineage
 from amnesia.modules.folder.services import get_children_containers
 from amnesia.modules.file import File
+from amnesia.modules.file.validation.file import FileSchema
 from amnesia.views import BaseView
 
 
@@ -42,6 +43,10 @@ class FolderBrowserView(BaseView):
             'folder': self.context.entity
         })
 
+        factories = {
+            File: FileSchema
+        }
+
         try:
             data = schema.load(params)
         except ValidationError as error:
@@ -51,6 +56,11 @@ class FolderBrowserView(BaseView):
         result = browser.query(**data)
 
         from amnesia.modules.content.validation import ContentSchema
+
+        return [
+            factories.get(o.__class__, ContentSchema)(exclude=('acls', )).dump(o)
+            for o in result.query.all()
+        ]
 
         return ContentSchema().dump(result.query.all(), many=True)
 

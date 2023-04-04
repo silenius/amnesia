@@ -11,7 +11,7 @@ from amnesia.modules.content.validation import ContentSchema
 class FileSchema(ContentSchema):
     ''' Schema for the File model '''
 
-    content_id = Integer()
+    content_id = Integer(dump_only=True)
     mime_id = Integer(dump_only=True)
     original_name = String(dump_only=True)
     file_size = Float(dump_only=True)

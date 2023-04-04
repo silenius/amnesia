@@ -63,9 +63,6 @@ class ContentSchema(Schema, PyramidContextMixin):
     inherits_parent_acl = Boolean()
     on_success = Integer(default=201, missing=201, validate=OneOf((201, 303)))
 
-    tags_id = List(Integer(), load_only=True)
-    tags = Nested(TagSchema, many=True, dump_only=True)
-
     acls = Nested('ContentACLSchema', exclude=('content', ), many=True)
 
     inherits_parent_acl = Boolean(missing=True)
@@ -89,21 +86,10 @@ class ContentSchema(Schema, PyramidContextMixin):
         elif 'acls' in _data:
             _data['acls'] = json.loads(_data['acls'])
 
-        # Tags
-        try:
-            _data['tags_id'] = as_list(_data['tags_id'])
-        except KeyError:
-            _data['tags_id'] = []
-
         return _data
 
     @post_load
     def post_load_process(self, item, **kwargs):
-        if 'tags_id' in item:
-            filters = Tag.id.in_(item.pop('tags_id'))
-            stmt_tags = sql.select(Tag).filter(filters)
-            item['tags'] = self.dbsession.execute(stmt_tags).scalars().all()
-
         if 'container_id' in item:
             item['parent'] = self.dbsession.get(Folder, item.pop('container_id'))
 

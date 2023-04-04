@@ -66,7 +66,6 @@ class SortSchema(Schema):
 
 class FolderBrowserSchema(Schema, PyramidContextMixin):
 
-    components = List(String(), missing=('main', 'pagination', 'navigation'))
     display = String(missing='list')
     limit = Integer(validate=Range(min=1, max=500), missing=None)
     offset = Integer(validate=Range(min=0), missing=0)
