@@ -52,11 +52,9 @@ class FolderBrowserView(BaseView):
         from amnesia.modules.content.validation import ContentSchema
 
         return [
-            factories.get(o.__class__, ContentSchema)(exclude=('acls', )).dump(o)
+            factories.get(o.__class__, ContentSchema)().dump(o)
             for o in result.query.all()
         ]
-
-        return ContentSchema().dump(result.query.all(), many=True)
 
     @view_config(request_method='GET', name='children',
                  accept='application/json')

@@ -174,7 +174,8 @@ def _content_callback():
             ContentACL,
             order_by=ContentACL.weight.desc(),
             back_populates='content',
-            cascade='all, delete-orphan'
+            cascade='all, delete-orphan',
+            lazy='subquery'
         ),
     })
 
