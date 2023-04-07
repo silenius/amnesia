@@ -11,9 +11,11 @@ from amnesia.modules.folder import FolderBrowser
 from amnesia.modules.folder.services import get_lineage
 from amnesia.modules.folder.services import get_children_containers
 from amnesia.modules.file import File
+from amnesia.modules.document import Document
 from amnesia.modules.file.validation.file import FileSchema
 from amnesia.modules.folder.validation import FolderBrowserSchema
 from amnesia.modules.folder.validation import FolderSchema
+from amnesia.modules.document.validation import DocumentSchema
 from amnesia.views import BaseView
 
 
@@ -38,7 +40,8 @@ class FolderBrowserView(BaseView):
         })
 
         factories = {
-            File: FileSchema
+            File: FileSchema,
+            Document: DocumentSchema
         }
 
         try:

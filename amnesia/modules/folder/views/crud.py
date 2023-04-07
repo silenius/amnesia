@@ -87,7 +87,8 @@ class FolderCRUD(ContentCRUD):
         try:
             data = schema.load(form_data)
         except ValidationError as error:
-            raise HTTPBadRequest(error.messages)
+            self.request.response.status_int = 400
+            return error.normalized_messages()
 
         folder = self.context.update(data)
 
@@ -99,10 +100,9 @@ class FolderCRUD(ContentCRUD):
         return HTTPNoContent(location=location)
 
 
-
-    #########################################################################
-    # C(R)UD - READ                                                         #
-    #########################################################################
+    #######
+    # GET #
+    #######
 
     @view_config(
         request_method='GET',
@@ -113,35 +113,6 @@ class FolderCRUD(ContentCRUD):
     def read_json(self):
         return self.schema(FolderSchema).dump(self.entity)
 
-    #########################################################################
-    # CR(U)D - UPDATE                                                       #
-    #########################################################################
-
-    @view_config(
-        request_method='POST',
-        renderer='amnesia:templates/folder/edit.pt',
-        permission='edit'
-    )
-    def update(self):
-        form_data = self.request.POST.mixed()
-        schema = self.schema(exclude={'container_id', 'acls'})
-
-        try:
-            data = schema.load(form_data)
-        except ValidationError as error:
-            form = FolderForm(self.request)
-            form_action = self.request.resource_path(self.context)
-
-            return {
-                'form': form.render(form_data, error.messages),
-                'form_action': form_action
-            }
-
-        updated_entity = self.context.update(data)
-
-        if updated_entity:
-            location = self.request.resource_url(updated_entity)
-            return HTTPFound(location=location)
 
 # Bulk delete
 

@@ -1,8 +1,11 @@
-# -*- coding: utf-8 -*-
-
 from sqlalchemy import inspect
 from sqlalchemy import engine_from_config as _engine_from_config
+from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
+
+__all__ = [
+    'polymorphic_ids', 'polymorphic_cls', 'engine_from_config'
+]
 
 
 def polymorphic_ids(src, cls):
@@ -24,7 +27,7 @@ def polymorphic_cls(src, ids):
     ]
 
 
-def engine_from_config(configuration, *args, **kwargs):
+def engine_from_config(configuration, *args, **kwargs) -> Engine:
     if configuration.get('sqlalchemy.poolclass') == 'NullPool':
         configuration['sqlalchemy.poolclass'] = NullPool
 

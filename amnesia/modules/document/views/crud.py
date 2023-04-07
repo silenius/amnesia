@@ -3,8 +3,10 @@ import logging
 from marshmallow import ValidationError
 
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPCreated
+from pyramid.httpexceptions import HTTPNoContent
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPInternalServerError
 
@@ -24,50 +26,22 @@ def includeme(config):
     config.scan(__name__, categories=('pyramid', 'amnesia'))
     #config.scan(__name__)
 
+
+@view_defaults(
+    context=DocumentEntity,
+    name=''
+)
+
 class DocumentCRUD(ContentCRUD):
     ''' Document CRUD '''
 
-    @view_config(
-        request_method='GET',
-        name='edit',
-        renderer='amnesia:templates/document/edit.pt',
-        context=DocumentEntity,
-        permission='edit'
-    )
-    def edit(self):
-        data = DocumentSchema().dump(self.entity)
-        form = DocumentForm(self.request)
-        action = self.request.resource_path(self.context)
-
-        return {
-            'form': form.render(data),
-            'form_action': action
-        }
-
-    @view_config(
-        request_method='GET',
-        name='add_document',
-        renderer='amnesia:templates/document/edit.pt',
-        context=FolderEntity,
-        permission='create'
-    )
-    def new(self):
-        data = self.request.GET.mixed()
-        form = DocumentForm(self.request)
-        action = self.request.resource_path(self.context, '@@add_document')
-
-        return {
-            'form': form.render(data),
-            'form_action': action
-        }
-
-    #########################################################################
-    # (C)RUD - CREATE                                                       #
-    #########################################################################
+    ########
+    # POST #
+    ########
 
     @view_config(
         request_method='POST',
-        renderer='amnesia:templates/document/edit.pt',
+        renderer='json',
         context=FolderEntity,
         name='add_document',
         permission='create'
@@ -82,32 +56,47 @@ class DocumentCRUD(ContentCRUD):
             data = schema.load(form_data)
         except ValidationError as error:
             self.request.response.status_int = 400
-
-            form = DocumentForm(self.request)
-            form_action = self.request.resource_path(
-                self.context, '@@add_document'
-            )
-
-            return {
-                'form': form.render(form_data, error.messages),
-                'form_action': form_action
-            }
+            return error.normalized_messages()
 
         new_entity = self.context.create(Document, data)
 
         if new_entity:
-            location = self.request.resource_url(new_entity)
-            http_code = data['on_success']
-            if http_code == 201:
-                return HTTPCreated(location=location)
-            if http_code == 303:
-                return HTTPSeeOther(location=location)
+            self.request.response.status_int = 201
+            return schema.dump(new_entity)
 
         raise HTTPInternalServerError()
 
-    #########################################################################
-    # C(R)UD - READ                                                         #
-    #########################################################################
+    #######
+    # PUT #
+    #######
+
+    @view_config(
+        request_method='PUT',
+        renderer='json',
+        permission='edit'
+    )
+    def put(self):
+        form_data = self.request.POST.mixed()
+        schema = self.schema(DocumentSchema, exclude={'acls'})
+
+        try:
+            data = schema.load(form_data)
+        except ValidationError as error:
+            self.request.response.status_int = 400
+            return error.normalized_messages()
+
+        document = self.context.update(data)
+
+        if not document:
+            raise HTTPInternalServerError()
+
+        location = self.request.resource_url(document)
+
+        return HTTPNoContent(location=location)
+
+    #######
+    # GET #
+    #######
 
     @view_config(
         request_method='GET',
@@ -117,22 +106,9 @@ class DocumentCRUD(ContentCRUD):
         context=DocumentEntity
     )
     def read_json(self):
-        schema = DocumentSchema(context={
-            'request': self.request
-        })
+        return self.schema(DocumentSchema).dump(self.entity)
 
-        return schema.dump(self.context.entity)
-
-    @view_config(
-        request_method='GET',
-        renderer='amnesia:templates/document/show.pt',
-        accept='text/html',
-        permission='read',
-        context=DocumentEntity
-    )
-    def read_html(self):
-        return super().read()
-
+    
     #########################################################################
     # CR(U)D - UPDATE                                                       #
     #########################################################################
