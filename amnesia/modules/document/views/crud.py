@@ -4,17 +4,13 @@ from marshmallow import ValidationError
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-from pyramid.httpexceptions import HTTPSeeOther
-from pyramid.httpexceptions import HTTPCreated
 from pyramid.httpexceptions import HTTPNoContent
-from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.document import Document
 from amnesia.modules.document import DocumentEntity
 from amnesia.modules.document.validation import DocumentSchema
-from amnesia.modules.document.forms import DocumentForm
 
 from ...content.views import ContentCRUD
 
@@ -27,11 +23,7 @@ def includeme(config):
     #config.scan(__name__)
 
 
-@view_defaults(
-    context=DocumentEntity,
-    name=''
-)
-
+@view_defaults(context=DocumentEntity)
 class DocumentCRUD(ContentCRUD):
     ''' Document CRUD '''
 
@@ -107,37 +99,3 @@ class DocumentCRUD(ContentCRUD):
     )
     def read_json(self):
         return self.schema(DocumentSchema).dump(self.entity)
-
-    
-    #########################################################################
-    # CR(U)D - UPDATE                                                       #
-    #########################################################################
-
-    @view_config(
-        request_method='POST',
-        renderer='amnesia:templates/document/edit.pt',
-        context=DocumentEntity,
-        permission='edit'
-    )
-    def update(self):
-        form_data = self.request.POST.mixed()
-        schema = DocumentSchema(context={
-            'request': self.request
-        }, exclude=('container_id', ))
-
-        try:
-            data = schema.load(form_data)
-        except ValidationError as error:
-            form = DocumentForm(self.request)
-            form_action = self.request.resource_path(self.context)
-
-            return {
-                'form': form.render(form_data, error.messages),
-                'form_action': form_action
-            }
-
-        updated_entity = self.context.update(data)
-
-        if updated_entity:
-            location = self.request.resource_url(updated_entity)
-            return HTTPFound(location=location)

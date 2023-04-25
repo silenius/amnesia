@@ -40,13 +40,13 @@ class ContentCRUD(BaseView):
             if not self.request.has_permission(permission)
         }
 
+        if exclude:
+            fields |= exclude
+
         context={
             'request': self.request, 
             'entity': self.context.entity
         }
-
-        if exclude:
-            fields |= exclude
 
         return factory(
             context=context,
