@@ -38,7 +38,6 @@ def includeme(config):
 
 @view_defaults(
     context=FolderEntity,
-    name=''
 )
 class FolderCRUD(ContentCRUD):
     """ Folder CRUD """
@@ -53,7 +52,7 @@ class FolderCRUD(ContentCRUD):
         name='add_folder',
         permission='create'
     )
-    def create(self):
+    def post(self):
         form_data = self.request.POST.mixed()
         schema = self.schema(FolderSchema)
 
@@ -92,12 +91,11 @@ class FolderCRUD(ContentCRUD):
 
         folder = self.context.update(data)
 
-        if not folder:
-            raise HTTPInternalServerError()
-
-        location = self.request.resource_url(folder)
-
-        return HTTPNoContent(location=location)
+        if folder:
+            location = self.request.resource_url(folder)
+            return HTTPNoContent(location=location)
+       
+        raise HTTPInternalServerError()
 
 
     #######
