@@ -1,12 +1,10 @@
 import logging
 
-from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.httpexceptions import HTTPInternalServerError
 
 from pyramid.view import view_defaults
 from pyramid.view import view_config
-from pyramid.renderers import render_to_response
 
 from amnesia.modules.content import Entity
 from amnesia.views import BaseView
@@ -29,7 +27,7 @@ class ContentCRUD(BaseView):
     def session(self):
         return self.request.session
 
-    def schema(self, factory, exclude=None):
+    def schema(self, factory, *, exclude=None, extra_context=None):
         perms = {
             ('acls', 'manage_acl'),
             ('default_order', 'manage_folder_order')
@@ -43,10 +41,14 @@ class ContentCRUD(BaseView):
         if exclude:
             fields |= exclude
 
-        context={
+        context = {
             'request': self.request, 
             'entity': self.context.entity
         }
+
+        if extra_context:
+            context |= extra_context
+
 
         return factory(
             context=context,
