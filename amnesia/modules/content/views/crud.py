@@ -58,7 +58,10 @@ class ContentCRUD(BaseView):
     # DELETE #
     ##########
 
-    @view_config(request_method='DELETE', permission='delete')
+    @view_config(
+        request_method='DELETE', 
+        permission='delete'
+    )
     def delete(self):
         if self.context.delete():
             return HTTPNoContent()
