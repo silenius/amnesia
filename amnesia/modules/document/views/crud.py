@@ -95,7 +95,6 @@ class DocumentCRUD(ContentCRUD):
         renderer='json',
         accept='application/json',
         permission='read',
-        context=DocumentEntity
     )
     def read_json(self):
         return self.schema(DocumentSchema).dump(self.entity)
