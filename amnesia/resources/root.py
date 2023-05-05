@@ -12,6 +12,7 @@ from amnesia.modules.search import SearchResource
 from amnesia.modules.tag import TagResource
 from amnesia.modules.content_type import ContentTypeResource
 from amnesia.modules.permission import PermissionResource
+from amnesia.modules.country import CountryResource
 
 from amnesia.resources import Resource
 
@@ -29,7 +30,8 @@ _tree = {
     'roles': RoleResource,
     'acls': ACLBaseResource,
     'content-type': ContentTypeResource,
-    'permissions': PermissionResource
+    'permissions': PermissionResource,
+    'country': CountryResource
 }
 
 

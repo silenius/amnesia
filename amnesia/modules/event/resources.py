@@ -24,6 +24,7 @@ class EventResource(EntityManager):
             entity = self.dbsession.get(Event, path)
             if entity:
                 return EventEntity(self.request, entity)
+
         raise KeyError
 
     def query(self):

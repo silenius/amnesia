@@ -3,12 +3,8 @@
 import json
 import logging
 
-from datetime import date
-from datetime import datetime
-
 from marshmallow import Schema
 from marshmallow import EXCLUDE
-from marshmallow import post_dump
 from marshmallow import post_load
 from marshmallow import pre_load
 from marshmallow import ValidationError
@@ -29,9 +25,7 @@ from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
 from amnesia.utils.validation.fields import JSON
 from amnesia.modules.folder import Folder
-from amnesia.modules.tag import Tag
 from amnesia.modules.state import State
-from amnesia.modules.tag.validation import TagSchema
 from amnesia.modules.content_type.validation import ContentTypeSchema
 from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import ACLSchema

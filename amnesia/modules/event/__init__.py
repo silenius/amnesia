@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .model import Event
 from .resources import EventEntity
 from .resources import EventResource

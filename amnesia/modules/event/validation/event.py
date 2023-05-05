@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# pylint: disable=E1101
-
 from marshmallow import validates_schema
 from marshmallow import ValidationError
 from marshmallow.fields import Integer
@@ -9,9 +5,11 @@ from marshmallow.fields import Float
 from marshmallow.fields import String
 from marshmallow.fields import DateTime
 from marshmallow.fields import Email
+from marshmallow.fields import Nested
 from marshmallow.validate import Length
 
 from amnesia.modules.content.validation import ContentSchema
+from amnesia.modules.country import CountrySchema
 
 
 class EventSchema(ContentSchema):
@@ -28,6 +26,7 @@ class EventSchema(ContentSchema):
     contact_email = Email(allow_none=True)
     contact_phone = String(allow_none=True)
     country_iso = String(allow_none=True, validate=Length(equal=2))
+    country = Nested(CountrySchema, dump_only=True)
 
     starts = DateTime('%Y-%m-%d %H:%M', required=True)
     ends = DateTime('%Y-%m-%d %H:%M', required=True)
