@@ -66,7 +66,6 @@ class SortSchema(Schema):
 
 class FolderBrowserSchema(Schema, PyramidContextMixin):
 
-    display = String(missing='list')
     limit = Integer(validate=Range(min=1, max=500), missing=None)
     offset = Integer(validate=Range(min=0), missing=0)
     sort_by = SortListField(Nested(SortSchema), missing=[])
@@ -74,6 +73,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
     undeferred = List(String(), missing=())
     sort_folder_first = Boolean(missing=False)
     filter_types = List(String())
+    filter_mimes = List(String())
     only_published = Boolean(missing=True)
 
     class Meta:
@@ -81,10 +81,11 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
 
     @pre_load
     def ensure_list(self, data, **kwargs):
-        try:
-            data['filter_types'] = as_list(data['filter_types'])
-        except KeyError:
-            data['filter_types'] = []
+        for k in ('filter_types', 'filter_mimes'):
+            try:
+                data[k] = as_list(data[k])
+            except KeyError:
+                data[k] = []
 
         return data
 
