@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class FolderEntity(Entity):
     """ Folder """
 
+    # FIXME: check change_container permission
     def paste(self, content_ids):
         stmt = sql.update(
             Content
@@ -34,7 +35,7 @@ class FolderEntity(Entity):
         except InternalError:
             raise PasteError(self.entity)
 
-    def create(self, cls, data):
+    def create(self, cls: type[Content], data):
         owner = self.request.user
         new_entity = cls(owner=owner, parent=self.entity, **data)
         self.notify(FolderAddObjectEvent(new_entity, self.entity, self.request))
@@ -46,7 +47,7 @@ class FolderEntity(Entity):
         except DatabaseError:
             return False
 
-    def bulk_delete(self, ids, owner=None):
+    def bulk_delete(self, ids: list[int], owner=None):
         q = sql.select(Content).where(
             Content.id.in_(ids), 
             Content.parent == self.entity

@@ -133,7 +133,8 @@ def bulk_delete(context, request):
     try:
         results = schema.load(params)
     except ValidationError as error:
-        raise HTTPBadRequest(error.messages)
+        request.response.status_int = 400
+        return error.normalized_messages()
 
     ids = results['ids']
 
