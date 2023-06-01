@@ -119,7 +119,7 @@ class Entity(Resource):
         """ Change the weight of the entity within it's container. """
 
         obj = self.dbsession.get(
-            Content, self.entity.id, [orm.lazyload('*')], with_for_update=True
+            Content, self.entity.id, options=[orm.lazyload('*')], with_for_update=True
         )
 
         (min_weight, max_weight) = sorted((new_weight, obj.weight))
@@ -141,7 +141,8 @@ class Entity(Resource):
         # Swap min_weight/max_weight, or increment/decrement by one depending
         # on whether one moves up or down
         new_weight = sql.case(
-            value=Content.weight, whens=whens,
+            whens,
+            value=Content.weight,
             else_=operation(Content.weight, 1)
         )
 
