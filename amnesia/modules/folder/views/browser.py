@@ -78,7 +78,6 @@ class FolderBrowserView(BaseView):
         ).as_tree()
 
         self.request.response.content_type = 'application/json'
-        self.request.response.headers['Access-Control-Allow-Origin'] = '*'
         self.request.response.text = json.dumps(result, cls=Encoder)
 
         return self.request.response
@@ -100,7 +99,6 @@ class FolderBrowserView(BaseView):
         )
 
         self.request.response.content_type = 'application/json'
-        self.request.response.headers['Access-Control-Allow-Origin'] = '*'
         self.request.response.text = json.dumps(result, cls=Encoder)
 
         return self.request.response

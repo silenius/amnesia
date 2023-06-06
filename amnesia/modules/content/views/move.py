@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# pylint: disable=E1101
-
 from marshmallow import Schema
 from marshmallow import ValidationError
 from marshmallow.fields import Integer
@@ -22,8 +18,13 @@ class WeightSchema(Schema):
     weight = Integer(required=True, validate=Range(min=1))
 
 
-@view_config(name='weight', context=Entity, request_method='POST',
-             renderer='json', permission='change_weight')
+@view_config(
+    name='weight', 
+    context=Entity, 
+    request_method='POST',
+    renderer='json', 
+    permission='change_weight'
+)
 def weight(context, request):
     """Change the weight of a Content (within its container)
        Returns the number of updated Content (rows)."""
