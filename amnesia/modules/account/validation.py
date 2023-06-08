@@ -1,6 +1,7 @@
 from marshmallow import Schema
 from marshmallow import EXCLUDE
 from marshmallow import post_load
+from marshmallow import post_dump
 from marshmallow import ValidationError
 from marshmallow.fields import DateTime, String
 from marshmallow.fields import Email
@@ -11,6 +12,7 @@ from marshmallow.fields import Nested
 from marshmallow.validate import Length
 from marshmallow.validate import Range
 
+from amnesia.utils.gravatar import gravatar
 from amnesia.utils.validation import PyramidContextMixin
 
 class LoginSchema(Schema):
@@ -43,6 +45,9 @@ class AccountSchema(Schema):
             else:
                 del data['password_repeat']
 
+    @post_dump
+    def gravatar(self, data, **kwargs):
+        data['gravatar'] = gravatar(data['email'])
         return data
 
 

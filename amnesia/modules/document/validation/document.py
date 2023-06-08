@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from marshmallow.fields import Integer
 from marshmallow.fields import String
 
