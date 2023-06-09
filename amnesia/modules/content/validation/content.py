@@ -40,6 +40,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     id = Integer(dump_only=True)
     added = DateTime(dump_only=True)
     updated = DateTime(dump_only=True)
+    last_update = DateTime(dump_only=True)
     title = String()
     description = String(missing=None)
     effective = DateTime(missing=None)

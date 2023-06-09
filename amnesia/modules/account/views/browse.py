@@ -31,7 +31,7 @@ class AccountBrowserView(BaseView):
 
     def browse(self):
         params = self.request.GET.mixed()
-        schema = BrowseAccountSchema(context={'request': self.request})
+        schema = self.schema(BrowseAccountSchema)
 
         try:
             data = schema.load(params)
@@ -67,7 +67,7 @@ class AccountBrowserView(BaseView):
         
         return {
             'data': {
-                'accounts': AccountSchema().dump(
+                'accounts': self.schema(AccountSchema).dump(
                     data['accounts'],
                     many=True
                 )

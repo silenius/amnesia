@@ -44,7 +44,7 @@ class RoleBrowserView(BaseView):
 
     def browse(self):
         params = self.request.GET.mixed()
-        schema = BrowseRoleSchema(context={'request': self.request})
+        schema = self.schema(BrowseRoleSchema)
 
         try:
             data = schema.load(params)
@@ -258,7 +258,7 @@ class RoleMemberView(BaseView):
     )
     def get_json(self):
         members = self.context.get_members()
-        return AccountSchema().dump(members, many=True)
+        return self.schema(AccountSchema).dump(members, many=True)
 
     @view_config(
         request_method='GET',
@@ -270,7 +270,7 @@ class RoleMemberView(BaseView):
         members = self.context.get_members(only=False)
 
         return [
-            AccountSchema().dump(member[0]) | { 'member': member[1] }
+            self.schema(AccountSchema).dump(member[0]) | { 'member': member[1] }
             for member in members
         ]
 

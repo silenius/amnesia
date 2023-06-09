@@ -47,7 +47,7 @@ class AccountSchema(Schema):
 
     @post_dump
     def gravatar(self, data, **kwargs):
-        data['gravatar'] = gravatar(data['email'])
+        data['gravatar'] = gravatar(self.context['request'], data['email'])
         return data
 
 

@@ -34,11 +34,11 @@ class FolderBrowserView(BaseView):
     )
     def browse_json(self):
         params = self.request.GET.mixed()
-        schema = FolderBrowserSchema(context={
-            'request': self.request,
+        schema = self.schema(FolderBrowserSchema, extra_context={
             'folder': self.context.entity
         })
 
+        #TODO: use ZCA
         factories = {
             File: FileSchema,
             Document: DocumentSchema
@@ -55,7 +55,9 @@ class FolderBrowserView(BaseView):
         from amnesia.modules.content.validation import ContentSchema
 
         return [
-            factories.get(o.__class__, ContentSchema)().dump(o)
+            self.schema(
+                factories.get(o.__class__, ContentSchema)
+            ).dump(o)
             for o in result.query.all()
         ]
 

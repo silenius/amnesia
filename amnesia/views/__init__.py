@@ -18,17 +18,22 @@ class BaseView(RequestMixin):
         self.context = context
         self.request = request
 
-    def schema(self, factory, **kwargs):
-        context={
+    def schema(self, factory, *, exclude=None, extra_context=None):
+        context = {
             'request': self.request, 
             'context': self.context
         }
 
+        if extra_context:
+            context |= extra_context
+
+        if exclude is None:
+            exclude = []
+
         return factory(
             context=context,
-            **kwargs
+            exclude=exclude
         )
-
 
 
 @view_config(name='change_locale')

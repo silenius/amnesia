@@ -28,6 +28,13 @@ class ContentCRUD(BaseView):
         return self.request.session
 
     def schema(self, factory, *, exclude=None, extra_context=None):
+        context = {
+            'entity': self.context.entity
+        }
+
+        if extra_context:
+            context |= extra_context
+
         perms = {
             ('acls', 'manage_acl'),
             ('default_order', 'manage_folder_order')
@@ -41,20 +48,9 @@ class ContentCRUD(BaseView):
         if exclude:
             fields |= exclude
 
-        context = {
-            'request': self.request, 
-            'entity': self.context.entity
-        }
-
-        if extra_context:
-            context |= extra_context
-
-
-        return factory(
-            context=context,
-            exclude=fields
+        return super().schema(
+            factory, exclude=fields, extra_context=context
         )
-
         
     ##########
     # DELETE #
