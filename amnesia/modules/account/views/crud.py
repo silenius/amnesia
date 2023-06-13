@@ -24,7 +24,8 @@ def includeme(config):
 
 @view_defaults(
     context=AccountEntity,
-    permission='manage_accounts'
+    permission='manage_accounts',
+    name=''
 )
 class AccountCRUD(BaseView):
 
@@ -49,7 +50,7 @@ class AccountCRUD(BaseView):
         if 'enabled' in data:
             self.context.entity.enabled = data['enabled']
 
-        return True
+        return schema.dump(self.context.entity)
 
     ##########
     # DELETE #
@@ -73,7 +74,7 @@ class AccountManager(BaseView):
     @view_config(
         request_method='GET',
         renderer='json',
-        name='my'
+        name='me'
     )
     def get(self):
         user = self.request.user

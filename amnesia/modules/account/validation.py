@@ -31,11 +31,6 @@ class AccountSchema(Schema):
     full_name = String(dump_only=True)
     enabled = Boolean()
     email = Email(required=True)
-    captcha_token = String(required=True, data_key='g-recaptcha-response',
-                           validate=[Length(min=1, error='captcha missing')])
-
-    class Meta:
-        unknown = EXCLUDE
 
     @post_load
     def check_password_repeat(self, data, **kwargs):
@@ -44,6 +39,7 @@ class AccountSchema(Schema):
                 raise ValidationError("Passwords don't match", 'password')
             else:
                 del data['password_repeat']
+        return data
 
     @post_dump
     def gravatar(self, data, **kwargs):

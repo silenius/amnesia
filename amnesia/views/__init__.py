@@ -18,7 +18,10 @@ class BaseView(RequestMixin):
         self.context = context
         self.request = request
 
-    def schema(self, factory, *, exclude=None, extra_context=None):
+    def schema(
+        self, factory, *, exclude=None, extra_context=None,
+        unknown=None
+    ):
         context = {
             'request': self.request, 
             'context': self.context
@@ -32,7 +35,8 @@ class BaseView(RequestMixin):
 
         return factory(
             context=context,
-            exclude=exclude
+            exclude=exclude,
+            unknown=unknown
         )
 
 
