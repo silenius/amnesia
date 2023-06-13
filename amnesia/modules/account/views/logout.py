@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPNoContent
 from pyramid.security import forget
 from pyramid.view import view_config
 
@@ -20,5 +18,4 @@ def includeme(config):
 def logout(context, request):
     headers = forget(request)
     request.session.invalidate()
-    location = request.application_url
-    return HTTPFound(location=location, headers=headers)
+    return HTTPNoContent(headers=headers)
