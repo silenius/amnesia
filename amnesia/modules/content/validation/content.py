@@ -1,5 +1,3 @@
-# pylint: disable=invalid-name,no-member
-
 import json
 import logging
 
@@ -63,6 +61,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     inherits_parent_acl = Boolean(missing=True)
 
     props = JSON(missing=None, default=None)
+    all_props = JSON(missing=None, default=None)
 
     class Meta:
         unknown = EXCLUDE
@@ -99,8 +98,7 @@ class ContentSchema(Schema, PyramidContextMixin):
             ]
 
         entity = self.context.get('entity')
-        has_permission = self.context['request'].has_permission
-        if not has_permission('manage_acl'):
+        if not self.request.has_permission('manage_acl'):
             k = 'inherits_parent_acl'
             # Update
             if entity:

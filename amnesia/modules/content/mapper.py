@@ -92,7 +92,8 @@ def includeme(config):
 
     _count_alias = tables['content'].alias('_count_children')
 
-    mapper_registry.map_imperatively(
+
+    m = mapper_registry.map_imperatively(
         Content, tables['content'],
         polymorphic_on=tables['content'].c.content_type_id,
         properties={
@@ -160,3 +161,36 @@ def includeme(config):
             )
 
         })
+
+
+    ## FIXME
+
+    root = sql.select(
+        tables['content'].c.props, tables['content'].c.container_id, sql.literal(1).label('level')
+    ).filter(
+        5818 == tables['content'].c.id
+    ).cte(
+        name='props_parents', recursive=True
+    )
+
+    root = root.union_all(
+        sql.select(
+            tables['content'].c.props, tables['content'].c.container_id, root.c.level + 1
+        ).join(
+            root, root.c.container_id == tables['content'].c.id
+        )
+    )
+
+    from sqlalchemy.dialects.postgresql import JSONB
+
+    foo = sql.func.jsonb_each(root.c.props.cast(JSONB))
+
+    m.add_property(
+        'all_props', orm.column_property(
+            sql.select(
+                sql.text('jsonb_object_agg(foo.key, foo.value)')
+            ).select_from(
+                root, foo.alias('foo')
+            )
+        )
+    )

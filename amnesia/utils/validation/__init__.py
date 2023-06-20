@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .helpers import TRUE
 from .helpers import FALSE
 from .helpers import is_true
