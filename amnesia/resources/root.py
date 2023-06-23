@@ -1,3 +1,5 @@
+from sqlalchemy import orm
+
 from amnesia.modules.content import Content
 from amnesia.modules.content import EntityManager
 from amnesia.modules.content import SessionResource
@@ -46,7 +48,11 @@ class Root(Resource):
     def __getitem__(self, path):
         # Access to a specific resource through it's id, ex: /123
         if path.isdigit():
-            entity = self.dbsession.get(Content, path)
+            entity = self.dbsession.get(
+                Content, 
+                path,
+                options=[orm.undefer(Content.all_props)]
+            )
             resource = self.request.cms_get_resource(entity)
             return resource(self.request, entity)
 

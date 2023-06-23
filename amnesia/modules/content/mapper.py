@@ -177,7 +177,7 @@ def add_all_props(mapper, class_):
         class_a.id, 
         class_a.props, 
         class_a.container_id, 
-        sql.literal(1).label('level')
+        sql.literal(1, type_=Integer).label('level')
     ).where(
         class_a.id == class_.id
     ).correlate_except(

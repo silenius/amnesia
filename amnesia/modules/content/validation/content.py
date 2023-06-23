@@ -5,6 +5,8 @@ from marshmallow import Schema
 from marshmallow import EXCLUDE
 from marshmallow import post_load
 from marshmallow import pre_load
+from marshmallow import pre_dump
+from marshmallow import post_dump
 from marshmallow import ValidationError
 
 from marshmallow.fields import Boolean
@@ -17,6 +19,7 @@ from marshmallow.fields import List
 from marshmallow.validate import Range
 from marshmallow.validate import OneOf
 
+from sqlalchemy import inspect
 from sqlalchemy import sql
 
 from amnesia.utils.validation import PyramidContextMixin
@@ -61,10 +64,26 @@ class ContentSchema(Schema, PyramidContextMixin):
     inherits_parent_acl = Boolean(missing=True)
 
     props = JSON(missing=None, default=None)
-    all_props = JSON(missing=None, default=None)
+    #all_props = JSON(missing=None, default=None)
 
     class Meta:
         unknown = EXCLUDE
+
+    ########
+    # DUMP #
+    ########
+
+    @post_dump
+    def pre_dump_all_props(self, data, **kwargs):
+        entity = self.context.get('entity')
+        
+        if entity:
+            insp = inspect(entity)
+        
+            if 'all_props' in insp.attrs and not 'all_props' in insp.unloaded:
+                data['all_props'] = entity.all_props
+
+        return data
 
     ########
     # LOAD #
