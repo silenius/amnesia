@@ -196,12 +196,12 @@ def add_all_props(mapper, class_):
 
     stmt = sql.select(
         # TODO: replace sql.text() with "the SQLAlchemy way"
-        sql.text('json_object_agg(foo.key, foo.value ORDER BY p.level DESC)')
+        sql.text('json_object_agg(pr.key, pr.value ORDER BY p.level DESC)')
     ).select_from(
-        root_a, sql.func.json_each(root_a.c.props).alias('foo')
+        root_a, sql.func.json_each(root_a.c.props).alias('pr')
     ).scalar_subquery()
 
     mapper.add_property(
         'all_props', 
-        orm.column_property(stmt)
+        orm.column_property(stmt, deferred=True)
     )
