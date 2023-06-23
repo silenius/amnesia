@@ -164,21 +164,21 @@ def includeme(config):
 
 @event.listens_for(Content, 'mapper_configured')
 def add_all_props(mapper, class_):
-    ## FIXME
-
-    lol = orm.aliased(class_)
+    class_a = orm.aliased(class_)
 
     root = sql.select(
-        lol.id, 
-        lol.props, 
-        lol.container_id, 
+        class_a.id, 
+        class_a.props, 
+        class_a.container_id, 
         sql.literal(1).label('level')
-    ).correlate_except(
-        lol
     ).where(
-        class_.id == lol.id
+        class_a.id == class_.id
+    ).correlate_except(
+        class_a
     ).cte(
-        name='props_parents', recursive=True
+        name='props_parents', 
+        nesting=True,
+        recursive=True
     )
 
     root = root.union_all(
@@ -187,16 +187,18 @@ def add_all_props(mapper, class_):
             class_.props, 
             class_.container_id, 
             root.c.level + 1
-        ).correlate_except(lol).join(
+        ).join(
             root, root.c.container_id == class_.id
         )
     )
 
+    root_a = root.alias('p')
 
     stmt = sql.select(
-        sql.text('json_object_agg(foo.key, foo.value)')
+        # TODO: replace sql.text() with "the SQLAlchemy way"
+        sql.text('json_object_agg(foo.key, foo.value ORDER BY p.level DESC)')
     ).select_from(
-        root, sql.func.json_each(root.c.props).alias('foo')
+        root_a, sql.func.json_each(root_a.c.props).alias('foo')
     ).scalar_subquery()
 
     mapper.add_property(
