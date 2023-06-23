@@ -164,6 +164,13 @@ def includeme(config):
 
 @event.listens_for(Content, 'mapper_configured')
 def add_all_props(mapper, class_):
+    '''
+    This function add a column_property 'all_props', which recursively fetch
+    and merge all parent 'props'.
+    This is usefull when you have a deeply nested Content-like object which
+    should inherit a props from parent(s) if not defined.
+    '''
+
     class_a = orm.aliased(class_)
 
     root = sql.select(
