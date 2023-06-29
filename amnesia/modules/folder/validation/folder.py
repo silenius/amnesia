@@ -1,5 +1,3 @@
-# pylint: disable=E1101
-
 import json
 
 from marshmallow import Schema
@@ -41,8 +39,7 @@ class FolderSchema(ContentSchema):
     polymorphic_children_ids = List(Integer, load_only=True)
 
     default_order = Nested(FolderOrder, many=True, default=[], missing=[])
-    default_limit = Integer(missing=10, default=10,
-                            validate=OneOf((10, 50, 100, 500)))
+    default_limit = Integer(missing=None, validate=OneOf((10, 50, 100, 500)))
 
     ########
     # LOAD #
