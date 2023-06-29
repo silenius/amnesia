@@ -1,8 +1,8 @@
-"""locked_acl
+"""folder limit
 
-Revision ID: d5ce94b0721d
+Revision ID: db4422a75bd0
 Revises: f42e6509f5f1
-Create Date: 2023-03-21 15:36:30.368030
+Create Date: 2023-06-29 11:26:04.675339
 
 """
 from pathlib import Path
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd5ce94b0721d'
+revision = 'db4422a75bd0'
 down_revision = 'f42e6509f5f1'
 branch_labels = None
 depends_on = None

@@ -58,12 +58,12 @@ def includeme(config):
         }
     )
 
-@event.listens_for(Folder, 'mapper_configured')
-def add_json_props(mapper, class_):
-    class_.default_limit = pg_json_property(
-        'props', 'default_limit', Integer, default=50
-    )
-
+#@event.listens_for(Folder, 'mapper_configured')
+#def add_json_props(mapper, class_):
+#    class_.default_limit = pg_json_property(
+#        'props', 'default_limit', Integer, default=50
+#    )
+#
 #@subscriber(ApplicationCreated)
 #def configure_root_folder(event):
 #    registry = event.app.registry
