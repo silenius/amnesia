@@ -206,6 +206,8 @@ def add_all_props(mapper, class_):
         sql.text('json_object_agg(pr.key, pr.value ORDER BY p.level DESC)')
     ).select_from(
         root_a, sql.func.json_each(root_a.c.props).alias('pr')
+    ).where(
+        sql.func.json_typeof(root_a.c.props) == 'object'
     ).scalar_subquery()
 
     mapper.add_property(
