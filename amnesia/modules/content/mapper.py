@@ -214,3 +214,12 @@ def add_all_props(mapper, class_):
         'all_props', 
         orm.column_property(stmt, deferred=True)
     )
+
+#@event.listens_for(Content, 'mapper_configured')
+#def add_last_update_age(mapper, class_):
+#    col = sql.func.age(
+#        sql.func.current_timestamp(),
+#        sql.func.coalesce(class_.updated, class_.added)
+#    )
+#
+#    mapper.add_property('last_update_age', orm.column_property(col))

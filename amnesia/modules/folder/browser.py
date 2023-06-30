@@ -1,5 +1,3 @@
-# pylint: disable=E1101
-
 import logging
 
 from collections import namedtuple
@@ -30,7 +28,7 @@ class FolderBrowser(RequestMixin):
         self.request = request
         self.folder = folder
 
-    def query(self, sort_by=(), offset=0, limit=None, deferred=(),
+    def query(self, *, sort_by=(), offset=0, limit=None, deferred=(),
               undeferred=(), sort_folder_first=False, count=True,
               filter_types=None, only_published=True, **kwargs):
 
@@ -157,7 +155,7 @@ class FolderBrowser(RequestMixin):
             sql.func.count('*')
         ).select_from(q)
 
-        count = self.dbsession.execute(stmt_count).scalar_one()
+        count = self.dbsession.scalars(stmt_count).one()
 
         ##########################
         # ORDER / LIMIT / OFFSET #
@@ -182,6 +180,6 @@ class FolderBrowser(RequestMixin):
             *(orm.undefer(p) for p in undeferred)
         ).order_by(*sort_by).offset(offset).limit(limit)
 
-        result = self.dbsession.execute(q).scalars()
+        result = self.dbsession.scalars(q)
 
         return FolderBrowserResult(result, sort_by, count)

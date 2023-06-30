@@ -16,6 +16,10 @@ from amnesia.modules.file.validation.file import FileSchema
 from amnesia.modules.folder.validation import FolderBrowserSchema
 from amnesia.modules.folder.validation import FolderSchema
 from amnesia.modules.document.validation import DocumentSchema
+from amnesia.modules.event import Event
+from amnesia.modules.event.validation import EventSchema
+from amnesia.modules.folder import Folder
+from amnesia.modules.folder.validation import FolderSchema
 from amnesia.views import BaseView
 
 
@@ -41,7 +45,9 @@ class FolderBrowserView(BaseView):
         #TODO: use ZCA
         factories = {
             File: FileSchema,
-            Document: DocumentSchema
+            Document: DocumentSchema,
+            Event: EventSchema,
+            Folder: FolderSchema,
         }
 
         try:
