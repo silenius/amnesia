@@ -203,11 +203,11 @@ def add_all_props(mapper, class_):
 
     stmt = sql.select(
         # TODO: replace sql.text() with "the SQLAlchemy way"
-        sql.text('json_object_agg(pr.key, pr.value ORDER BY p.level DESC)')
+        sql.text('jsonb_object_agg(pr.key, pr.value ORDER BY p.level DESC)')
     ).select_from(
-        root_a, sql.func.json_each(root_a.c.props).alias('pr')
+        root_a, sql.func.jsonb_each(root_a.c.props).alias('pr')
     ).where(
-        sql.func.json_typeof(root_a.c.props) == 'object'
+        sql.func.jsonb_typeof(root_a.c.props) == 'object'
     ).scalar_subquery()
 
     mapper.add_property(
