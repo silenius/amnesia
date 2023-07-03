@@ -5,6 +5,7 @@ from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_defaults
 from pyramid.view import view_config
 
+from amnesia.modules.content.validation import ContentSchema
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderBrowser
@@ -58,14 +59,20 @@ class FolderBrowserView(BaseView):
         browser = FolderBrowser(self.request, self.context.entity)
         result = browser.query(**data)
 
-        from amnesia.modules.content.validation import ContentSchema
-
-        return [
-            self.schema(
-                factories.get(o.__class__, ContentSchema)
-            ).dump(o)
-            for o in result.query.all()
-        ]
+        return {
+            'meta': {
+                'limit': result.limit,
+                'offset': result.offset,
+                'sort': [_.to_dict() for _ in result.sort],
+                'count': result.count,
+            },
+            'data': [
+                self.schema(
+                    factories.get(o.__class__, ContentSchema)
+                ).dump(o)
+                for o in result.result.all()
+            ]
+        }
 
     @view_config(request_method='GET', name='children',
                  accept='application/json')

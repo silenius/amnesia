@@ -1,10 +1,12 @@
 import logging
 
-from collections import namedtuple
+from dataclasses import dataclass
 from operator import attrgetter
+from typing import Any
 
 from sqlalchemy import orm
 from sqlalchemy import sql
+from sqlalchemy.engine import ScalarResult
 
 from amnesia.modules.content_type import ContentType
 from amnesia.utils.request import RequestMixin
@@ -15,12 +17,20 @@ try:
 except ImportError:
     WITH_TRANSLATION=False
 
+
 log = logging.getLogger(__name__)
 
-FolderBrowserResult = namedtuple(
-    'FolderBrowserResult',
-    ['query', 'sort', 'count']
-)
+FOLDER_DEFAULT_LIMIT = 50
+
+
+@dataclass(frozen=True)
+class FolderBrowserResult:
+    result: ScalarResult[Any]
+    offset: int
+    sort: list
+    limit: int
+    count: int
+
 
 class FolderBrowser(RequestMixin):
 
@@ -33,7 +43,13 @@ class FolderBrowser(RequestMixin):
               filter_types=None, only_published=True, **kwargs):
 
         if limit is None:
-            limit = self.folder.default_limit
+            if self.folder.default_limit:
+                limit = self.folder.default_limit
+            else:
+                limit = self.settings.get(
+                    'amnesia.folder_default_limit',
+                    FOLDER_DEFAULT_LIMIT
+                )
 
         #########
         # QUERY #
@@ -164,22 +180,22 @@ class FolderBrowser(RequestMixin):
         if sort_by:
             if WITH_TRANSLATION:
                 trans_cols = self.registry['amnesia.translations']['attrs']
-                sort_by = [o.to_sql(lang_partition) if (o.src in trans_cols and o.prop in trans_cols[o.src]) else o.to_sql(entity) for o in sort_by]
+                sort_by_sql = [o.to_sql(lang_partition) if (o.src in trans_cols and o.prop in trans_cols[o.src]) else o.to_sql(entity) for o in sort_by]
             else:
-                sort_by = [o.to_sql(entity) for o in sort_by]
+                sort_by_sql = [o.to_sql(entity) for o in sort_by]
         else:
-            sort_by = [entity.weight.desc()]
+            sort_by_sql = [entity.weight.desc()]
 
         if sort_folder_first:
-            sort_by.insert(0, sql.func.lower(ContentType.name) != 'folder')
+            sort_by_sql.insert(0, sql.func.lower(ContentType.name) != 'folder')
 
         # Query database
         # FIXME: OFFSET based pagination isn't scalable
         q = q.options(
             *(orm.defer(p) for p in deferred),
             *(orm.undefer(p) for p in undeferred)
-        ).order_by(*sort_by).offset(offset).limit(limit)
+        ).order_by(*sort_by_sql).offset(offset).limit(limit)
 
         result = self.dbsession.scalars(q)
 
-        return FolderBrowserResult(result, sort_by, count)
+        return FolderBrowserResult(result, offset, sort_by, limit, count)
