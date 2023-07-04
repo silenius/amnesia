@@ -40,16 +40,17 @@ class ContentCRUD(BaseView):
             ('default_order', 'manage_folder_order')
         }
 
-        fields = {
+        exclude_fields = {
             field for (field, permission) in perms
-            if not self.request.has_permission(permission)
+            if field in factory._declared_fields and
+            not self.request.has_permission(permission)
         }
 
         if exclude:
-            fields |= exclude
+            exclude_fields |= exclude
 
         return super().schema(
-            factory, exclude=fields, extra_context=context
+            factory, exclude=exclude_fields, extra_context=context
         )
         
     ##########
