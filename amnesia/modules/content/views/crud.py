@@ -42,8 +42,7 @@ class ContentCRUD(BaseView):
 
         exclude_fields = {
             field for (field, permission) in perms
-            if field in factory._declared_fields and
-            not self.request.has_permission(permission)
+            if not self.request.has_permission(permission)
         }
 
         if exclude:

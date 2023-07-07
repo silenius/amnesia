@@ -33,6 +33,8 @@ class BaseView(RequestMixin):
         if exclude is None:
             exclude = []
 
+        exclude = [f for f in exclude if f in factory._declared_fields]
+
         return factory(
             context=context,
             exclude=exclude,

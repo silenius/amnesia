@@ -68,7 +68,8 @@ class FolderBrowserView(BaseView):
             },
             'data': [
                 self.schema(
-                    factories.get(o.__class__, ContentSchema)
+                    factories.get(o.__class__, ContentSchema),
+                    exclude=['polymorphic_children']
                 ).dump(o)
                 for o in result.result.all()
             ]
