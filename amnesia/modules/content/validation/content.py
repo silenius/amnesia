@@ -30,6 +30,7 @@ from amnesia.modules.state import State
 from amnesia.modules.content_type.validation import ContentTypeSchema
 from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import ACLSchema
+from amnesia.modules.state.validation import StateSchema
 from amnesia.modules.account import ContentACL
 
 log = logging.getLogger(__name__)
@@ -53,9 +54,9 @@ class ContentSchema(Schema, PyramidContextMixin):
     type = Nested(ContentTypeSchema, dump_only=True)
     owner = Nested(AccountSchema, dump_only=True)
     container_id = Integer(dump_only=True)
+    state = Nested(StateSchema, dump_only=True)
     parent = Nested('ContentSchema', exclude=('parent', ), dump_only=True)
     owner_id = Integer(dump_only=True)
-    state_id = Integer(dump_only=True)
     inherits_parent_acl = Boolean()
     on_success = Integer(default=201, missing=201, validate=OneOf((201, 303)))
 
