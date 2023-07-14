@@ -56,11 +56,11 @@ class ContentSchema(Schema, PyramidContextMixin):
     container_id = Integer(dump_only=True)
     state = Nested(StateSchema, dump_only=True)
     parent = Nested('ContentSchema', exclude=('parent', ), dump_only=True)
-    owner_id = Integer(dump_only=True)
     inherits_parent_acl = Boolean()
     on_success = Integer(default=201, missing=201, validate=OneOf((201, 303)))
 
-    acls = Nested('ContentACLSchema', exclude=('content', ), many=True)
+    acls = Nested('ContentACLSchema', exclude=('content', ), 
+                  dump_only=True, many=True)
 
     inherits_parent_acl = Boolean(missing=True)
 
