@@ -93,6 +93,12 @@ class Entity(Resource):
             if not raw:
                 yield DENY_ALL
 
+    def publish(self):
+        ...
+
+    def unpublish(self):
+        ...
+
     def update(self, data):
         """ Update an entity """
 

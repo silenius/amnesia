@@ -13,7 +13,7 @@ def includeme(config):
     name='logout',
     context=AuthResource,
     permission='logout',
-    request_method='GET'
+    request_method='POST'
 )
 def logout(context, request):
     headers = forget(request)

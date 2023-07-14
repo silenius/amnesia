@@ -38,18 +38,23 @@ class FolderBrowser(RequestMixin):
         self.request = request
         self.folder = folder
 
+    @property
+    def default_limit(self):
+        if self.folder.default_limit:
+            return self.folder.default_limit
+        else:
+            return self.settings.get(
+                'amnesia.folder_default_limit',
+                FOLDER_DEFAULT_LIMIT
+            )
+
+
     def query(self, *, sort_by=(), offset=0, limit=None, deferred=(),
               undeferred=(), sort_folder_first=False, count=True,
               filter_types=None, only_published=True, **kwargs):
 
         if limit is None:
-            if self.folder.default_limit:
-                limit = self.folder.default_limit
-            else:
-                limit = self.settings.get(
-                    'amnesia.folder_default_limit',
-                    FOLDER_DEFAULT_LIMIT
-                )
+            limit = self.default_limit
 
         #########
         # QUERY #
@@ -152,8 +157,8 @@ class FolderBrowser(RequestMixin):
 
         if only_published:
             filters = sql.and_(
-                filters,
-                entity.filter_published()
+                entity.filter_published(),
+                filters
             )
 
         if filter_types:
@@ -171,7 +176,7 @@ class FolderBrowser(RequestMixin):
             sql.func.count('*')
         ).select_from(q)
 
-        count = self.dbsession.scalars(stmt_count).one()
+        count = self.dbsession.scalar(stmt_count)
 
         ##########################
         # ORDER / LIMIT / OFFSET #
