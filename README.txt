@@ -3,7 +3,7 @@
  /(__)\  )    (  )  (  )__) \__ \ _)(_  /(__)\
 (__)(__)(_/\/\_)(_)\_)(____)(___/(____)(__)(__)
 
- ... just another CMS, based on Pyramid, Chameleon, and SQLAlchemy.
+ ... just another (headless) CMS, based on Pyramid and SQLAlchemy.
 
 
 Main objectives are:

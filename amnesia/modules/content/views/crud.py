@@ -1,10 +1,14 @@
 import logging
 
-from pyramid.httpexceptions import HTTPNoContent
-from pyramid.httpexceptions import HTTPInternalServerError
+from pyramid.httpexceptions import (
+    HTTPNoContent,
+    HTTPInternalServerError
+)
 
-from pyramid.view import view_defaults
-from pyramid.view import view_config
+from pyramid.view import (
+    view_defaults,
+    view_config
+)
 
 from amnesia.modules.content import Entity
 from amnesia.views import BaseView

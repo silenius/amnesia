@@ -10,3 +10,4 @@ def includeme(config):
     config.include('.move')
     config.include('.copy')
     config.include('.security')
+    config.include('.state')

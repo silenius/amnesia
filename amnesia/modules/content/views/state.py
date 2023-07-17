@@ -1,5 +1,10 @@
 import logging
 
+from pyramid.httpexceptions import (
+    HTTPNoContent,
+    HTTPInternalServerError
+)
+
 from pyramid.view import view_config
 
 from amnesia.modules.content import Entity
@@ -11,7 +16,6 @@ def includeme(config):
     config.scan(__name__)
 
 
-
 @view_config(
     name='publish',
     context=Entity,
@@ -20,7 +24,10 @@ def includeme(config):
     permission='publish'
 )
 def publish(context, request):
-    ...
+    if context.publish():
+        return HTTPNoContent()
+    raise HTTPInternalServerError()
+
 
 @view_config(
     name='unpublish',
@@ -31,4 +38,6 @@ def publish(context, request):
 )
 
 def unpublish(context, request):
-    ...
+    if context.unpublish():
+        return HTTPNoContent()
+    raise HTTPInternalServerError()

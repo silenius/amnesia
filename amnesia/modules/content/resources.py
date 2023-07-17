@@ -14,6 +14,7 @@ from sqlalchemy import sql
 from sqlalchemy.exc import DatabaseError
 
 from amnesia.modules.content import Content
+from amnesia.modules.state import State
 from amnesia.resources import Resource
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -94,10 +95,19 @@ class Entity(Resource):
                 yield DENY_ALL
 
     def publish(self):
-        ...
+        published = self.dbsession.scalar(
+            sql.select(State).filter_by(name='published')
+        )
+
+        return self.update({'state': published})
+        
 
     def unpublish(self):
-        ...
+        draft = self.dbsession.scalar(
+            sql.select(State).filter_by(name='draft')
+        )
+
+        return self.update({'state': draft})
 
     def update(self, data):
         """ Update an entity """
