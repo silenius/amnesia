@@ -20,6 +20,19 @@ class LoginSchema(Schema):
     password = String(required=True, load_only=True, validate=Length(min=4))
 
 
+class RoleSchema(Schema):
+    name = String(required=True, validate=[Length(min=4)])
+    description = String()
+    id = Integer(dump_only=True)
+    created = DateTime(dump_only=True)
+    enabled = Boolean(dump_only=True)
+    locked = Boolean(dump_only=True)
+    virtual = Boolean(dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
 class AccountSchema(Schema):
     id = Integer(dump_only=True)
     login = String(required=True, validate=Length(min=4))
@@ -31,6 +44,7 @@ class AccountSchema(Schema):
     full_name = String(dump_only=True)
     enabled = Boolean()
     email = Email(required=True)
+    roles = Nested(RoleSchema, many=True, dump_only=True)
 
     @post_load
     def check_password_repeat(self, data, **kwargs):
@@ -46,18 +60,6 @@ class AccountSchema(Schema):
         data['gravatar'] = gravatar(self.context['request'], data['email'])
         return data
 
-
-class RoleSchema(Schema):
-    name = String(required=True, validate=[Length(min=4)])
-    description = String()
-    id = Integer(dump_only=True)
-    created = DateTime(dump_only=True)
-    enabled = Boolean(dump_only=True)
-    locked = Boolean(dump_only=True)
-    virtual = Boolean(dump_only=True)
-
-    class Meta:
-        unknown = EXCLUDE
 
 class PermissionSchema(Schema):
     id = Integer(dump_only=True)

@@ -39,6 +39,7 @@ def includeme(config):
 
             'account_roles': orm.relationship(
                 AccountRole,
+                lazy='subquery',
                 back_populates="account",
                 cascade='all, delete-orphan'
             ),
