@@ -26,7 +26,6 @@ from amnesia.utils.validation import PyramidContextMixin
 from amnesia.utils.validation import as_list
 from amnesia.utils.validation.fields import JSON
 from amnesia.modules.folder import Folder
-from amnesia.modules.state import State
 from amnesia.modules.content_type.validation import ContentTypeSchema
 from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import ACLSchema
@@ -106,9 +105,6 @@ class ContentSchema(Schema, PyramidContextMixin):
     def post_load_process(self, item, **kwargs):
         if 'container_id' in item:
             item['parent'] = self.dbsession.get(Folder, item.pop('container_id'))
-
-        stmt_state = sql.select(State).filter_by(name='published')
-        item['state'] = self.dbsession.execute(stmt_state).scalar_one()
 
         if 'acls' in item:
             item['acls'] = [

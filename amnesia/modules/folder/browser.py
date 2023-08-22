@@ -51,7 +51,8 @@ class FolderBrowser(RequestMixin):
 
     def query(self, *, sort_by=(), offset=0, limit=None, deferred=(),
               undeferred=(), sort_folder_first=False, count=True,
-              filter_types=None, only_published=True, **kwargs):
+              filter_types=None, only_published=True, state=None, 
+              filter_mimes=None):
 
         if limit is None:
             limit = self.default_limit
@@ -166,6 +167,7 @@ class FolderBrowser(RequestMixin):
                 sql.func.lower(ContentType.name).in_(filter_types),
                 filters
             )
+
 
         # Apply filters
         q = q.filter(filters)
