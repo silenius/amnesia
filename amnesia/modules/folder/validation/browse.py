@@ -69,7 +69,7 @@ class FolderBrowserSchema(Schema, PyramidContextMixin):
     sort_by = SortListField(Nested(SortSchema), missing=[])
     deferred = List(String(), missing=())
     undeferred = List(String(), missing=())
-    sort_folder_first = Boolean(missing=False)
+    sort_folder_first = Boolean(missing=True)
     filter_types = List(String())
     filter_mimes = List(String())
     only_published = Boolean(missing=True)

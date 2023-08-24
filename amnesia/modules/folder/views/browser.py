@@ -65,6 +65,7 @@ class FolderBrowserView(BaseView):
                 'offset': result.offset,
                 'sort': [_.to_dict() for _ in result.sort],
                 'count': result.count,
+                'sort_folder_first': data['sort_folder_first']
             },
             'data': [
                 self.schema(
