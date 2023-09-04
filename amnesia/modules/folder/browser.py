@@ -20,7 +20,7 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-FOLDER_DEFAULT_LIMIT = 50
+FOLDER_DEFAULT_LIMIT = 10
 
 
 @dataclass(frozen=True)
