@@ -111,9 +111,11 @@ class FolderBrowser(RequestMixin):
                 # Case 1: the sort is on a mapped class which is directly
                 # available from the base class through a property.
                 # ex: ContentType.name (Content -> "type").
-                if path.mapper.entity is pl_cfg.base_mapper.entity:
-                    q = join(path.prop)
-                    contains_eager = orm.contains_eager(path.prop)
+                if path.class_ is pl_cfg.base_mapper.class_:
+                    prop = getattr(entity, path.prop)
+                    q = join(prop)
+
+                    contains_eager = orm.contains_eager(prop)
 
                 # Case 2: the sort is on a mapped class which is reachable
                 # through a polymorphic entity

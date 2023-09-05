@@ -51,6 +51,13 @@ class EntityOrder:
         # If a path is required, the first one should be a polymorphic entity
         self.path = path if path is not None else []
 
+    def __eq__(self, other):
+        if self.class_ == other.class_ and self.prop == other.prop:
+            return self.path == other.path if self.path else True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     # DIRECTION
 
@@ -106,19 +113,6 @@ class EntityOrder:
         except:
             self._doc = None
 
-    #########################################################################
-
-    def __eq__(self, other):
-        if self.class_ == other.class_ and self.prop == other.prop:
-            if self.path:
-                if self.path == other.path:
-                    return True
-                return False
-            return True
-        return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     @property
     def mapper(self):
@@ -163,8 +157,7 @@ class EntityOrder:
             elif insp.class_ is self.src:
                 col = getattr(src, self.prop)
             else:
-                col = getattr(src, self.src.__name__)
-                col = getattr(col, self.prop)
+                col = self.col
         else:
             col = getattr(self.src, self.prop)
 
@@ -211,7 +204,7 @@ class EntityOrder:
 
     def has_path(self, cls):
         for path in self.path:
-            if path.class_ == cls or path.class_ is None:
+            if path.class_ in {cls, self.mapper.base_mapper.class_}: 
                 return True
         return False
 
@@ -269,8 +262,7 @@ def for_entity(entity, orders):
     elif isinstance(insp, orm.Mapper):
         cls = list(map(attrgetter('class_'), insp.iterate_to_root()))
         base = insp.base_mapper
-
         return {
             k: v for (k, v) in orders.items()
-            if v.class_ in cls or v.has_path(base)
+            if v.class_ in cls or v.has_path(base.class_)
         }
