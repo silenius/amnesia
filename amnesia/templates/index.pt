@@ -1,9 +1,0 @@
-<metal:block use-macro="load: amnesia:templates/layout.pt">
-    <metal:block fill-slot="content">
-        <div id="main"> 
-            <div class="container">
-                Welcome to Amnesia CMS \œ/
-            </div>
-        </div>
-    </metal:block>
-</metal:block>
