@@ -16,6 +16,8 @@ from .model import ACL
 from .model import GlobalACL
 from .model import ContentACL
 
+from .security import get_content_acl
+
 
 def includeme(config):
     tables = config.registry['metadata'].tables
@@ -180,6 +182,18 @@ def _content_callback():
         ),
     })
 
+
+#@event.listens_for(Content, 'mapper_configured')
+#def add_all_acls(mapper, class_):
+#    class_a = orm.aliased(class_)
+#
+#    stmt = get_content_acl(class_, recursive=True, with_global_acl=True)
+#
+#    mapper.add_property(
+#        'all_props', 
+#        orm.column_property(stmt, deferred=True)
+#    )
+#
 
 @event.listens_for(Account, 'mapper_configured')
 def _account_callback(mapper, class_):

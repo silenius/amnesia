@@ -13,7 +13,8 @@ log = logging.getLogger(__name__)
 @RequestLocalCache()
 def load_global_acl(request):
     from amnesia.modules.account.security import get_global_acl
-    return get_global_acl(request.dbsession, request.identity)
+    stmt = get_global_acl(request.identity)
+    return request.dbsession.scalars(stmt).all()
 
 
 class Resource(RequestMixin):

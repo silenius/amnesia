@@ -2,7 +2,7 @@ from sqlalchemy import sql
 
 from amnesia.modules.account import Permission
 from amnesia.modules.account import Role
-from amnesia.modules.account.security import get_parent_acl
+#from amnesia.modules.account.security import get_parent_acl
 from amnesia.modules.tag import Tag
 
 from amnesia.utils.forms import render_form
@@ -66,8 +66,8 @@ class ContentForm:
                     sql.select(Permission).order_by(Permission.name)
                 ).scalars().all()
 
-            if 'parent_acl' not in data:
-                data['parent_acl'] = get_parent_acl(self.context)
+#            if 'parent_acl' not in data:
+#                data['parent_acl'] = get_parent_acl(self.context)
 
             if 'roles' not in data:
                 data['roles'] = self.dbsession.execute(

@@ -8,6 +8,7 @@ from pyramid.traversal import lineage
 
 from sqlalchemy import sql
 from sqlalchemy import orm
+from sqlalchemy import Select
 from sqlalchemy.types import Integer
 
 from amnesia.modules.content import Content
@@ -20,7 +21,7 @@ from amnesia.modules.account import Role
 log = logging.getLogger(__name__)
 
 
-def get_global_acl(dbsession, identity=None):
+def get_global_acl(identity=None) -> Select:
     stmt = sql.select(
         GlobalACL
     ).join(
@@ -39,24 +40,24 @@ def get_global_acl(dbsession, identity=None):
 
     stmt = stmt.filter(filters).order_by(GlobalACL.weight.desc())
 
-    return dbsession.execute(stmt).scalars().all()
+    return stmt
 
-def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
+def get_content_acl(
+        entity, *, recursive=False, with_global_acl=True
+    ) -> Select:
     # We want ACL for this entity only
     if not recursive:
         # Content ACL only
         if not with_global_acl:
-            result = dbsession.execute(
-                sql.select(
-                    ContentACL
-                ).filter_by(
-                    content=entity
-                ).order_by(
-                    ContentACL.weight.desc()
-                )
-            ).scalars().all()
+            stmt = sql.select(
+                ContentACL
+            ).filter_by(
+                content=entity
+            ).order_by(
+                ContentACL.weight.desc()
+            )
 
-            return result
+            return stmt
 
         # Content ACL and Global ACL
         acl_types = orm.with_polymorphic(
@@ -84,7 +85,7 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
             acl_types.GlobalACL.weight.desc()
         )
 
-        return dbsession.execute(stmt).scalars().all()
+        return stmt
 
     # Recursive ACL, we need to fetch hierarchy first
     contents = sql.select(
@@ -132,20 +133,15 @@ def get_content_acl(dbsession, entity, recursive=False, with_global_acl=True):
             acls.c.weight.desc()
         )
 
-        return dbsession.execute(stmt).scalars().all()
+        return stmt
 
     stmt = content_acls.order_by(
         contents.c.level,
         contents.c.weight.desc()
     )
 
-    return dbsession.execute(stmt).scalars().all()
+    return stmt
 
-def get_parent_acl(resource):
-    parent_acl = []
 
-    for res in lineage(resource):
-        for ace in res.__acl__(raw=True):
-            parent_acl.append(ace)
-
-    return parent_acl
+def get_resource_acls(resource, *, self_=True, parent=True):
+    return (ace for res in lineage(resource) for ace in res.__acl__(raw=True))

@@ -5,7 +5,7 @@ from pyramid.view import view_config
 from amnesia.views import BaseView
 from amnesia.modules.content import Entity
 from amnesia.modules.account import ContentACL
-from amnesia.modules.account.security import get_parent_acl
+from amnesia.modules.account.security import get_resource_acls
 from amnesia.modules.account.validation import ACLSchema
 from amnesia.modules.content.validation import ContentACLSchema
 
@@ -23,9 +23,11 @@ class ACLS(BaseView):
         renderer='json'
     )
     def acls(self):
-        schema = self.schema(ContentACLSchema, exclude=('content.acls', ))
+        content_acl_schema = self.schema(ContentACLSchema, exclude=('content.acls', ))
+        acl_schema = self.schema(ACLSchema)
+
         return [
-            schema.dump(acl) 
-            if isinstance(acl, ContentACL) else ACLSchema().dump(acl)
-            for acl in get_parent_acl(self.context)
+            content_acl_schema.dump(acl) 
+            if isinstance(acl, ContentACL) else acl_schema.dump(acl)
+            for acl in get_resource_acls(self.context)
         ]

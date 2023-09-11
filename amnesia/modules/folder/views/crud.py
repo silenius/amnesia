@@ -20,14 +20,13 @@ from sqlalchemy import sql
 
 from amnesia import order
 
-from amnesia.modules.content_type import ContentType
 from amnesia.modules.content.validation import IdListSchema
+from amnesia.modules.content.validation import ContentACLSchema
 from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder.validation import FolderSchema
-from amnesia.modules.folder.forms import FolderForm
-from amnesia.modules.account import ContentACL
+from amnesia.modules.account.validation import ACLSchema
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -109,6 +108,7 @@ class FolderCRUD(ContentCRUD):
         renderer='json'
     )
     def read_json(self):
+      #  return self.schema(ContentACLSchema).dump(list(self.context.__acl__(raw=True)), many=True)
         return self.schema(FolderSchema).dump(self.entity)
 
 

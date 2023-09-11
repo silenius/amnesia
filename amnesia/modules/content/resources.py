@@ -23,10 +23,10 @@ log = logging.getLogger(__name__)  # pylint: disable=C0103
 @RequestLocalCache()
 def load_content_acl(request):
     from amnesia.modules.account.security import get_content_acl
-    return get_content_acl(
-        request.dbsession, request.context.entity, recursive=True,
-        with_global_acl=True
+    stmt = get_content_acl(
+        request.context.entity, recursive=True, with_global_acl=True
     )
+    return request.dbsession.scalars(stmt).all()
 
 
 class Entity(Resource):
