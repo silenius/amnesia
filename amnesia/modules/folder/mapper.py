@@ -1,7 +1,11 @@
 import logging
 
-from sqlalchemy import orm
-from sqlalchemy import event
+from sqlalchemy import (
+    orm,
+    event,
+    sql
+)
+
 from sqlalchemy.types import Integer
 
 from amnesia.db import mapper_registry
@@ -56,6 +60,24 @@ def includeme(config):
             ),
 
         }
+    )
+
+
+@event.listens_for(Folder, 'mapper_configured')
+def add_count_children(mapper, class_):
+    class_a = orm.aliased(Content)
+
+    stmt = sql.select(
+        sql.func.count('*')
+    ).where(
+        class_a.container_id == class_.id
+    ).correlate_except(
+        class_a 
+    )
+
+    mapper.add_property(
+        'count_children',
+        orm.column_property(stmt, deferred=True)
     )
 
 #@event.listens_for(Folder, 'mapper_configured')

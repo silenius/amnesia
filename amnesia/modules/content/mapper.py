@@ -90,9 +90,6 @@ def includeme(config):
     config.include('amnesia.modules.language.mapper')
     config.scan(__name__, categories=('pyramid', 'amnesia'))
 
-    _count_alias = tables['content'].alias('_count_children')
-
-
     mapper_registry.map_imperatively(
         Content, tables['content'],
         polymorphic_on=tables['content'].c.content_type_id,
@@ -147,18 +144,6 @@ def includeme(config):
                 ),
                 deferred=True
             ),
-
-            'count_children': orm.column_property(
-                sql.select(
-                    sql.func.count('*')
-                ).where(
-                    _count_alias.c.container_id == tables['content'].c.id
-                ).correlate_except(
-                    _count_alias
-                ).scalar_subquery(),
-                deferred=True
-            )
-
         })
 
 
