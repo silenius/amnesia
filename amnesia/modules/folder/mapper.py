@@ -29,25 +29,19 @@ def includeme(config):
     tables = config.registry['metadata'].tables
 
     t_folder = tables['folder']
-
-#    q_count_children = sql.select([
-#        sql.func.count('*').label('cpt')
-#    ]).where(
-#        t_content.c.container_id == t_folder.c.content_id
-#    ).lateral('children')
+    t_content = tables['content']
+    t_doc = tables['document']
 
     mapper_registry.map_imperatively(
         Folder,
         t_folder,
         inherits=Content,
         polymorphic_identity=get_type_id(config, 'folder'),
-        inherit_condition=tables['folder'].c.content_id ==
-        tables['content'].c.id,
+        inherit_condition=t_folder.c.content_id == t_content.c.id,
         properties={
             'alternate_index': orm.relationship(
                 lambda: Document,
-                primaryjoin=tables['folder'].c.index_content_id ==
-                tables['document'].c.content_id,
+                primaryjoin=t_folder.c.index_content_id == t_doc.c.content_id,
                 innerjoin=True,
                 uselist=False,
                 post_update=True,
@@ -65,6 +59,12 @@ def includeme(config):
 
 @event.listens_for(Folder, 'mapper_configured')
 def add_count_children(mapper, class_):
+    '''
+    This function add a column_property 'count_children' which contain the
+    number of items in the folder.
+
+    '''
+
     class_a = orm.aliased(Content)
 
     stmt = sql.select(
