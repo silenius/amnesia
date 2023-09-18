@@ -48,31 +48,6 @@ class Content(Base):
 
         return mapper.class_
 
-    def find_prop(self, key, maxdepth=None, default=None, skip=None):
-        ''' Loop through all parents (or until maxdepth is reached) and check
-        for key in props (and return it). A maxdepth==0 will only search on
-        current object '''
-        def walk_up(node):
-            while node is not None:
-                yield node
-                node = node.parent
-
-        for cpt, node in enumerate(walk_up(self)):
-            if maxdepth is not None and cpt > maxdepth:
-                break
-            if node.props and key in node.props:
-                value = node.props[key]
-                if skip is not None:
-                    if callable(skip):
-                        if not skip(value):
-                            return value
-                    elif value not in skip:
-                        return value
-                else:
-                    return value
-
-        return default
-
     @hybrid_property
     def last_update(self):
         return self.updated if self.updated else self.added
