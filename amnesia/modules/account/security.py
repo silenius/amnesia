@@ -89,7 +89,9 @@ def get_content_acl(
 
     # Recursive ACL, we need to fetch hierarchy first
     contents = sql.select(
-        Content, sql.literal(1, type_=Integer).label('level')
+        Content.id, 
+        Content.container_id, 
+        sql.literal(1, type_=Integer).label('level')
     ).filter(
         Content.id == entity.id
     ).cte(
@@ -99,7 +101,9 @@ def get_content_acl(
     )
 
     contents_join = sql.select(
-        Content, contents.c.level + 1
+        Content.id, 
+        Content.container_id, 
+        contents.c.level + 1
     ).join(
         contents, contents.c.container_id == Content.id
     )
