@@ -172,7 +172,7 @@ def includeme(config):
 
 
 @event.listens_for(orm.mapper, 'before_configured', once=True)
-def _content_callback():
+def add_acls_relationship():
     orm.class_mapper(Content).add_properties({
         'acls': orm.relationship(
             ContentACL,
@@ -183,70 +183,6 @@ def _content_callback():
         ),
     })
 
-
-#@event.listens_for(Content, 'mapper_configured')
-#def add_all_acls(mapper, class_):
-#    class_a = orm.aliased(class_)
-#
-#    contents = sql.select(
-#        class_a.id, 
-#        class_a.container_id, 
-#        sql.literal(1, type_=Integer).label('level')
-#    ).where(
-#        class_a.id == class_.id
-#    ).correlate_except(
-#        class_a
-#    ).cte(
-#        name='content_acl', 
-#        nesting=True,
-#        recursive=True
-#    )
-#
-#    contents = contents.union_all(
-#        sql.select(
-#            class_.id,
-#            class_.container_id, 
-#            contents.c.level + 1
-#        ).join(
-#            contents, contents.c.container_id == class_.id
-#        )
-#    )
-#
-#    contents_a = contents.alias('p')
-#
-#    content_acls = sql.select(
-#        ContentACL
-#    ).join(
-#        contents_a, contents_a.c.id == ContentACL.content_id
-#    )
-#
-#    content_acls = content_acls.add_columns(
-#        contents_a.c.level.label('level')
-#    )
-#
-#    global_acls = sql.select(
-#        GlobalACL, sql.literal(None).label('level')
-#    )
-#
-#    acls = content_acls.union_all(
-#        global_acls
-#    ).subquery()
-#
-#    au = orm.aliased(ACL, acls)
-#
-#    stmt = sql.select(
-#        au
-#    ).order_by(
-#        # First content ACLS, then global ACLS.
-#        acls.c.level.nullslast(),
-#        acls.c.weight.desc()
-#    ).scalar_subquery()
-#
-#    mapper.add_property(
-#        'all_acls', 
-#        orm.column_property(stmt)
-#    )
-#
 
 @event.listens_for(Account, 'mapper_configured')
 def _account_callback(mapper, class_):
