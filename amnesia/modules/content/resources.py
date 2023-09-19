@@ -32,7 +32,7 @@ def load_content_acl(request):
 class Entity(Resource):
     """ Base SQLAlchemy entity -> resource wrapper """
 
-    def __init__(self, request, entity, parent=None):
+    def __init__(self, request, entity, *, parent=None):
         super().__init__(request)
         self.entity = entity
         self.parent = parent
@@ -100,7 +100,6 @@ class Entity(Resource):
         )
 
         return self.update({'state': published})
-        
 
     def unpublish(self):
         draft = self.dbsession.scalar(

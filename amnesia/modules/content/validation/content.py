@@ -74,7 +74,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     ########
 
     @post_dump
-    def pre_dump_all_props(self, data, **kwargs):
+    def post_dump_all_props(self, data, **kwargs):
         entity = self.context.get('entity')
         
         if entity:

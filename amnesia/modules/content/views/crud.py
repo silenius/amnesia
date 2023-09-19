@@ -55,7 +55,7 @@ class ContentCRUD(BaseView):
         return super().schema(
             factory, exclude=exclude_fields, extra_context=context
         )
-        
+
     ##########
     # DELETE #
     ##########

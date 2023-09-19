@@ -2,23 +2,11 @@ import logging
 
 from marshmallow import ValidationError
 
-from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.httpexceptions import HTTPFound
-from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPInternalServerError
-from pyramid.httpexceptions import HTTPCreated
-from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.httpexceptions import HTTPNoContent
-from pyramid.renderers import render_to_response
-from pyramid.security import Authenticated
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-
-from sqlalchemy import orm
-from sqlalchemy import sql
-
-from amnesia import order
 
 from amnesia.modules.content.validation import IdListSchema
 from amnesia.modules.content.validation import ContentACLSchema
@@ -26,7 +14,7 @@ from amnesia.modules.content.views import ContentCRUD
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder.validation import FolderSchema
-from amnesia.modules.account.validation import ACLSchema
+from amnesia.modules.account.security import get_resource_acls
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -108,9 +96,13 @@ class FolderCRUD(ContentCRUD):
         renderer='json'
     )
     def read_json(self):
-      #  return self.schema(ContentACLSchema).dump(list(self.context.__acl__(raw=True)), many=True)
         return self.schema(FolderSchema).dump(self.entity)
 
+#        data['__resource'] = {
+#            'recursive_acls': self.schema(ContentACLSchema).dump(
+#                get_resource_acls(self.context), many=True
+#            )
+#        }
 
 # Bulk delete
 
