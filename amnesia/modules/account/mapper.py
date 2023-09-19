@@ -2,6 +2,7 @@ from sqlalchemy import event
 from sqlalchemy import orm
 from sqlalchemy import sql
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.types import Integer
 
 from amnesia.db import mapper_registry
 from amnesia.modules.content import Content
@@ -187,11 +188,63 @@ def _content_callback():
 #def add_all_acls(mapper, class_):
 #    class_a = orm.aliased(class_)
 #
-#    stmt = get_content_acl(class_, recursive=True, with_global_acl=True)
+#    contents = sql.select(
+#        class_a.id, 
+#        class_a.container_id, 
+#        sql.literal(1, type_=Integer).label('level')
+#    ).where(
+#        class_a.id == class_.id
+#    ).correlate_except(
+#        class_a
+#    ).cte(
+#        name='content_acl', 
+#        nesting=True,
+#        recursive=True
+#    )
+#
+#    contents = contents.union_all(
+#        sql.select(
+#            class_.id,
+#            class_.container_id, 
+#            contents.c.level + 1
+#        ).join(
+#            contents, contents.c.container_id == class_.id
+#        )
+#    )
+#
+#    contents_a = contents.alias('p')
+#
+#    content_acls = sql.select(
+#        ContentACL
+#    ).join(
+#        contents_a, contents_a.c.id == ContentACL.content_id
+#    )
+#
+#    content_acls = content_acls.add_columns(
+#        contents_a.c.level.label('level')
+#    )
+#
+#    global_acls = sql.select(
+#        GlobalACL, sql.literal(None).label('level')
+#    )
+#
+#    acls = content_acls.union_all(
+#        global_acls
+#    ).subquery()
+#
+#    au = orm.aliased(ACL, acls)
+#
+#    stmt = sql.select(
+#        au
+#    ).order_by(
+#        # First content ACLS, then global ACLS.
+#        acls.c.level.nullslast(),
+#        acls.c.weight.desc()
+#    ).scalar_subquery()
 #
 #    mapper.add_property(
-#        'all_props', 
-#        orm.column_property(stmt, deferred=True)
+#        'all_acls', 
+#        orm.column_property(stmt)
 #    )
 #
 

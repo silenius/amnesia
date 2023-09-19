@@ -43,7 +43,7 @@ def get_global_acl(identity=None) -> Select:
     return stmt
 
 def get_content_acl(
-        entity, *, recursive=False, with_global_acl=True
+        entity, *, recursive=False, with_global_acl=True, cte_nesting=False
     ) -> Select:
     # We want ACL for this entity only
     if not recursive:
@@ -91,9 +91,11 @@ def get_content_acl(
     contents = sql.select(
         Content, sql.literal(1, type_=Integer).label('level')
     ).filter(
-        Content.id == entity.content_id
+        Content.id == entity.id
     ).cte(
-        name=f'content_acl_{entity.content_id}', recursive=True
+        name=f'content_acl_{entity.id}', 
+        nesting=cte_nesting,
+        recursive=True
     )
 
     contents_join = sql.select(
