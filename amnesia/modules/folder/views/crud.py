@@ -98,11 +98,6 @@ class FolderCRUD(ContentCRUD):
     def read_json(self):
         return self.schema(FolderSchema).dump(self.entity)
 
-#        data['__resource'] = {
-#            'recursive_acls': self.schema(ContentACLSchema).dump(
-#                get_resource_acls(self.context), many=True
-#            )
-#        }
 
 # Bulk delete
 

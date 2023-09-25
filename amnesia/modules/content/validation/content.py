@@ -31,6 +31,7 @@ from amnesia.modules.account.validation import AccountSchema
 from amnesia.modules.account.validation import ACLSchema
 from amnesia.modules.state.validation import StateSchema
 from amnesia.modules.account import ContentACL
+from amnesia.modules.account.security import get_resource_acls
 
 log = logging.getLogger(__name__)
 

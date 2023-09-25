@@ -80,7 +80,6 @@ class Entity(Resource):
     def __acl__(self, raw=False):
         if not raw:
             yield Allow, 'r:Manager', ALL_PERMISSIONS
-        #yield Allow, Owner, ALL_PERMISSIONS
 
         for acl in load_content_acl(self.request):
             if acl.resource.name == 'CONTENT' and acl.content is self.entity:

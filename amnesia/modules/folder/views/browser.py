@@ -35,6 +35,7 @@ class FolderBrowserView(BaseView):
         request_method='GET',
         renderer='json',
         name='browse',
+        permission='browse',
         accept='application/json'
     )
     def browse_json(self):
