@@ -66,6 +66,7 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
     root = sql.select(
         Folder.id, 
         Folder.container_id,
+        Folder.weight,
         sql.literal(1, type_=Integer).label('level')
     ).filter(
         sql.and_(
@@ -92,6 +93,7 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
         sql.select(
             Folder.id,
             Folder.container_id,
+            Folder.weight,
             root.c.level + 1
         ).join(
             root, root.c.id == Folder.container_id
