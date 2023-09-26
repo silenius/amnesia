@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .crud import ContentCRUD
 
 
@@ -11,3 +9,4 @@ def includeme(config):
     config.include('.copy')
     config.include('.security')
     config.include('.state')
+    config.include('.lineage')

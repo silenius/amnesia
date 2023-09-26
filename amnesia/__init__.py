@@ -118,7 +118,7 @@ def include_amnesia(config):
     config.include(include_session)
     #config.include(include_security)
 
-    config.include('amnesia.widgets')
+    #config.include('amnesia.widgets')
     config.include('amnesia.subscribers')
     config.include('amnesia.renderers')
     config.include('amnesia.db')

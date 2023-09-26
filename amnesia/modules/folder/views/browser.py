@@ -9,7 +9,6 @@ from amnesia.modules.content.validation import ContentSchema
 from amnesia.modules.folder import Folder
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.folder import FolderBrowser
-from amnesia.modules.folder.services import get_lineage
 from amnesia.modules.folder.services import get_children_containers
 from amnesia.modules.file import File
 from amnesia.modules.document import Document
@@ -95,27 +94,6 @@ class FolderBrowserView(BaseView):
             self.context.entity.id,
             max_depth=depth
         ).as_tree()
-
-        self.request.response.content_type = 'application/json'
-        self.request.response.text = json.dumps(result, cls=Encoder)
-
-        return self.request.response
-
-    @view_config(request_method='GET', name='lineage',
-                 accept='application/json')
-    def lineage(self):
-        schema = FolderSchema(only=('id', 'title'))
-
-        class Encoder(json.JSONEncoder):
-            def default(self, obj):
-                if isinstance(obj, Folder):
-                    return schema.dump(obj)
-                return super().default(obj)
-
-        result = get_lineage(
-            self.request.dbsession,
-            self.context.entity.id
-        )
 
         self.request.response.content_type = 'application/json'
         self.request.response.text = json.dumps(result, cls=Encoder)

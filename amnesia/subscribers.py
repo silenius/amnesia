@@ -23,6 +23,5 @@ def add_renderers_global(event):
 
     event.update({
         'h': helpers,
-        'widgets': registry['widgets'],
         'layout': layout
     })

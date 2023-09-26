@@ -17,7 +17,7 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
-__all__ = ['get_lineage', 'get_children_containers']
+__all__ = ['get_children_containers']
 
 
 class FolderHierarchy:
@@ -118,42 +118,3 @@ def get_children_containers(dbsession, folder_id, max_depth=None):
     tabs = dbsession.execute(stmt).all()
 
     return FolderHierarchy(tabs)
-
-
-def get_lineage(dbsession, folder_id):
-    root = sql.select(
-        Folder.id,
-        Folder.container_id,
-        sql.literal(1, type_=Integer).label('level')
-    ).filter(
-        Folder.id == folder_id
-    ).cte(
-        name='parents', recursive=True
-    )
-
-    root = root.union_all(
-        sql.select(
-            Folder.id,
-            Folder.container_id,
-            root.c.level + 1
-        ).join(
-            root, root.c.container_id == Folder.id
-        )
-    )
-
-    stmt = sql.select(
-        Folder
-    ).join(
-        root, root.c.id == Folder.id
-    )
-
-    if WITH_TRANSLATION:
-        (stmt, lang_partition) = with_current_translations(stmt, Folder)
-
-    stmt = stmt.order_by(
-        root.c.level.desc()
-    )
-
-    lineage = dbsession.execute(stmt).scalars().all()
-
-    return lineage
