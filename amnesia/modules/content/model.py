@@ -1,5 +1,7 @@
 # pylint: disable=E1101
 
+import typing as t
+
 from datetime import datetime
 
 from pytz import timezone
@@ -23,7 +25,7 @@ class Content(Base):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return u'<{0}:{1}>'.format(self.__class__.__name__, self.id)
 
 #    def format(self, format, **kwargs):
@@ -33,7 +35,7 @@ class Content(Base):
     __str__ = __repr__
 
     @property
-    def fa_icon(self):
+    def fa_icon(self) -> t.Optional[str]:
         try:
             return self.type.icons['fa']
         except (TypeError, KeyError):

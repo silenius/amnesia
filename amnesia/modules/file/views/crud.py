@@ -11,6 +11,7 @@ from amnesia.modules.folder import FolderEntity
 from amnesia.modules.file import File
 from amnesia.modules.file import utils as file_utils
 from amnesia.modules.file import FileEntity
+from amnesia.modules.file import ImageFileEntity
 from amnesia.modules.file.validation import FileSchema
 from amnesia.modules.file.events import FileUpdated
 from amnesia.modules.content.views import ContentCRUD
@@ -30,12 +31,27 @@ def includeme(config):
     permission='read'
 )
 def download(context, request):
-    file_response = context.serve()
-
-    if not file_response:
-        return HTTPNotFound()
+    try:
+        file_response = context.serve()
+    except FileNotFoundError:
+        raise HTTPNotFound()
 
     return file_response
+
+
+@view_config(
+    context=ImageFileEntity,
+    name='download',
+    request_method='GET',
+    permission='read',
+    renderer='string'
+)
+def image_download(context, request):
+    return request.accept.best_match((
+        'imagee/lol', 'imagee/bar'
+    ), "image/webp")
+
+
 
 
 class FileCRUD(ContentCRUD):

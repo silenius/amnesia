@@ -1,6 +1,7 @@
 # pylint: disable=E1101
 
 import os.path
+import typing as t
 
 from hashids import Hashids
 
@@ -17,7 +18,7 @@ class File(Content):
         super().feed(**kwargs)
 
     @property
-    def fa_icon(self):
+    def fa_icon(self) -> t.Optional[str]:
         if self.mime.major.name == 'image':
             return 'fa-file-image-o'
         if self.mime.major.name == 'video':
@@ -27,14 +28,14 @@ class File(Content):
         return super().fa_icon
 
     @property
-    def extension(self):
+    def extension(self) -> str:
         return os.path.splitext(self.original_name)[1].lower()
 
     @property
-    def alnum_fname(self):
+    def alnum_fname(self) -> str:
         file_name, file_ext = os.path.splitext(self.original_name)
         return ''.join(s for s in file_name if s.isalnum()) + file_ext
 
-    def get_hashid(self, salt, min_length=8):
+    def get_hashid(self, salt: str, min_length: int=8) -> str:
         hashid = Hashids(salt=salt, min_length=min_length)
         return hashid.encode(self.path_name)

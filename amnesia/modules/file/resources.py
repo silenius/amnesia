@@ -1,22 +1,33 @@
-# -*- coding: utf-8 -*-
-
 import pathlib
+import typing as t
 import unicodedata
 
-from pyramid.response import FileResponse
+from pyramid.response import (
+    Response,
+    FileResponse
+)
+
+from pyramid.request import Request
 
 from sqlalchemy import sql
 
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
+
 from amnesia.modules.file import File
 
 
 class FileEntity(Entity):
     """ File """
 
+    def __new__(cls, request: Request, entity: File):
+        if entity.mime.major.name == 'image':
+            cls = ImageFileEntity
+
+        return super().__new__(cls)
+
     @property
-    def storage_dir(self):
+    def storage_dir(self) -> str:
         dirname = self.settings['file_storage_dir']
         path = pathlib.Path(dirname)
 
@@ -26,7 +37,7 @@ class FileEntity(Entity):
         return path
 
     @property
-    def absolute_path(self):
+    def absolute_path(self) -> str:
         ''' Returns file path on disk '''
         salt = self.settings['amnesia.hashid_file_salt']
         hid = self.entity.get_hashid(salt=salt)
@@ -39,7 +50,7 @@ class FileEntity(Entity):
         return path
 
     @property
-    def relative_path(self):
+    def relative_path(self) -> str:
         return self.absolute_path.relative_to(self.storage_dir)
 
     def get_content_disposition(self, name=None):
@@ -53,7 +64,7 @@ class FileEntity(Entity):
 
         return '{0}; filename="{1}"'.format('attachment', file_name)
 
-    def serve(self):
+    def serve(self) -> t.Union[Response, FileResponse]:
         serve_method = self.settings.get('amnesia.serve_file_method')
 
         if serve_method == 'internal':
@@ -61,14 +72,11 @@ class FileEntity(Entity):
 
         return self.serve_file_response()
 
-    def serve_file_response(self):
+    def serve_file_response(self) -> FileResponse:
         file_path_on_disk = self.absolute_path
 
-        try:
-            resp = FileResponse(file_path_on_disk, self.request,
+        resp = FileResponse(file_path_on_disk, self.request,
                                 content_type=self.entity.mime.full)
-        except FileNotFoundError:
-            return None
 
         disposition = self.get_content_disposition()
 
@@ -76,12 +84,15 @@ class FileEntity(Entity):
 
         return resp
 
-    def serve_file_internal(self, prefix=None):
+    def serve_file_internal(self, prefix: str=None) -> Response:
         if not prefix:
             prefix = self.settings.get('amnesia.serve_internal_path',
                                        '__pfiles')
         prefix = prefix.strip('/')
         x_accel = pathlib.Path('/', prefix, self.relative_path)
+
+        if not x_accel.is_file():
+            raise FileNotFoundError
 
         resp = self.request.response
         resp.content_type = self.entity.mime.full
@@ -90,16 +101,20 @@ class FileEntity(Entity):
         return resp
 
 
+class ImageFileEntity(FileEntity):
+    ...
+
+
 class FileResource(EntityManager):
 
     __name__ = 'file'
 
-    def __getitem__(self, path):
+    def __getitem__(self, path: str):
         if path.isdigit():
             entity = self.dbsession.get(File, path)
             if entity:
                 return FileEntity(self.request, entity)
         raise KeyError
 
-    def query(self):
+    def query(self) -> sql.Select:
         return sql.select(File)
