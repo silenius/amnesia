@@ -2,7 +2,11 @@ import logging
 
 from marshmallow import ValidationError
 
-from pyramid.view import view_config
+from pyramid.view import (
+    view_config,
+    view_defaults
+)
+
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.httpexceptions import HTTPInternalServerError
@@ -48,12 +52,15 @@ def download(context, request):
 )
 def image_download(context, request):
     return request.accept.best_match((
-        'imagee/lol', 'imagee/bar'
+        'imagee/lol', 'imagee/bar', 'image/jpg', 'text/html', 'image/webp'
     ), "image/webp")
 
 
 
 
+@view_defaults(
+    context=FileEntity
+)
 class FileCRUD(ContentCRUD):
     """ File CRUD """
 
@@ -100,7 +107,6 @@ class FileCRUD(ContentCRUD):
     @view_config(
         request_method='PUT',
         renderer='json',
-        context=FileEntity,
         permission='edit'
     )
     def put(self):
@@ -138,8 +144,7 @@ class FileCRUD(ContentCRUD):
         request_method='GET',
         renderer='json',
         accept='application/json',
-        permission='read',
-        context=FileEntity
+        permission='read'
     )
     def get(self):
         schema = self.schema(FileSchema)

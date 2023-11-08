@@ -2,18 +2,22 @@ import logging
 import os.path
 import pathlib
 import shutil
+import typing as t
 
 import magic
 
+from pyramid.request import Request
 from webob.compat import cgi_FieldStorage
 
+from amnesia.modules.file import File
 from amnesia.modules.file.events import FileSavedToDisk
 from amnesia.modules.mime.utils import fetch_mime
 
 log = logging.getLogger(__name__)
 
 
-def save_to_disk(request, entity, src: cgi_FieldStorage):
+def save_to_disk(request: Request, entity: File, src: cgi_FieldStorage) -> \
+        File|t.Literal[False]:
     settings = request.registry.settings
 
     input_file = src.file

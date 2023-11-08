@@ -75,8 +75,11 @@ class FileEntity(Entity):
     def serve_file_response(self) -> FileResponse:
         file_path_on_disk = self.absolute_path
 
-        resp = FileResponse(file_path_on_disk, self.request,
-                                content_type=self.entity.mime.full)
+        resp = FileResponse(
+            file_path_on_disk, 
+            self.request,
+            content_type=self.entity.mime.full
+        )
 
         disposition = self.get_content_disposition()
 
