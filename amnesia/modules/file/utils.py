@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 def save_to_disk(request: Request, entity: File, src: cgi_FieldStorage) -> \
-        File|t.Literal[False]:
+        t.Union[File, t.Literal[False]]:
     settings = request.registry.settings
 
     input_file = src.file

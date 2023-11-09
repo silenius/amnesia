@@ -27,7 +27,7 @@ class FileEntity(Entity):
         return super().__new__(cls)
 
     @property
-    def storage_dir(self) -> str:
+    def storage_dir(self) -> pathlib.Path:
         dirname = self.settings['file_storage_dir']
         path = pathlib.Path(dirname)
 
@@ -37,7 +37,7 @@ class FileEntity(Entity):
         return path
 
     @property
-    def absolute_path(self) -> str:
+    def absolute_path(self) -> pathlib.Path:
         ''' Returns file path on disk '''
         salt = self.settings['amnesia.hashid_file_salt']
         hid = self.entity.get_hashid(salt=salt)
@@ -50,10 +50,10 @@ class FileEntity(Entity):
         return path
 
     @property
-    def relative_path(self) -> str:
+    def relative_path(self) -> pathlib.Path:
         return self.absolute_path.relative_to(self.storage_dir)
 
-    def get_content_disposition(self, name=None):
+    def get_content_disposition(self, name: t.Optional[str]=None) -> str:
         if not name:
             name = self.entity.alnum_fname
 
@@ -87,7 +87,7 @@ class FileEntity(Entity):
 
         return resp
 
-    def serve_file_internal(self, prefix: str=None) -> Response:
+    def serve_file_internal(self, prefix: t.Optional[str]=None) -> Response:
         if not prefix:
             prefix = self.settings.get('amnesia.serve_internal_path',
                                        '__pfiles')
