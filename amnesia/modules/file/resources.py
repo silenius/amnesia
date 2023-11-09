@@ -2,6 +2,11 @@ import pathlib
 import typing as t
 import unicodedata
 
+try:
+    from PIL import Image
+except ImportError:
+    Image = False
+
 from pyramid.response import (
     Response,
     FileResponse
@@ -53,7 +58,11 @@ class FileEntity(Entity):
     def relative_path(self) -> pathlib.Path:
         return self.absolute_path.relative_to(self.storage_dir)
 
-    def get_content_disposition(self, name: t.Optional[str]=None) -> str:
+    def get_content_disposition(
+            self, 
+            disposition: t.Optional[str]='inline',
+            name: t.Optional[str]=None
+        ) -> str:
         if not name:
             name = self.entity.alnum_fname
 
@@ -62,30 +71,33 @@ class FileEntity(Entity):
         file_name = unicodedata.normalize('NFKD', name).\
             encode('ascii', 'ignore').decode('ascii')
 
-        return '{0}; filename="{1}"'.format('attachment', file_name)
+        return f'{disposition}; filename="{file_name}"'
 
-    def serve(self) -> t.Union[Response, FileResponse]:
+    def serve(
+            self, 
+            disposition: t.Optional[str]=None, 
+            name: t.Optional[str]=None
+        ) -> t.Union[Response, FileResponse]:
         serve_method = self.settings.get('amnesia.serve_file_method')
 
         if serve_method == 'internal':
-            return self.serve_file_internal()
+            resp = self.serve_file_internal()
+        else:
+            resp = self.serve_file_response()
 
-        return self.serve_file_response()
+        if disposition in ('inline', 'attachment'):
+            resp.content_disposition = self.get_content_disposition(
+                disposition, name
+            )
+
+        return resp
 
     def serve_file_response(self) -> FileResponse:
-        file_path_on_disk = self.absolute_path
-
-        resp = FileResponse(
-            file_path_on_disk, 
+        return FileResponse(
+            self.absolute_path,
             self.request,
             content_type=self.entity.mime.full
         )
-
-        disposition = self.get_content_disposition()
-
-        resp.headers.add('Content-Disposition', disposition)
-
-        return resp
 
     def serve_file_internal(self, prefix: t.Optional[str]=None) -> Response:
         if not prefix:
