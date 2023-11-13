@@ -1,4 +1,5 @@
 import logging
+import typing as t
 
 from marshmallow import ValidationError
 
@@ -7,9 +8,19 @@ from pyramid.view import (
     view_defaults
 )
 
-from pyramid.httpexceptions import HTTPNotFound
-from pyramid.httpexceptions import HTTPNoContent
-from pyramid.httpexceptions import HTTPInternalServerError
+from pyramid.httpexceptions import (
+    HTTPNotFound,
+    HTTPNoContent,
+    HTTPInternalServerError,
+    HTTPNotAcceptable
+)
+
+from pyramid.response import (
+    Response,
+    FileResponse
+)
+
+from pyramid.request import Request
 
 from amnesia.modules.folder import FolderEntity
 from amnesia.modules.file import File
@@ -22,7 +33,6 @@ from amnesia.modules.content.views import ContentCRUD
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
-
 def includeme(config):
     ''' Pyramid includeme func'''
     config.scan(__name__)
@@ -34,28 +44,15 @@ def includeme(config):
     request_method='GET',
     permission='read'
 )
-def download(context, request):
+def download(context: FileEntity, 
+             request: Request
+    ) -> t.Union[Response, FileResponse]:
     try:
-        file_response = context.serve()
+        file_response = context.serve(disposition='attachment')
     except FileNotFoundError:
         raise HTTPNotFound()
 
     return file_response
-
-
-@view_config(
-    context=ImageFileEntity,
-    name='download',
-    request_method='GET',
-    permission='read',
-    renderer='string'
-)
-def image_download(context, request):
-    return request.accept.best_match((
-        'imagee/lol', 'imagee/bar', 'image/jpg', 'text/html', 'image/webp'
-    ), "image/webp")
-
-
 
 
 @view_defaults(
@@ -146,6 +143,30 @@ class FileCRUD(ContentCRUD):
         accept='application/json',
         permission='read'
     )
+    @view_config(
+        request_method='GET',
+        renderer='json',
+        accept='application/json',
+        permission='read',
+        context=ImageFileEntity,
+    )
     def get(self):
         schema = self.schema(FileSchema)
         return schema.dump(self.context.entity, many=False)
+
+    @view_config(
+        request_method='GET',
+        permission='read',
+        context=ImageFileEntity
+    )
+    def image_get(self):
+        formats = ('image/jpeg', 'image/png', 'image/webp')
+        format = self.request.accept.best_match(formats)
+
+        if format:
+            return self.context.serve(
+                disposition='inline',
+                format=format
+            )
+        else:
+            raise HTTPNotAcceptable()

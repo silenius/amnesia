@@ -21,6 +21,13 @@ from amnesia.modules.content import EntityManager
 
 from amnesia.modules.file import File
 
+if Image:
+    supported_img_formats = frozenset(
+        Image.registered_extensions().values()
+    )
+else:
+    supported_img_formats = frozenset()
+
 
 class FileEntity(Entity):
     """ File """
@@ -75,15 +82,16 @@ class FileEntity(Entity):
 
     def serve(
             self, 
+            *,
             disposition: t.Optional[str]=None, 
             name: t.Optional[str]=None
         ) -> t.Union[Response, FileResponse]:
         serve_method = self.settings.get('amnesia.serve_file_method')
 
         if serve_method == 'internal':
-            resp = self.serve_file_internal()
+            resp = self.serve_file_internal()  # NGINX
         else:
-            resp = self.serve_file_response()
+            resp = self.serve_file_response()  # Pyramid
 
         if disposition in ('inline', 'attachment'):
             resp.content_disposition = self.get_content_disposition(

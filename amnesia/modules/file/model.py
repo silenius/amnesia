@@ -28,6 +28,10 @@ class File(Content):
         return super().fa_icon
 
     @property
+    def is_image(self) -> bool:
+        return self.mime.major.name == 'image'
+
+    @property
     def extension(self) -> str:
         return os.path.splitext(self.original_name)[1].lower()
 
