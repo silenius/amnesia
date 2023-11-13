@@ -160,13 +160,13 @@ class FileCRUD(ContentCRUD):
         context=ImageFileEntity
     )
     def image_get(self):
-        formats = ('image/jpeg', 'image/png', 'image/webp')
-        format = self.request.accept.best_match(formats)
+        supported = self.context.supported_formats.keys()
+        format = self.request.accept.best_match(supported)
 
         if format:
             return self.context.serve(
                 disposition='inline',
                 format=format
             )
-        else:
-            raise HTTPNotAcceptable()
+
+        raise HTTPNotAcceptable()

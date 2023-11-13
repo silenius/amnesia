@@ -2,6 +2,8 @@ import pathlib
 import typing as t
 import unicodedata
 
+from functools import cached_property
+
 try:
     from PIL import Image
 except ImportError:
@@ -20,13 +22,6 @@ from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 
 from amnesia.modules.file import File
-
-if Image:
-    supported_img_formats = frozenset(
-        Image.registered_extensions().values()
-    )
-else:
-    supported_img_formats = frozenset()
 
 
 class FileEntity(Entity):
@@ -102,7 +97,7 @@ class FileEntity(Entity):
 
     def serve_file_response(self) -> FileResponse:
         return FileResponse(
-            self.absolute_path,
+            self.absolute_path,  # /data/file/a/1/g/3/123.xxx
             self.request,
             content_type=self.entity.mime.full
         )
@@ -112,7 +107,12 @@ class FileEntity(Entity):
             prefix = self.settings.get('amnesia.serve_internal_path',
                                        '__pfiles')
         prefix = prefix.strip('/')
-        x_accel = pathlib.Path('/', prefix, self.relative_path)
+        
+        x_accel = pathlib.Path(
+            '/', 
+            prefix, 
+            self.relative_path  # a/1/g/3/123.xxx
+        )
 
         if not x_accel.is_file():
             raise FileNotFoundError
@@ -125,7 +125,26 @@ class FileEntity(Entity):
 
 
 class ImageFileEntity(FileEntity):
-    ...
+
+    @cached_property
+    def supported_formats(self):
+        if not Image:
+            return {}
+
+        registered_extensions = frozenset(
+            Image.registered_extensions().values()
+        )
+
+        mimes = {
+            'image/jpeg': ('JPEG', 'jpg'),
+            'image/png': ('PNG', 'png'),
+            'image/webp': ('WEBP', 'webp')
+        } 
+        
+        return {
+            k: v for (k,v) in mimes.items() 
+            if v[0] in registered_extensions
+        }
 
 
 class FileResource(EntityManager):
