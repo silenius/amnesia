@@ -9,37 +9,31 @@ import magic
 from pyramid.request import Request
 from webob.compat import cgi_FieldStorage
 
-from amnesia.modules.file import File
+from amnesia.modules.file import (
+    File,
+    FileEntity
+)
 from amnesia.modules.file.events import FileSavedToDisk
 from amnesia.modules.mime.utils import fetch_mime
 
 log = logging.getLogger(__name__)
 
 
-def save_to_disk(request: Request, entity: File, src: cgi_FieldStorage) -> \
-        t.Union[File, t.Literal[False]]:
-    settings = request.registry.settings
-
+def save_to_disk(
+        context: FileEntity, 
+        entity: File, 
+        src: cgi_FieldStorage
+    ) -> t.Union[File, t.Literal[False]]:
+    request = context.request
     input_file = src.file
     # IE sends an absolute file *path* as the filename.
     input_file_name = pathlib.Path(src.filename).name
     entity.original_name = input_file_name
 
-    dirname = settings['file_storage_dir']
-    salt = settings['amnesia.hashid_file_salt']
-
     if entity.content_id and input_file:
         log.debug('===>>> save_file: %s', entity.path_name)
-        hid = entity.get_hashid(salt=salt)
-
-        file_name = pathlib.Path(
-            dirname,
-            *(hid[:4]),
-            hid + entity.extension
-        )
-
-        if not file_name.parent.exists():
-            file_name.parent.mkdir(parents=True)
+        file_name = context.absolute_path
+        file_name.parent.mkdir(parents=True, exist_ok=True)
 
         # Ensure that the current file position of the input file is 0 (= we
         # are at the begining of the file)
@@ -74,4 +68,3 @@ def save_to_disk(request: Request, entity: File, src: cgi_FieldStorage) -> \
         return entity
 
     return False
-

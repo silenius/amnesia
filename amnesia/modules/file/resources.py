@@ -33,32 +33,52 @@ class FileEntity(Entity):
 
         return super().__new__(cls)
 
-    @property
-    def storage_dir(self) -> pathlib.Path:
-        dirname = self.settings['file_storage_dir']
-        path = pathlib.Path(dirname)
+    def get_path(self, setting: str) -> pathlib.Path:
+        '''
+        Returns a setting as a Path
+        '''
+        dirname = self.settings[setting]
 
-        if not path.is_absolute():
-            raise ValueError('file_storage_dir must be an absolute path')
+        if dirname:
+            path = pathlib.Path(dirname)
+
+            if path and path.is_absolute():
+                return path
+
+        raise ValueError(f'{setting} must be an absolute path')
+
+    @cached_property
+    def storage_dir(self) -> pathlib.Path:
+        '''
+        Returns the directory (as a Path) where files are stored
+        '''
+        return self.get_path('file_storage_dir')
+
+    @cached_property
+    def subpath(self) -> pathlib.Path:
+        ''' 
+        Compute a subpath from the hash id.
+        This is mainly used to avoid storing all the files in the same
+        directory (which could be impractical and have performance issues).
+        Thus is we have a hashid of '49QBelWP' this function returns
+        4/9/Q/B/49QBelWP + file extension = 4/9/Q/B/49QBelWP.png 
+        '''
+        salt = self.settings['amnesia.hashid_file_salt']
+        hid = self.entity.get_hashid(salt=salt)
+
+        path = pathlib.Path(
+            *(hid[:4]),
+            hid + self.entity.extension
+        )  # 4/9/Q/B/49QBelWP.png
 
         return path
 
     @property
     def absolute_path(self) -> pathlib.Path:
-        ''' Returns file path on disk '''
-        salt = self.settings['amnesia.hashid_file_salt']
-        hid = self.entity.get_hashid(salt=salt)
-
-        path = self.storage_dir.joinpath(
-            *(hid[:4]),
-            hid + self.entity.extension
-        )
-
-        return path
-
-    @property
-    def relative_path(self) -> pathlib.Path:
-        return self.absolute_path.relative_to(self.storage_dir)
+        ''' 
+        Returns absolute file path on disk 
+        '''
+        return self.storage_dir / self.subpath
 
     def get_content_disposition(
             self, 
@@ -78,15 +98,35 @@ class FileEntity(Entity):
     def serve(
             self, 
             *,
+            path: t.Optional[pathlib.Path]=None,
+            subpath: t.Optional[pathlib.Path]=None,
             disposition: t.Optional[str]=None, 
-            name: t.Optional[str]=None
+            name: t.Optional[str]=None,
+            content_type: t.Optional[str]=None,
+            serve_method: t.Optional[str]=None
         ) -> t.Union[Response, FileResponse]:
-        serve_method = self.settings.get('amnesia.serve_file_method')
+        if serve_method is None:
+            serve_method = self.settings.get('amnesia.serve_file_method')
+
+        if content_type is None:
+            content_type = str(self.entity.mime)
 
         if serve_method == 'internal':
-            resp = self.serve_file_internal()  # NGINX
+            path = subpath
+            if not path:
+                path = self.subpath
+
+            factory = self.serve_file_internal
         else:
-            resp = self.serve_file_response()  # Pyramid
+            if not path:
+                path = self.absolute_path
+            
+            factory = self.serve_file_response
+
+        resp = factory(path)
+
+        if content_type:
+            resp.content_type = content_type
 
         if disposition in ('inline', 'attachment'):
             resp.content_disposition = self.get_content_disposition(
@@ -95,36 +135,35 @@ class FileEntity(Entity):
 
         return resp
 
-    def serve_file_response(self) -> FileResponse:
-        return FileResponse(
-            self.absolute_path,  # /data/file/a/1/g/3/123.xxx
-            self.request,
-            content_type=self.entity.mime.full
-        )
+    def serve_file_response(
+            self, 
+            path: pathlib.Path,
+        ) -> FileResponse:
+        return FileResponse(path, self.request)
 
-    def serve_file_internal(self, prefix: t.Optional[str]=None) -> Response:
+    def serve_file_internal(
+            self, 
+            path: pathlib.Path,
+            prefix: t.Optional[str]=None
+        ) -> Response:
         if not prefix:
-            prefix = self.settings.get('amnesia.serve_internal_path',
-                                       '__pfiles')
-        prefix = prefix.strip('/')
-        
-        x_accel = pathlib.Path(
-            '/', 
-            prefix, 
-            self.relative_path  # a/1/g/3/123.xxx
-        )
-
-        if not x_accel.is_file():
-            raise FileNotFoundError
+            prefix = self.settings.get(
+                'amnesia.serve_internal_path', '__pfiles'
+            ).strip('/')
+            
+        x_accel = pathlib.Path('/', prefix, path)
 
         resp = self.request.response
-        resp.content_type = self.entity.mime.full
         resp.headers.add('X-Accel-Redirect', str(x_accel))
 
         return resp
 
 
 class ImageFileEntity(FileEntity):
+
+    @cached_property
+    def cache_dir(self) -> pathlib.Path:
+        return self.get_path('file_cache_dir')
 
     @cached_property
     def supported_formats(self):
@@ -136,15 +175,68 @@ class ImageFileEntity(FileEntity):
         )
 
         mimes = {
+            # 'minor/major: ('pillow internal format', 'file extension')
             'image/jpeg': ('JPEG', 'jpg'),
             'image/png': ('PNG', 'png'),
-            'image/webp': ('WEBP', 'webp')
+            'image/webp': ('WEBP', 'webp'),
+            'image/gif': ('GIF', 'gif')
         } 
         
         return {
-            k: v for (k,v) in mimes.items() 
+            k: v for (k, v) in mimes.items() 
             if v[0] in registered_extensions
         }
+
+    def serve(
+            self, 
+            *,
+            disposition: t.Optional[str]=None, 
+            name: t.Optional[str]=None,
+            format: t.Optional[str]=None,
+        ) -> t.Union[Response, FileResponse]:
+        # The requested format is different (eg: the stored file is a PNG file
+        # but the user requested WEBP format)
+        if format and format != str(self.entity.mime):
+            if name is None:
+                name = f'{self.subpath.stem}.{self.supported_formats[format][1]}' # 1234.ext
+
+            subpath = pathlib.Path(
+                self.subpath.parent,  # 1/2/3/4
+                self.subpath.stem,  # 124
+                name
+            )
+
+            outfile = pathlib.Path(self.cache_dir) / subpath
+
+            # TODO: add lock file to prevent concurrent access
+            if not outfile.is_file():
+                outfile.parent.mkdir(parents=True, exist_ok=True)
+                with Image.open(self.absolute_path) as im:
+                    pillow_format = self.supported_formats[format][0]
+
+                    try:
+                        im.save(outfile, pillow_format)
+                    except OSError as e:
+                        # JPEG doesn't support transparency, discard the Alpha
+                        # channel
+
+                        im = im.convert('RGB')
+                        im.save(outfile, pillow_format)
+
+
+            if outfile.is_file():
+                return super().serve(
+                    content_type=format,
+                    path=outfile,
+                    subpath=subpath,
+                    disposition=disposition,
+                    name=name
+                )
+
+        return super().serve(
+            disposition=disposition,
+            name=name
+        )
 
 
 class FileResource(EntityManager):

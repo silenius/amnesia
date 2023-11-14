@@ -1,5 +1,3 @@
-# pylint: disable=E1101
-
 import os.path
 import typing as t
 

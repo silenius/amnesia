@@ -91,7 +91,7 @@ class FileCRUD(ContentCRUD):
         new_entity = self.context.create(File, data)
 
         if new_entity:
-            file_utils.save_to_disk(self.request, new_entity, data['content'])
+            file_utils.save_to_disk(self.context, new_entity, data['content'])
             self.request.response.status_int = 201
             return schema.dump(new_entity)
 
@@ -124,7 +124,7 @@ class FileCRUD(ContentCRUD):
 
             if data.get('content'):
                 file_utils.save_to_disk(
-                    self.request, updated_entity, data['content']
+                    self.context, updated_entity, data['content']
                 )
 
             location = self.request.resource_url(updated_entity)

@@ -26,7 +26,7 @@ class Content(Base):
         super().__init__(**kwargs)
 
     def __repr__(self) -> str:
-        return u'<{0}:{1}>'.format(self.__class__.__name__, self.id)
+        return f'<{self.__class__.__name__}:{self.id}>'
 
 #    def format(self, format, **kwargs):
 #        serializer = Serializer(self)

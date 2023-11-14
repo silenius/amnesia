@@ -23,9 +23,8 @@ class Mime(Base):
         self.template = template
         self.major = major
 
-    @property
-    def full(self):
-        return '{0}/{1}'.format(self.major.name, self.name)
+    def __str__(self) -> str:
+        return f'{self.major.name}/{self.name}'
 
     ###########
     # Filters #
@@ -35,7 +34,10 @@ class Mime(Base):
     def filter_mime(cls, value):
         (major, minor) = value.split('/')
         cond = sql.and_()
+
         cond.append(MimeMajor.name == major)
+
         if minor and minor != '*':
             cond.append(Mime.name == minor)
+        
         return cond
