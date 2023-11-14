@@ -206,7 +206,7 @@ class ImageFileEntity(FileEntity):
                 name
             )
 
-            outfile = pathlib.Path(self.cache_dir) / subpath
+            outfile = self.cache_dir / subpath
 
             # TODO: add lock file to prevent concurrent access
             if not outfile.is_file():
