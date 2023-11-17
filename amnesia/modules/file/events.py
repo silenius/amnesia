@@ -5,6 +5,11 @@ class FileUpdated:
         self.entity = entity
 
 
+class BeforeFileSavedToDisk:
+    def __init__(self, request, entity):
+        self.request = request
+
+
 class FileSavedToDisk:
 
     def __init__(self, request, entity, full_path):

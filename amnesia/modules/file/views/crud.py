@@ -29,6 +29,7 @@ from amnesia.modules.file import FileEntity
 from amnesia.modules.file import ImageFileEntity
 from amnesia.modules.file.validation import FileSchema
 from amnesia.modules.file.events import FileUpdated
+from amnesia.modules.file.exc import UnsupportedFormatError
 from amnesia.modules.content.views import ContentCRUD
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -160,13 +161,15 @@ class FileCRUD(ContentCRUD):
         context=ImageFileEntity
     )
     def image_get(self):
-        supported = self.context.supported_formats.keys()
-        format = self.request.accept.best_match(supported)
-
-        if format:
-            return self.context.serve(
-                disposition='inline',
-                format=format
-            )
+        if best_match := self.request.accept.best_match(
+            self.context.supported_formats.keys()
+        ):
+            try:
+                return self.context.serve(
+                    disposition='inline',
+                    format=best_match
+                )
+            except UnsupportedFormatError:
+                pass
 
         raise HTTPNotAcceptable()

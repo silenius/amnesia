@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import typing as t
 import unicodedata
@@ -21,7 +22,10 @@ from sqlalchemy import sql
 from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 
-from amnesia.modules.file import File
+from . import File
+from .exc import UnsupportedFormatError
+
+log = logging.getLogger(__name__)
 
 
 class FileEntity(Entity):
@@ -68,7 +72,7 @@ class FileEntity(Entity):
 
         path = pathlib.Path(
             *(hid[:4]),
-            hid + self.entity.extension
+            f'{hid}{self.entity.extension}'
         )  # 4/9/Q/B/49QBelWP.png
 
         return path
@@ -116,14 +120,12 @@ class FileEntity(Entity):
             if not path:
                 path = self.subpath
 
-            factory = self.serve_file_internal
+            resp = self.serve_file_internal(path)
         else:
             if not path:
                 path = self.absolute_path
             
-            factory = self.serve_file_response
-
-        resp = factory(path)
+            resp = self.serve_file_response(path)
 
         if content_type:
             resp.content_type = content_type
@@ -146,7 +148,7 @@ class FileEntity(Entity):
             path: pathlib.Path,
             prefix: t.Optional[str]=None
         ) -> Response:
-        if not prefix:
+        if prefix is None:
             prefix = self.settings.get(
                 'amnesia.serve_internal_path', '__pfiles'
             ).strip('/')
@@ -163,10 +165,37 @@ class ImageFileEntity(FileEntity):
 
     @cached_property
     def cache_dir(self) -> pathlib.Path:
+        '''
+        Returns the directory (as a Path) where cache files are stored.
+        Example: /data/some/cache/dir
+        
+        '''
         return self.get_path('file_cache_dir')
 
     @cached_property
-    def supported_formats(self):
+    def cache_subpath(self) -> pathlib.Path:
+        '''
+        Returns the cache "subpath"
+        Example: 1/2/3/4/1234
+        '''
+        return pathlib.Path(
+            self.subpath.parent,
+            self.subpath.stem
+        )
+
+    @cached_property
+    def absolute_cache_path(self) -> pathlib.Path:
+        '''
+        Returns the full absolute path cache.
+        Example: /data/some/cache/dir/1/2/3/4/1234
+        '''
+        return pathlib.Path(
+            self.cache_dir,
+            self.cache_subpath
+        )
+
+    @cached_property
+    def supported_formats(self) -> dict:
         if not Image:
             return {}
 
@@ -176,10 +205,11 @@ class ImageFileEntity(FileEntity):
 
         mimes = {
             # 'minor/major: ('pillow internal format', 'file extension')
+            'image/avif': ('AVIF', 'avif'),
+            'image/webp': ('WEBP', 'webp'),
             'image/jpeg': ('JPEG', 'jpg'),
             'image/png': ('PNG', 'png'),
-            'image/webp': ('WEBP', 'webp'),
-            'image/gif': ('GIF', 'gif')
+            'image/gif': ('GIF', 'gif'),
         } 
         
         return {
@@ -197,22 +227,20 @@ class ImageFileEntity(FileEntity):
         # The requested format is different (eg: the stored file is a PNG file
         # but the user requested WEBP format)
         if format and format != str(self.entity.mime):
-            if name is None:
-                name = f'{self.subpath.stem}.{self.supported_formats[format][1]}' # 1234.ext
+            try:
+                format_info = self.supported_formats[format]
+            except KeyError:
+                raise UnsupportedFormatError(format)
 
-            subpath = pathlib.Path(
-                self.subpath.parent,  # 1/2/3/4
-                self.subpath.stem,  # 124
-                name
-            )
+            subpath_file = f'{self.subpath.stem}.{format_info[1]}'
 
-            outfile = self.cache_dir / subpath
+            outfile = self.absolute_cache_path / subpath_file
 
             # TODO: add lock file to prevent concurrent access
             if not outfile.is_file():
                 outfile.parent.mkdir(parents=True, exist_ok=True)
                 with Image.open(self.absolute_path) as im:
-                    pillow_format = self.supported_formats[format][0]
+                    pillow_format = format_info[0]
 
                     try:
                         im.save(outfile, pillow_format)
@@ -225,6 +253,7 @@ class ImageFileEntity(FileEntity):
 
 
             if outfile.is_file():
+                subpath = self.cache_subpath / subpath_file
                 return super().serve(
                     content_type=format,
                     path=outfile,

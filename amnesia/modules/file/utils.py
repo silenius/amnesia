@@ -6,14 +6,18 @@ import typing as t
 
 import magic
 
-from pyramid.request import Request
 from webob.compat import cgi_FieldStorage
 
 from amnesia.modules.file import (
     File,
     FileEntity
 )
-from amnesia.modules.file.events import FileSavedToDisk
+
+from amnesia.modules.file.events import (
+        BeforeFileSavedToDisk,
+        FileSavedToDisk
+)
+
 from amnesia.modules.mime.utils import fetch_mime
 
 log = logging.getLogger(__name__)
@@ -38,6 +42,7 @@ def save_to_disk(
         # Ensure that the current file position of the input file is 0 (= we
         # are at the begining of the file)
         input_file.seek(0)
+        request.registry.notify(BeforeFileSavedToDisk(request))
         with open(file_name, 'wb') as output_file:
             shutil.copyfileobj(input_file, output_file)
 
