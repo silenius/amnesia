@@ -59,6 +59,15 @@ class FileEntity(Entity):
         return self.get_path('file_storage_dir')
 
     @cached_property
+    def cache_dir(self) -> pathlib.Path:
+        '''
+        Returns the directory (as a Path) where cache files are stored.
+        Example: /data/some/cache/dir
+        
+        '''
+        return self.get_path('file_cache_dir')
+
+    @cached_property
     def subpath(self) -> pathlib.Path:
         ''' 
         Compute a subpath from the hash id.
@@ -77,12 +86,28 @@ class FileEntity(Entity):
 
         return path
 
+    @cached_property
+    def cache_subpath(self) -> pathlib.Path:
+        '''
+        Returns the cache "subpath"
+        Example: 1/2/3/4/1234
+        '''
+        return self.subpath.parent / self.subpath.stem
+
     @property
     def absolute_path(self) -> pathlib.Path:
         ''' 
         Returns absolute file path on disk 
         '''
         return self.storage_dir / self.subpath
+
+    @cached_property
+    def absolute_cache_path(self) -> pathlib.Path:
+        '''
+        Returns the full absolute path cache.
+        Example: /data/some/cache/dir/1/2/3/4/1234
+        '''
+        return self.cache_dir / self.cache_subpath
 
     def get_content_disposition(
             self, 
@@ -162,37 +187,6 @@ class FileEntity(Entity):
 
 
 class ImageFileEntity(FileEntity):
-
-    @cached_property
-    def cache_dir(self) -> pathlib.Path:
-        '''
-        Returns the directory (as a Path) where cache files are stored.
-        Example: /data/some/cache/dir
-        
-        '''
-        return self.get_path('file_cache_dir')
-
-    @cached_property
-    def cache_subpath(self) -> pathlib.Path:
-        '''
-        Returns the cache "subpath"
-        Example: 1/2/3/4/1234
-        '''
-        return pathlib.Path(
-            self.subpath.parent,
-            self.subpath.stem
-        )
-
-    @cached_property
-    def absolute_cache_path(self) -> pathlib.Path:
-        '''
-        Returns the full absolute path cache.
-        Example: /data/some/cache/dir/1/2/3/4/1234
-        '''
-        return pathlib.Path(
-            self.cache_dir,
-            self.cache_subpath
-        )
 
     @cached_property
     def supported_formats(self) -> dict:

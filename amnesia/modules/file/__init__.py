@@ -13,3 +13,4 @@ __all__ = [
 def includeme(config):
     config.include('amnesia.modules.file.mapper')
     config.include('amnesia.modules.file.views')
+    config.include('.subscribers')

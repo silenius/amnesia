@@ -123,7 +123,7 @@ class FileCRUD(ContentCRUD):
             evt = FileUpdated(self.request, self.entity)
             self.notify(evt)
 
-            if data.get('content'):
+            if 'content' in data:
                 file_utils.save_to_disk(
                     self.context, updated_entity, data['content']
                 )
