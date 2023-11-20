@@ -1,4 +1,9 @@
-from marshmallow import pre_load
+import pathlib
+
+from marshmallow import (
+    pre_load,
+    post_load
+)
 
 from marshmallow.fields import String
 from marshmallow.fields import Integer
@@ -27,4 +32,14 @@ class FileSchema(ContentSchema):
             content.required = False
             content.allow_none = True
 
+        return data
+
+    @post_load
+    def original_name(self, data, **kwargs):
+        # IE sends an absolute file *path* as the filename.
+        method = self.context['request'].method
+        
+        if method == 'POST' or (method == 'PUT' and data['content'] is not None):
+            data['original_name'] = pathlib.Path(data['content'].filename).name
+        
         return data

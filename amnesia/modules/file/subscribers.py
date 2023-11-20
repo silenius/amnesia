@@ -4,6 +4,7 @@ import shutil
 from pyramid.events import subscriber
 
 from .events import BeforeFileSavedToDisk
+from .utils import get_storage_paths
 
 log = logging.getLogger(__name__)
 
@@ -14,5 +15,10 @@ def includeme(config):
 
 @subscriber(BeforeFileSavedToDisk)
 def remove_file_cache(event):
-    context = event.request.context
-    shutil.rmtree(context.absolute_cache_path)
+    settings = event.request.registry.settings
+    storage_paths = get_storage_paths(settings, event.entity)
+    
+    try:
+        shutil.rmtree(storage_paths['absolute_cache_path'])
+    except FileNotFoundError:
+        pass

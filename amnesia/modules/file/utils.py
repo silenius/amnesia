@@ -6,11 +6,11 @@ import typing as t
 
 import magic
 
+from pyramid.request import Request
 from webob.compat import cgi_FieldStorage
 
 from amnesia.modules.file import (
     File,
-    FileEntity
 )
 
 from amnesia.modules.file.events import (
@@ -24,26 +24,22 @@ log = logging.getLogger(__name__)
 
 
 def save_to_disk(
-        context: FileEntity, 
+        request: Request, 
         entity: File, 
-        src: cgi_FieldStorage
+        src: cgi_FieldStorage,
+        filename: pathlib.Path
     ) -> t.Union[File, t.Literal[False]]:
-    request = context.request
     input_file = src.file
-    # IE sends an absolute file *path* as the filename.
-    input_file_name = pathlib.Path(src.filename).name
-    entity.original_name = input_file_name
 
     if entity.content_id and input_file:
         log.debug('===>>> save_file: %s', entity.path_name)
-        file_name = context.absolute_path
-        file_name.parent.mkdir(parents=True, exist_ok=True)
+        filename.parent.mkdir(parents=True, exist_ok=True)
 
         # Ensure that the current file position of the input file is 0 (= we
         # are at the begining of the file)
         input_file.seek(0)
-        request.registry.notify(BeforeFileSavedToDisk(request))
-        with open(file_name, 'wb') as output_file:
+        request.registry.notify(BeforeFileSavedToDisk(request, entity))
+        with open(filename, 'wb') as output_file:
             shutil.copyfileobj(input_file, output_file)
 
             # Close both files, to ensure buffers are flushed
@@ -55,7 +51,7 @@ def save_to_disk(
         # file, we use the magic number instead. The magic number approach
         # offers better guarantees that the format will be identified
         # correctly.
-        file_magic = magic.detect_from_filename(file_name)
+        file_magic = magic.detect_from_filename(filename)
         mime_type = file_magic.mime_type
         major, minor = mime_type.split('/')
 
@@ -65,11 +61,36 @@ def save_to_disk(
         entity.mime = mime_obj
 
         # bytes -> megabytes
-        entity.file_size = os.path.getsize(file_name) / 1024.0 / 1024.0
+        entity.file_size = os.path.getsize(filename) / 1024.0 / 1024.0
 
-        event = FileSavedToDisk(request, entity, file_name)
+        event = FileSavedToDisk(request, entity, filename)
         request.registry.notify(event)
 
         return entity
 
     return False
+
+
+def get_storage_paths(settings: dict, entity: File) -> dict:
+    storage_dir = pathlib.Path(settings['file_storage_dir'])
+    cache_dir = pathlib.Path(settings['file_cache_dir'])
+
+    for d in (storage_dir, cache_dir):
+        if not d.is_absolute():
+            raise ValueError(f'{d} is not an absolute path')
+
+    salt = settings['amnesia.hashid_file_salt']
+
+    hid = entity.get_hashid(salt=salt)
+    subpath = pathlib.Path(
+        *(hid[:4]),
+        f'{hid}{entity.extension}'
+    )  # 4/9/Q/B/49QBelWP.png
+    cache_subpath = subpath.parent / subpath.stem
+
+    return {
+        'absolute_path': storage_dir / subpath,
+        'subpath': subpath,
+        'cache_subpath': cache_subpath,
+        'absolute_cache_path': cache_dir / cache_subpath
+    }

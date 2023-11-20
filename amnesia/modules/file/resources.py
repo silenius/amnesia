@@ -23,6 +23,7 @@ from amnesia.modules.content import Entity
 from amnesia.modules.content import EntityManager
 
 from . import File
+from .utils import get_storage_paths
 from .exc import UnsupportedFormatError
 
 log = logging.getLogger(__name__)
@@ -37,77 +38,9 @@ class FileEntity(Entity):
 
         return super().__new__(cls)
 
-    def get_path(self, setting: str) -> pathlib.Path:
-        '''
-        Returns a setting as a Path
-        '''
-        dirname = self.settings[setting]
-
-        if dirname:
-            path = pathlib.Path(dirname)
-
-            if path and path.is_absolute():
-                return path
-
-        raise ValueError(f'{setting} must be an absolute path')
-
-    @cached_property
-    def storage_dir(self) -> pathlib.Path:
-        '''
-        Returns the directory (as a Path) where files are stored
-        '''
-        return self.get_path('file_storage_dir')
-
-    @cached_property
-    def cache_dir(self) -> pathlib.Path:
-        '''
-        Returns the directory (as a Path) where cache files are stored.
-        Example: /data/some/cache/dir
-        
-        '''
-        return self.get_path('file_cache_dir')
-
-    @cached_property
-    def subpath(self) -> pathlib.Path:
-        ''' 
-        Compute a subpath from the hash id.
-        This is mainly used to avoid storing all the files in the same
-        directory (which could be impractical and have performance issues).
-        Thus is we have a hashid of '49QBelWP' this function returns
-        4/9/Q/B/49QBelWP + file extension = 4/9/Q/B/49QBelWP.png 
-        '''
-        salt = self.settings['amnesia.hashid_file_salt']
-        hid = self.entity.get_hashid(salt=salt)
-
-        path = pathlib.Path(
-            *(hid[:4]),
-            f'{hid}{self.entity.extension}'
-        )  # 4/9/Q/B/49QBelWP.png
-
-        return path
-
-    @cached_property
-    def cache_subpath(self) -> pathlib.Path:
-        '''
-        Returns the cache "subpath"
-        Example: 1/2/3/4/1234
-        '''
-        return self.subpath.parent / self.subpath.stem
-
     @property
-    def absolute_path(self) -> pathlib.Path:
-        ''' 
-        Returns absolute file path on disk 
-        '''
-        return self.storage_dir / self.subpath
-
-    @cached_property
-    def absolute_cache_path(self) -> pathlib.Path:
-        '''
-        Returns the full absolute path cache.
-        Example: /data/some/cache/dir/1/2/3/4/1234
-        '''
-        return self.cache_dir / self.cache_subpath
+    def storage_paths(self):
+        return get_storage_paths(self.settings, self.entity)
 
     def get_content_disposition(
             self, 
@@ -143,12 +76,12 @@ class FileEntity(Entity):
         if serve_method == 'internal':
             path = subpath
             if not path:
-                path = self.subpath
+                path = self.storage_paths['subpath']
 
             resp = self.serve_file_internal(path)
         else:
             if not path:
-                path = self.absolute_path
+                path = self.storage_paths['absolute_path']
             
             resp = self.serve_file_response(path)
 
@@ -226,14 +159,14 @@ class ImageFileEntity(FileEntity):
             except KeyError:
                 raise UnsupportedFormatError(format)
 
-            subpath_file = f'{self.subpath.stem}.{format_info[1]}'
+            subpath_file = f'{self.storage_paths["subpath"].stem}.{format_info[1]}'
 
-            outfile = self.absolute_cache_path / subpath_file
+            outfile = self.storage_paths['absolute_cache_path'] / subpath_file
 
             # TODO: add lock file to prevent concurrent access
             if not outfile.is_file():
                 outfile.parent.mkdir(parents=True, exist_ok=True)
-                with Image.open(self.absolute_path) as im:
+                with Image.open(self.storage_paths['absolute_path']) as im:
                     pillow_format = format_info[0]
 
                     try:
@@ -247,7 +180,7 @@ class ImageFileEntity(FileEntity):
 
 
             if outfile.is_file():
-                subpath = self.cache_subpath / subpath_file
+                subpath = self.storage_paths['cache_subpath'] / subpath_file
                 return super().serve(
                     content_type=format,
                     path=outfile,

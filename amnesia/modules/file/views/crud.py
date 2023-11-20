@@ -86,13 +86,18 @@ class FileCRUD(ContentCRUD):
         data.update({
             'file_size': 0,
             'mime_id': -1,
-            'original_name': ''
         })
 
         new_entity = self.context.create(File, data)
 
         if new_entity:
-            file_utils.save_to_disk(self.context, new_entity, data['content'])
+            storage_paths = file_utils.get_storage_paths(self.settings,
+                                                         new_entity)
+            file_utils.save_to_disk(
+                self.request, new_entity, data['content'],
+                storage_paths['absolute_path']
+            )
+
             self.request.response.status_int = 201
             return schema.dump(new_entity)
 
@@ -123,9 +128,12 @@ class FileCRUD(ContentCRUD):
             evt = FileUpdated(self.request, self.entity)
             self.notify(evt)
 
-            if 'content' in data:
+            if 'content' in data and data['content'] is not None:
+                storage_paths = file_utils.get_storage_paths(self.settings,
+                                                         updated_entity)
                 file_utils.save_to_disk(
-                    self.context, updated_entity, data['content']
+                    self.context, updated_entity, data['content'],
+                    storage_paths['absolute_path']
                 )
 
             location = self.request.resource_url(updated_entity)
