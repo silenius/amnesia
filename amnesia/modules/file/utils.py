@@ -4,6 +4,8 @@ import pathlib
 import shutil
 import typing as t
 
+from io import BufferedRandom
+
 import magic
 
 from pyramid.request import Request
@@ -26,24 +28,23 @@ log = logging.getLogger(__name__)
 def save_to_disk(
         request: Request, 
         entity: File, 
-        src: cgi_FieldStorage,
+        data_stream: BufferedRandom,
         filename: pathlib.Path
     ) -> t.Union[File, t.Literal[False]]:
-    input_file = src.file
 
-    if entity.content_id and input_file:
+    if entity.content_id and data_stream:
         log.debug('===>>> save_file: %s', entity.path_name)
         filename.parent.mkdir(parents=True, exist_ok=True)
 
         # Ensure that the current file position of the input file is 0 (= we
         # are at the begining of the file)
-        input_file.seek(0)
+        data_stream.seek(0)
         request.registry.notify(BeforeFileSavedToDisk(request, entity))
         with open(filename, 'wb') as output_file:
-            shutil.copyfileobj(input_file, output_file)
+            shutil.copyfileobj(data_stream, output_file)
 
             # Close both files, to ensure buffers are flushed
-            input_file.close()
+            data_stream.close()
             output_file.close()
 
         # A file must be associated to a MIME type (image/png,

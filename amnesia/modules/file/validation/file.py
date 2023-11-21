@@ -27,7 +27,9 @@ class FileSchema(ContentSchema):
 
     @pre_load
     def _pre_content(self, data, **kwargs):
-        if self.context['request'].method in ['PUT']:
+        method = self.context['request'].method
+
+        if method == 'PUT':
             content = self.fields['content']
             content.required = False
             content.allow_none = True
@@ -36,10 +38,10 @@ class FileSchema(ContentSchema):
 
     @post_load
     def original_name(self, data, **kwargs):
-        # IE sends an absolute file *path* as the filename.
         method = self.context['request'].method
         
         if method == 'POST' or (method == 'PUT' and data['content'] is not None):
+            # IE sends an absolute file *path* as the filename.
             data['original_name'] = pathlib.Path(data['content'].filename).name
         
         return data

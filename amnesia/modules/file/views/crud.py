@@ -94,7 +94,7 @@ class FileCRUD(ContentCRUD):
             storage_paths = file_utils.get_storage_paths(self.settings,
                                                          new_entity)
             file_utils.save_to_disk(
-                self.request, new_entity, data['content'],
+                self.request, new_entity, data['content'].file,
                 storage_paths['absolute_path']
             )
 
@@ -132,7 +132,7 @@ class FileCRUD(ContentCRUD):
                 storage_paths = file_utils.get_storage_paths(self.settings,
                                                          updated_entity)
                 file_utils.save_to_disk(
-                    self.context, updated_entity, data['content'],
+                    self.request, updated_entity, data['content'].file,
                     storage_paths['absolute_path']
                 )
 
