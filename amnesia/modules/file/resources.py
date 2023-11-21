@@ -50,6 +50,8 @@ class FileEntity(Entity):
         if not name:
             name = self.entity.alnum_fname
 
+        name = name.replace('"', '')
+
         # Only ASCII is guaranteed to work in HTTP headers, so ensure that the
         # filename contains only ASCII characters
         file_name = unicodedata.normalize('NFKD', name).\
@@ -144,6 +146,9 @@ class ImageFileEntity(FileEntity):
             if v[0] in registered_extensions
         }
 
+    def get_supported_mimes(self) -> frozenset:
+        return frozenset(self.supported_formats.keys())
+
     def serve(
             self, 
             *,
@@ -181,6 +186,11 @@ class ImageFileEntity(FileEntity):
 
             if outfile.is_file():
                 subpath = self.storage_paths['cache_subpath'] / subpath_file
+                if name is None:
+                    name = pathlib.Path(
+                        self.entity.alnum_fname
+                    ).with_suffix(outfile.suffix).name
+
                 return super().serve(
                     content_type=format,
                     path=outfile,
