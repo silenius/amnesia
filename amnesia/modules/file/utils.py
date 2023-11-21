@@ -9,15 +9,14 @@ from io import BufferedRandom
 import magic
 
 from pyramid.request import Request
-from webob.compat import cgi_FieldStorage
 
 from amnesia.modules.file import (
     File,
 )
 
 from amnesia.modules.file.events import (
-        BeforeFileSavedToDisk,
-        FileSavedToDisk
+    BeforeFileSavedToDisk,
+    FileSavedToDisk
 )
 
 from amnesia.modules.mime.utils import fetch_mime
@@ -73,6 +72,31 @@ def save_to_disk(
 
 
 def get_storage_paths(settings: dict, entity: File) -> dict:
+    '''
+    This function returns paths related to File objects:
+    - absolute_path: the full absolute path where the file is stored.
+    - subpath: to avoid storing all files in the same directory each file has
+      an associated "subpath" which can be used. It is a combibation of hid[:4]
+      and the original file extension.
+    - absolute_cache_path: the full absolute *directory* where files related to
+      entity are stored.
+    - cache_subpath: the "subpath" directory where files related to entity are
+      stored.
+
+      For example, for a given File-like entity, let's say that
+      entity.get_hashid() returns 'VmWoLOQR' the function returns something
+      like: {
+        'absolute_cache_path': PosixPath('/usr/home/jcigar/code/projects/amnesiabbpf/data/files_cache/V/m/W/o/VmWoLOQR'),
+        'absolute_path': PosixPath('/usr/home/jcigar/code/projects/amnesiabbpf/data/files/V/m/W/o/VmWoLOQR.png'),
+        'cache_subpath': PosixPath('V/m/W/o/VmWoLOQR'),
+        'subpath': PosixPath('V/m/W/o/VmWoLOQR.png')
+        }
+    
+    (this is with file_storage_dir = %(here)s/data/files and file_cache_dir = %(here)s/data/files_cache)
+
+    Note: the *cache* entries are directories so that the could easily remove
+    the 'cached' version of files in one operation if needed (for example an User update a file)
+    '''
     storage_dir = pathlib.Path(settings['file_storage_dir'])
     cache_dir = pathlib.Path(settings['file_cache_dir'])
 
