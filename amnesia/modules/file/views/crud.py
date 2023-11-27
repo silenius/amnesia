@@ -20,6 +20,7 @@ from pyramid.response import (
     FileResponse
 )
 
+from pyramid.renderers import render_to_response
 from pyramid.request import Request
 
 from amnesia.modules.folder import FolderEntity
@@ -152,13 +153,6 @@ class FileCRUD(ContentCRUD):
         accept='application/json',
         permission='read'
     )
-    @view_config(
-        request_method='GET',
-        renderer='json',
-        accept='application/json',
-        permission='read',
-        context=ImageFileEntity,
-    )
     def get(self):
         schema = self.schema(FileSchema)
         return schema.dump(self.context.entity, many=False)
@@ -169,9 +163,19 @@ class FileCRUD(ContentCRUD):
         context=ImageFileEntity
     )
     def image_get(self):
-        if best_match := self.request.accept.best_match(
-            self.context.supported_formats.keys()
-        ):
+        mimes = list(self.context.get_supported_mimes())
+        mimes.append('application/json')
+        best_match = self.request.accept.best_match(mimes)
+
+        if best_match:
+            if best_match == 'application/json':
+                schema = self.schema(FileSchema)
+                return render_to_response(
+                    'json',
+                    schema.dump(self.context.entity, many=False),
+                    request=self.request
+                )
+
             try:
                 return self.context.serve(
                     disposition='inline',

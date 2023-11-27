@@ -37,7 +37,7 @@ class FileSchema(ContentSchema):
         return data
 
     @post_load
-    def original_name(self, data, **kwargs):
+    def clean_original_name(self, data, **kwargs):
         method = self.context['request'].method
         
         if method == 'POST' or (method == 'PUT' and data['content'] is not None):

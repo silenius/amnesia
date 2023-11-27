@@ -3,6 +3,7 @@ import pathlib
 import typing as t
 import unicodedata
 
+from collections.abc import KeysView
 from functools import cached_property
 
 try:
@@ -44,20 +45,26 @@ class FileEntity(Entity):
 
     def get_content_disposition(
             self, 
-            disposition: t.Optional[str]='inline',
+            disposition: t.Literal['inline', 'attachment']='inline',
             name: t.Optional[str]=None
         ) -> str:
-        if not name:
+        if name is None:
             name = self.entity.alnum_fname
 
         name = name.replace('"', '')
 
         # Only ASCII is guaranteed to work in HTTP headers, so ensure that the
         # filename contains only ASCII characters
-        file_name = unicodedata.normalize('NFKD', name).\
-            encode('ascii', 'ignore').decode('ascii')
+        if not name.isascii():
+            name = unicodedata.normalize(
+                'NFKD', name
+            ).encode(
+                'ascii', 'ignore'
+            ).decode(
+                'ascii'
+            )
 
-        return f'{disposition}; filename="{file_name}"'
+        return f'{disposition}; filename="{name}"'
 
     def serve(
             self, 
@@ -146,8 +153,8 @@ class ImageFileEntity(FileEntity):
             if v[0] in registered_extensions
         }
 
-    def get_supported_mimes(self) -> frozenset:
-        return frozenset(self.supported_formats.keys())
+    def get_supported_mimes(self) -> KeysView:
+        return self.supported_formats.keys()
 
     def serve(
             self, 
@@ -182,7 +189,6 @@ class ImageFileEntity(FileEntity):
 
                         im = im.convert('RGB')
                         im.save(outfile, pillow_format)
-
 
             if outfile.is_file():
                 subpath = self.storage_paths['cache_subpath'] / subpath_file

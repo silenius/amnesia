@@ -15,6 +15,10 @@ def includeme(config):
 
 @subscriber(BeforeFileSavedToDisk)
 def remove_file_cache(event):
+    '''
+    When a file is written we must ensure that the versions in the cache are
+    removed otherwise an outdated version of the file would be served.
+    '''
     settings = event.request.registry.settings
     storage_paths = get_storage_paths(settings, event.entity)
     
