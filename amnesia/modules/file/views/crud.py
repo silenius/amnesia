@@ -157,12 +157,17 @@ class FileCRUD(ContentCRUD):
         schema = self.schema(FileSchema)
         return schema.dump(self.context.entity, many=False)
 
+
+@view_defaults(
+    context=ImageFileEntity
+)
+class ImageFileCRUD(ContentCRUD):
+
     @view_config(
         request_method='GET',
         permission='read',
-        context=ImageFileEntity
     )
-    def image_get(self):
+    def get(self):
         mimes = list(self.context.get_supported_mimes())
         mimes.append('application/json')
         best_match = self.request.accept.best_match(mimes)

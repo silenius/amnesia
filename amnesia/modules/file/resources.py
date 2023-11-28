@@ -83,11 +83,10 @@ class FileEntity(Entity):
             content_type = str(self.entity.mime)
 
         if serve_method == 'internal':
-            path = subpath
-            if not path:
-                path = self.storage_paths['subpath']
+            if not subpath:
+                subpath = self.storage_paths['subpath']
 
-            resp = self.serve_file_internal(path)
+            resp = self.serve_file_internal(subpath)
         else:
             if not path:
                 path = self.storage_paths['absolute_path']

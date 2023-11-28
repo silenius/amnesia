@@ -71,7 +71,10 @@ def save_to_disk(
     return False
 
 
-def get_storage_paths(settings: dict, entity: File) -> dict:
+def get_storage_paths(
+        settings: dict, 
+        entity: File
+    ) -> dict[str, pathlib.Path]:
     '''
     This function returns paths related to File objects:
     - absolute_path: the full absolute path where the file is stored.
@@ -94,8 +97,10 @@ def get_storage_paths(settings: dict, entity: File) -> dict:
     
     (this is with file_storage_dir = %(here)s/data/files and file_cache_dir = %(here)s/data/files_cache)
 
-    Note: the *cache* entries are directories so that the could easily remove
-    the 'cached' version of files in one operation if needed (for example an User update a file)
+    Note: the *cache* entries are directories so that we can easily remove
+    the 'cached' version of files in one operation if needed (for example when
+    a User update a File all the cached versions should be removed, we can
+    issue a single rm -rf -like Python equivalent (shutil.rmtree))
     '''
     storage_dir = pathlib.Path(settings['file_storage_dir'])
     cache_dir = pathlib.Path(settings['file_cache_dir'])
@@ -107,11 +112,13 @@ def get_storage_paths(settings: dict, entity: File) -> dict:
     salt = settings['amnesia.hashid_file_salt']
 
     hid = entity.get_hashid(salt=salt)
+
     subpath = pathlib.Path(
         *(hid[:4]),
         f'{hid}{entity.extension}'
     )  # 4/9/Q/B/49QBelWP.png
-    cache_subpath = subpath.parent / subpath.stem
+    
+    cache_subpath = subpath.parent / subpath.stem  # 4/9/Q/B/49QBelWP
 
     return {
         'absolute_path': storage_dir / subpath,
