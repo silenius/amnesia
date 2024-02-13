@@ -47,8 +47,8 @@ class ContentSchema(Schema, PyramidContextMixin):
     description = String(missing=None)
     effective = DateTime(missing=None)
     expiration = DateTime(missing=None)
-    exclude_nav = Boolean(missing=False)
-    is_fts = Boolean(missing=False)
+    exclude_nav = Boolean(missing=None)
+    is_fts = Boolean(missing=None)
     weight = Integer(dump_only=True)
     content_type_id = Integer(dump_only=True)
     type = Nested(ContentTypeSchema, dump_only=True)
@@ -57,7 +57,6 @@ class ContentSchema(Schema, PyramidContextMixin):
     state = Nested(StateSchema, dump_only=True)
     parent = Nested('ContentSchema', exclude=('parent', ), dump_only=True)
     inherits_parent_acl = Boolean()
-    on_success = Integer(default=201, missing=201, validate=OneOf((201, 303)))
 
     acls = Nested('ContentACLSchema', exclude=('content', ), 
                   dump_only=True, many=True)

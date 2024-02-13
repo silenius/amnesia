@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from .browser import FolderBrowserView
 
 
@@ -9,3 +7,4 @@ def includeme(config):
     config.include('.browser')
     config.include('.crud')
     config.include('.paste')
+    config.include('.default_media')

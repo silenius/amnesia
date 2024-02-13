@@ -1,5 +1,4 @@
 import logging
-import typing as t
 
 from marshmallow import ValidationError
 
@@ -9,16 +8,11 @@ from pyramid.view import (
 )
 
 from pyramid.httpexceptions import (
-    HTTPNotFound,
     HTTPNoContent,
     HTTPInternalServerError,
     HTTPNotAcceptable
 )
 
-from pyramid.response import (
-    Response,
-    FileResponse
-)
 
 from pyramid.renderers import render_to_response
 from pyramid.request import Request
@@ -40,32 +34,15 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_config(
-    context=FileEntity,
-    name='download',
-    request_method='GET',
-    permission='read'
-)
-def download(context: FileEntity, 
-             request: Request
-    ) -> t.Union[Response, FileResponse]:
-    try:
-        file_response = context.serve(disposition='attachment')
-    except FileNotFoundError:
-        raise HTTPNotFound()
-
-    return file_response
-
-
 @view_defaults(
     context=FileEntity
 )
 class FileCRUD(ContentCRUD):
     """ File CRUD """
 
-    ########
-    # POST #
-    ########
+    #########################################################################
+    # POST                                                                  #
+    #########################################################################
 
     @view_config(
         request_method='POST',
@@ -104,9 +81,9 @@ class FileCRUD(ContentCRUD):
 
         raise HTTPInternalServerError()
 
-    #######
-    # PUT #
-    #######
+    #########################################################################
+    # PUT                                                                   #
+    #########################################################################
 
     @view_config(
         request_method='PUT',
@@ -144,7 +121,7 @@ class FileCRUD(ContentCRUD):
         raise HTTPInternalServerError()
 
     #########################################################################
-    # C(R)UD - READ                                                         #
+    # READ                                                                  #
     #########################################################################
 
     @view_config(

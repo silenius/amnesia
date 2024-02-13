@@ -82,7 +82,7 @@ class FolderResource(EntityManager):
 
     __name__ = 'folder'
 
-    def __getitem__(self, path):
+    def __getitem__(self, path: str):
         if path.isdigit():
             entity = self.dbsession.get(Folder, path)
             if entity:
@@ -92,3 +92,8 @@ class FolderResource(EntityManager):
 
     def query(self):
         return sql.select(Folder)
+
+    def get_default_media(self):
+        return self.dbsession.execute(
+            self.query().filter_by(default_media=True)
+        ).scalar_one_or_none()

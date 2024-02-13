@@ -34,7 +34,7 @@ class FileEntity(Entity):
     """ File """
 
     def __new__(cls, request: Request, entity: File):
-        if entity.mime.major.name == 'image':
+        if entity.is_image:
             cls = ImageFileEntity
 
         return super().__new__(cls)
@@ -139,7 +139,7 @@ class ImageFileEntity(FileEntity):
         )
 
         mimes = {
-            # 'minor/major: ('pillow internal format', 'file extension')
+            # 'major/minor: ('pillow internal format', 'file extension')
             'image/avif': ('AVIF', 'avif'),
             'image/webp': ('WEBP', 'webp'),
             'image/jpeg': ('JPEG', 'jpg'),
