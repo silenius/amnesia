@@ -45,9 +45,9 @@ def webpack_build_assets(registry, asset_config, *args, **kwargs):
     with worker_config_file.open('wt') as cfg:  # pylint: disable=no-member
         cfg.write(json.dumps(worker_config))
 
-    # Download requirements (yarn)
-    yarn_cmd = ['yarn', 'install']
-    subprocess.run(yarn_cmd, env=os.environ, cwd=build_dir, check=True)
+    # Download requirements (npm)
+    npm_cmd = ['npm', 'install']
+    subprocess.run(npm_cmd, env=os.environ, cwd=build_dir, check=True)
 
     # Execute build process (webpack)
     webpack_bin = os.path.join(build_dir, 'node_modules', '.bin', 'webpack')
