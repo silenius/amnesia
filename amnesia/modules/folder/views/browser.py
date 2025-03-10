@@ -80,7 +80,7 @@ class FolderBrowserView(BaseView):
     @view_config(request_method='GET', name='children',
                  accept='application/json')
     def children(self):
-        schema = FolderSchema(only=('id', 'title'))
+        schema = FolderSchema(only=('id', 'title', 'index_content_id'))
         depth = None
 
         class Encoder(json.JSONEncoder):
