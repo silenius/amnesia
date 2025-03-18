@@ -10,9 +10,9 @@ from pyramid.view import (
 from pyramid.httpexceptions import (
     HTTPNoContent,
     HTTPInternalServerError,
-    HTTPNotAcceptable
+    HTTPNotAcceptable,
+    HTTPNotFound
 )
-
 
 from pyramid.renderers import render_to_response
 from pyramid.request import Request
@@ -164,6 +164,8 @@ class ImageFileCRUD(ContentCRUD):
                     format=best_match
                 )
             except UnsupportedFormatError:
-                pass
+                raise HTTPNotAcceptable()
+            except FileNotFoundError:
+                raise HTTPNotFound()
 
         raise HTTPNotAcceptable()
