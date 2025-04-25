@@ -39,6 +39,3 @@ def download(
         raise HTTPNotFound()
 
     return file_response
-
-
-

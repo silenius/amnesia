@@ -2,8 +2,12 @@ import logging
 
 from pkg_resources import iter_entry_points
 from pyramid.config import Configurator
+from pyramid.csrf import CookieCSRFStoragePolicy
+from pyramid.settings import asbool
 
-from amnesia.security.policy import cookie_security_policy
+from amnesia.security.policy import (
+    cookie_security_policy,
+)
 from amnesia.traversal import AmnesiaResourceURL
 from amnesia.resources import get_root
 from amnesia.modules.content import Content
@@ -52,8 +56,18 @@ def include_session(config):
 #            config.include('pyramid_beaker')
 
 
-def include_security(config):
-    config.set_default_csrf_options(require_csrf=True)
+def include_csrf_policy(config):
+    settings = config.registry.settings
+
+    cfg = {
+        'httponly': asbool(settings.get('csrf.cookie.httponly', 'true')),
+        'secure': asbool(settings.get('csrf.cookie.secure', 'false')),
+    }
+
+    policy = CookieCSRFStoragePolicy(**cfg)
+    #policy = HttpHeaderCSRFStoragePolicy()
+    config.set_csrf_storage_policy(policy)
+    #config.set_default_csrf_options(require_csrf=True)
 
 
 def include_entry_points(config):
@@ -115,8 +129,8 @@ def include_amnesia(config):
     config.include(include_config_directives)
     config.include(include_request_methods)
     config.include(include_pyramid_addons)
-    config.include(include_session)
-    #config.include(include_security)
+    #config.include(include_session)
+    #config.include(include_csrf_policy)
 
     #config.include('amnesia.widgets')
     config.include('amnesia.subscribers')
