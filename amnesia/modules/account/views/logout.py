@@ -17,5 +17,10 @@ def includeme(config):
 )
 def logout(context, request):
     headers = forget(request)
-    request.session.invalidate()
+
+    try:
+        request.session.invalidate()
+    except AttributeError:
+        pass
+
     return HTTPNoContent(headers=headers)
