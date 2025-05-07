@@ -1,4 +1,5 @@
-import json
+import csv
+import io
 import urllib
 import os.path
 import sys
@@ -20,7 +21,7 @@ from amnesia.db import get_session_factory
 from amnesia.db import get_tm_session
 from amnesia.modules.country import Country
 
-SRC = 'https://datahub.io/core/country-list/r/data.json'
+SRC = 'https://datahub.io/core/country-codes/_r/-/data/country-codes.csv'
 
 
 def usage(argv):
@@ -49,13 +50,17 @@ def main(argv=sys.argv):
         dbsession = get_tm_session(session_factory, transaction.manager)
 
         res = urllib.request.urlopen(SRC)
-        res_body = res.read()
+        res_body = io.StringIO(res.read().decode('utf-8'))
+        reader = csv.DictReader(res_body)
 
-        j = json.loads(res_body.decode('utf-8'))
+        for row in reader:
+            print(f"===>>> {row['official_name_en']}")
 
-        for data in j:
-            print(f"===>>> {data['Name']}")
-            c = Country(iso=data['Code'].lower(), name=data['Name'])
+            c = Country(
+                iso=row['ISO3166-1-Alpha-2'].lower(), 
+                name=row['official_name_en']
+            )
+            
             dbsession.add(c)
 
 if __name__ == '__main__':
