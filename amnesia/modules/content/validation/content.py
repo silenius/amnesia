@@ -58,8 +58,7 @@ class ContentSchema(Schema, PyramidContextMixin):
     parent = Nested('ContentSchema', exclude=('parent', ), dump_only=True)
     inherits_parent_acl = Boolean()
 
-    acls = Nested('ContentACLSchema', exclude=('content', ), 
-                  dump_only=True, many=True)
+    acls = Nested('ContentACLSchema', exclude=('content', ), many=True)
 
     inherits_parent_acl = Boolean(missing=True)
 

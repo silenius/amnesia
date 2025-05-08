@@ -40,6 +40,6 @@ class Lineage(BaseView):
 
         return [{
             'id': content.id,
-            'title': content.title
+            'title': content.title,
         } for content in tree]
         
