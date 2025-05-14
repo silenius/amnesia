@@ -17,13 +17,10 @@ class File(Content):
 
     @property
     def fa_icon(self) -> t.Optional[str]:
-        if self.mime.major.name == 'image':
-            return 'fa-file-image-o'
-        if self.mime.major.name == 'video':
-            return 'fa-file-video-o'
-        if self.mime.full == 'application/pdf':
-            return 'fa-file-pdf-o'
-        return super().fa_icon
+        return next(
+            (x for x in (self.mime.icons, self.mime_major.icons) if x), 
+            super().fa_icon
+        )
 
     @property
     def is_image(self) -> bool:
