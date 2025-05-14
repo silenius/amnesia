@@ -1,0 +1,13 @@
+ALTER TABLE mime RENAME icon TO icons;
+UPDATE mime SET icons=NULL;
+ALTER TABLE mime ALTER icons TYPE jsonb USING icons::jsonb;
+UPDATE mime SET icons='{"fa": "fa-file-pdf"}' WHERE template='application/pdf';
+UPDATE mime SET icons='{"fa": "fa-file-csv"}' WHERE template='text/csv';
+ALTER TABLE mime_major RENAME icon TO icons;
+UPDATE mime_major SET icons=NULL;
+ALTER TABLE mime_major ALTER icons TYPE jsonb USING icons::jsonb;
+UPDATE mime_major SET icons='{"fa": "fa-file-image"}' WHERE name='image';
+UPDATE mime_major SET icons='{"fa": "fa-file-audio"}' WHERE name='audio';
+UPDATE mime_major SET icons='{"fa": "fa-file"}' WHERE name='application';
+UPDATE mime_major SET icons='{"fa": "fa-file-lines"}' WHERE name='text';
+UPDATE mime_major SET icons='{"fa": "fa-file-video"}' WHERE name='video';
