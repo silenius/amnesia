@@ -17,9 +17,13 @@ class File(Content):
 
     @property
     def fa_icon(self) -> t.Optional[str]:
+        candidates = (
+            self.mime.icons,
+            self.mime.major.icons
+        )
+
         return next(
-            (x for x in (self.mime.icons.get('fa'),
-                         self.mime.major.icons.get('fa')) if x), 
+            (x.get('fa') for x in candidates if x), 
             super().fa_icon
         )
 

@@ -24,7 +24,6 @@ class FileSchema(ContentSchema):
     file_size = Float(dump_only=True)
     content = Raw(load_only=True, required=True)
     mime = Nested(Mime, dump_only=True)
-    fa_icon = String(dump_only=True)
 
     @pre_load
     def _pre_content(self, data, **kwargs):
