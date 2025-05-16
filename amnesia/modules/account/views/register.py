@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from marshmallow import ValidationError
 
 from pyramid.httpexceptions import HTTPInternalServerError
@@ -26,23 +24,16 @@ def includeme(config):
 )
 class Register(BaseView):
 
-    form_tmpl = 'amnesia:templates/account/_form_register.pt'
-
-    def form(self, data=None, errors=None):
-        return render_form(self.form_tmpl, self.request, data, errors=errors)
-
-    @view_config(request_method='GET')
-    def get(self):
-        return {'form': self.form()}
-
     @view_config(request_method='POST')
     def post(self):
         form_data = self.request.POST.mixed()
+        schema = AccountSchema()
 
         try:
-            result = AccountSchema().load(form_data)
+            result = schema.load(form_data)
         except ValidationError as error:
-            return {'form': self.form(form_data, error.messages)}
+            self.request.response.status_int = 400
+            return error.normalized_messages()
 
         if self.context.find_login(result['login']):
             errors = {'login': 'Login already exists'}
@@ -54,7 +45,8 @@ class Register(BaseView):
             errors = None
 
         if errors:
-            return {'form': self.form(form_data, errors)}
+            self.request.response.status_int = 400
+            return errors
 
         if (not self.request.has_permission('manage_roles')):
             result.pop('enabled', None)
@@ -63,7 +55,5 @@ class Register(BaseView):
 
         if not new_account:
             raise HTTPInternalServerError()
-
-        self.request.override_renderer = 'amnesia:templates/account/register_ok.pt'
 
         return {'new_account': new_account}

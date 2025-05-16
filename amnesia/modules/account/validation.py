@@ -42,7 +42,7 @@ class AccountSchema(Schema):
     last_name = String(required=True)
     first_name = String(required=True)
     full_name = String(dump_only=True)
-    enabled = Boolean()
+    enabled = Boolean(dump_only=True)
     email = Email(required=True)
     roles = Nested(RoleSchema, many=True, dump_only=True)
 
