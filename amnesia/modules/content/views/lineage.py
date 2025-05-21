@@ -42,4 +42,3 @@ class Lineage(BaseView):
             'id': content.id,
             'title': content.title,
         } for content in tree]
-        
