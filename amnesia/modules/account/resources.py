@@ -37,7 +37,7 @@ class AuthResource(Resource):
 
     __name__ = 'auth'
 
-    def __init__(self, request, parent):
+    def __init__(self, request, parent) -> None:
         super().__init__(request)
         self.parent = parent
 
@@ -53,10 +53,10 @@ class AuthResource(Resource):
         if self.registration_enabled:
             yield Allow, Everyone, 'register'
 
-        yield DENY_ALL
+        yield from super().__acl__()
 
     @property
-    def registration_enabled(self):
+    def registration_enabled(self) -> bool:
         return asbool(self.settings.get('registration_enabled'))
 
 

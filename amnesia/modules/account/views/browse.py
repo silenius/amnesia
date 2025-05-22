@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import HTTPForbidden
 
 from sqlalchemy import sql
 
@@ -63,6 +62,12 @@ class AccountBrowserView(BaseView):
         renderer='json'
     )
     def browse_json(self):
+        can_browse = self.request.has_permission('browse_accounts')
+        can_manage = self.request.has_permission('manage_accounts')
+
+        if not any((can_browse, can_manage)):
+            raise HTTPForbidden()
+
         data = self.browse()
         
         return {
@@ -78,13 +83,3 @@ class AccountBrowserView(BaseView):
                 'offset': data['offset']
             }
         }
- 
-    @view_config(request_method='GET', name='browse', accept='application/xml',
-                 renderer='amnesia:templates/account/_browse.xml')
-    def browse_xml(self):
-        return self.browse()
-
-    @view_config(request_method='GET', name='', accept='text/html',
-                 renderer='amnesia:templates/account/browse.pt')
-    def index(self):
-        return {}

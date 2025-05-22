@@ -20,10 +20,10 @@ def load_global_acl(request):
 class Resource(RequestMixin):
     ''' Base resource class. All other resources should inherit from it. '''
 
-    def __init__(self, request):
+    def __init__(self, request) -> None:
         self.request = request
 
-    def __acl__(self, raw=False):
+    def __acl__(self, raw: bool=False):
         if not raw:
             yield Allow, 'r:Manager', ALL_PERMISSIONS
 
@@ -33,6 +33,7 @@ class Resource(RequestMixin):
         # Note: if there's no explicit permission, the default is to DENY so in
         # theory there is no need for a yield DENY_ALL (but keep it just to be
         # sure)
+
 
         if not raw:
             yield DENY_ALL
