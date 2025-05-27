@@ -360,19 +360,19 @@ class RoleMember(Resource):
             AccountRole == self.role
         )
 
-    def get_members(self, only=True):
+    def get_members(self, only: bool=True, count: bool=False):
         if only:
-            stmt = sql.select(Account).filter(
+            return sql.select(Account).filter(
                 Account.account_roles.any(role=self.role)
             )
 
-            return self.dbsession.execute(stmt).scalars().all()
+            #return self.dbsession.execute(stmt).scalars().all()
         else:
-            stmt = sql.select(Account).add_columns(
+            return sql.select(Account).add_columns(
                 Account.account_roles.any(role=self.role)
             )
 
-            return self.dbsession.execute(stmt).all()
+            #return self.dbsession.execute(stmt).all()
 
     def add_member(self, account):
         try:

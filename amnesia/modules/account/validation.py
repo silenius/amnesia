@@ -1,13 +1,20 @@
-from marshmallow import Schema
-from marshmallow import EXCLUDE
-from marshmallow import post_load
-from marshmallow import post_dump
-from marshmallow import ValidationError
-from marshmallow.fields import DateTime, String
-from marshmallow.fields import Email
-from marshmallow.fields import Integer
-from marshmallow.fields import Boolean
-from marshmallow.fields import Nested
+from marshmallow import (
+    Schema,
+    EXCLUDE,
+    pre_load,
+    post_load,
+    post_dump,
+    ValidationError
+)
+
+from marshmallow.fields import(
+    DateTime, 
+    String,
+    Email,
+    Integer,
+    Boolean,
+    Nested
+)
 
 from marshmallow.validate import Length
 from marshmallow.validate import Range
@@ -42,9 +49,18 @@ class AccountSchema(Schema):
     last_name = String(required=True)
     first_name = String(required=True)
     full_name = String(dump_only=True)
-    enabled = Boolean(dump_only=True)
+    enabled = Boolean()
     email = Email(required=True)
     roles = Nested(RoleSchema, many=True, dump_only=True)
+
+    @pre_load
+    def _pre_enabled(self, data, **kwargs):
+        method = self.context['request'].method
+
+        if method != 'PATCH':
+            data['enabled'] = False
+
+        return data
 
     @post_load
     def check_password_repeat(self, data, **kwargs):
@@ -99,6 +115,12 @@ class BrowseRoleSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
+class BrowseRoleMembersSchema(Schema):
+    limit = Integer(validate=Range(min=1, max=100), missing=50)
+    offset = Integer(validate=Range(min=0), missing=0)
+
+    class Meta:
+        unknown = EXCLUDE
 
 class ResourceSchema(Schema):
     id = Integer(validate=Range(min=1), dump_only=True)

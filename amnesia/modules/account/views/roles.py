@@ -15,18 +15,25 @@ from marshmallow import ValidationError
 from sqlalchemy import sql
 
 from amnesia.views import BaseView
-from amnesia.modules.account import Account
-from amnesia.modules.account import Role
-from amnesia.modules.account import DatabaseAuthResource
-from amnesia.modules.account import RoleResource
-from amnesia.modules.account import RoleEntity
-from amnesia.modules.account import RoleMember
-from amnesia.modules.account import RoleMemberEntity
-from amnesia.modules.account.validation import BrowseAccountSchema
-from amnesia.modules.account.validation import AccountSchema
-from amnesia.modules.account.validation import BrowseRoleSchema
-from amnesia.modules.account.validation import RoleSchema
-from amnesia.modules.account.validation import PermissionSchema
+
+from amnesia.modules.account import (
+    Account,
+    Role,
+    DatabaseAuthResource,
+    RoleResource,
+    RoleEntity,
+    RoleMember,
+    RoleMemberEntity,
+)
+
+from amnesia.modules.account.validation import (
+    BrowseAccountSchema,
+    AccountSchema,
+    BrowseRoleSchema,
+    BrowseRoleMembersSchema,
+    RoleSchema,
+    PermissionSchema,
+)
 
 log = logging.getLogger(__name__)
 
@@ -267,32 +274,38 @@ class RoleMemberView(BaseView):
         name="all"
     )
     def get_all_json(self):
-        members = self.context.get_members(only=False)
+        params = self.request.GET.mixed()
+        schema = self.schema(BrowseRoleMembersSchema) 
 
-        return [
-            self.schema(AccountSchema).dump(member[0]) | { 'member': member[1] }
-            for member in members
-        ]
+        try:
+            data = schema.load(params)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
 
-    @view_config(request_method='GET', accept='text/html',
-                 renderer='amnesia:templates/role/members.pt')
-    def get_html(self):
-        stmt = sql.select(Account)
-        accounts = self.dbsession.execute(stmt).scalars().all()
+        stmt = self.context.get_members(only=False)
+
+        count = self.dbsession.execute(
+            sql.select(sql.func.count('*')).select_from(stmt)
+        ).scalar()
+
+        members = self.dbsession.execute(
+            stmt.offset(
+                data['offset']
+            ).limit(
+                data['limit']
+            )
+        ).all()
 
         return {
-            'role': self.context.role,
-            'accounts': accounts
-        }
-
-    @view_config(request_method='GET', accept='application/xml',
-                 renderer='amnesia:templates/role/_members.xml')
-    def get_xml(self):
-        accounts = self.context.get_members()
-
-        return {
-            'role': self.context.role,
-            'accounts': accounts
+            'meta': {
+                'count': count,
+                'limit': data['limit'],
+                'offset': data['offset']
+            }, 
+            'data' : [
+                self.schema(AccountSchema).dump(member[0]) | { 'member': member[1] }
+                for member in members
+            ]
         }
 
     ########
