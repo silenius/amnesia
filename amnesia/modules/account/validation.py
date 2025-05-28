@@ -21,6 +21,8 @@ from marshmallow.validate import Range
 
 from amnesia.utils.gravatar import gravatar
 from amnesia.utils.validation import PyramidContextMixin
+from amnesia.validation.content import PaginationSchema
+
 
 class LoginSchema(Schema):
     login = String(required=True, validate=Length(min=4))
@@ -96,35 +98,27 @@ class ForgotPasswordSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
+
 class RecoverPasswordSchema(AccountSchema):
     token = String(required=True, validate=[Length(equal=32)])
 
 
-class BrowseAccountSchema(Schema):
-    limit = Integer(validate=Range(min=1, max=100), missing=50)
-    offset = Integer(validate=Range(min=0), missing=0)
-
-    class Meta:
-        unknown = EXCLUDE
+class BrowseAccountSchema(PaginationSchema):
+    pass
 
 
-class BrowseRoleSchema(Schema):
-    limit = Integer(validate=Range(min=1, max=100), missing=50)
-    offset = Integer(validate=Range(min=0), missing=0)
+class BrowseRoleSchema(PaginationSchema):
+    pass
 
-    class Meta:
-        unknown = EXCLUDE
 
-class BrowseRoleMembersSchema(Schema):
-    limit = Integer(validate=Range(min=1, max=100), missing=50)
-    offset = Integer(validate=Range(min=0), missing=0)
+class BrowseRoleMembersSchema(PaginationSchema):
+    pass
 
-    class Meta:
-        unknown = EXCLUDE
 
 class ResourceSchema(Schema):
     id = Integer(validate=Range(min=1), dump_only=True)
     name = String()
+
 
 class ACLSchema(Schema, PyramidContextMixin):
     id = Integer(validate=Range(min=1), dump_only=True)
