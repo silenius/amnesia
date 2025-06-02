@@ -7,7 +7,7 @@ from marshmallow import (
     ValidationError
 )
 
-from marshmallow.fields import(
+from marshmallow.fields import (
     DateTime, 
     String,
     Email,
@@ -16,12 +16,14 @@ from marshmallow.fields import(
     Nested
 )
 
-from marshmallow.validate import Length
-from marshmallow.validate import Range
+from marshmallow.validate import (
+    Length,
+    Range
+)
 
 from amnesia.utils.gravatar import gravatar
 from amnesia.utils.validation import PyramidContextMixin
-from amnesia.validation.content import PaginationSchema
+from amnesia.modules.content.validation.pagination import PaginationSchema
 
 
 class LoginSchema(Schema):
@@ -112,6 +114,10 @@ class BrowseRoleSchema(PaginationSchema):
 
 
 class BrowseRoleMembersSchema(PaginationSchema):
+    pass
+
+
+class BrowseRolePermissionsSchema(PaginationSchema):
     pass
 
 

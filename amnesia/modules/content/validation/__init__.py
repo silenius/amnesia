@@ -1,3 +1,7 @@
-from .content import ContentSchema
-from .content import ContentACLSchema
-from .content import IdListSchema
+from .content import (
+    ContentSchema,
+    ContentACLSchema,
+    IdListSchema
+)
+
+from .pagination import PaginationSchema

@@ -304,9 +304,7 @@ class RoleEntity(Resource):
             Permission.name
         )
 
-        result = self.dbsession.execute(q).all()
-
-        return result
+        return q
 
     def update(self, name, description=None):
         if self.role.locked or self.role.virtual:

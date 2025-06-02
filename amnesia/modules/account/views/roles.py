@@ -29,6 +29,7 @@ from amnesia.modules.account.validation import (
     AccountSchema,
     BrowseRoleSchema,
     BrowseRoleMembersSchema,
+    BrowseRolePermissionsSchema,
     RoleSchema,
     PermissionSchema,
 )
@@ -240,13 +241,38 @@ class RoleEntityPermission(BaseView):
         renderer='json'
     )
     def global_permissions(self):
-        permissions = self.context.get_global_permissions()
+        params = self.request.GET.mixed()
+        schema = self.schema(BrowseRolePermissionsSchema)
 
-        return [PermissionSchema().dump(permission[0]) | {
-            'acl_id': permission[1],
-            'allow': permission[2],
-            'weight': permission[3]
-        } for permission in permissions]
+        try:
+            data = schema.load(params)
+        except ValidationError as error:
+            raise HTTPBadRequest(error.messages)
+
+        stmt = self.context.get_global_permissions()
+        stmt_count  = sql.select(sql.func.count('*')).select_from(stmt)
+
+        count = self.dbsession.execute(stmt_count).scalar()
+        permissions = self.dbsession.execute(
+            stmt.offset(data['offset']).limit(data['limit'])
+        ).all()
+
+        schema = self.schema(PermissionSchema)
+
+        return {
+            'meta': {
+                'count': count,
+                'limit': data['limit'],
+                'offset': data['offset']
+            },
+            'data': [
+                schema.dump(permission[0]) | {
+                    'acl_id': permission[1],
+                    'allow': permission[2],
+                    'weight': permission[3]
+                } for permission in permissions
+            ]
+        }
 
 
 @view_defaults(context=RoleMember)
