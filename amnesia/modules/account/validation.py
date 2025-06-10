@@ -40,6 +40,13 @@ class RoleSchema(Schema):
     locked = Boolean(dump_only=True)
     virtual = Boolean(dump_only=True)
 
+    @post_load
+    def check_system_dot(self, data, **kwargs):
+        if data['name'].startswith('system.'):
+            raise ValidationError("cannot start with system.", 'name')
+
+        return data
+
     class Meta:
         unknown = EXCLUDE
 

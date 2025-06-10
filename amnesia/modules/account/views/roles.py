@@ -104,35 +104,33 @@ class RoleBrowserView(BaseView):
 
         return data
 
-@view_defaults(context=RoleResource, name='')
+
+@view_defaults(
+    context=RoleResource, 
+    name=''
+)
 class RolesCRUD(BaseView):
-
-    #######
-    # GET #
-    #######
-
-    @view_config(request_method='GET', accept='text/html',
-                 renderer='amnesia:templates/role/browse.pt')
-    def get_html(self):
-        return {}
 
     ########
     # POST #
     ########
 
-    @view_config(request_method='POST', permission='create')
+    @view_config(
+        request_method='POST', 
+        permission='create',
+        renderer='json'
+    )
     def post(self):
         params = self.request.POST.mixed()
-        schema = RoleSchema()
+        schema = self.schema(RoleSchema)
 
         try:
             data = schema.load(params)
         except ValidationError as error:
-            raise HTTPBadRequest(error.messages)
+            self.request.response.status_int = 400
+            return error.normalized_messages()
 
-        role = self.context.create(
-            name=data['name'], description=data['description']
-        )
+        role = self.context.create(data)
 
         if not role:
             raise HTTPInternalServerError()
@@ -140,13 +138,6 @@ class RolesCRUD(BaseView):
         location = self.request.resource_url(self.context, role.id)
 
         return HTTPCreated(location=location)
-
-
-@view_config(context=RoleResource, request_method='GET', name='new',
-             accept='text/html', renderer='amnesia:templates/role/new.pt',
-             permission='create')
-def new(context, request):
-    return {}
 
 
 ##############################################################################
@@ -166,25 +157,11 @@ class RoleEntityCRUD(BaseView):
     @view_config(
         request_method='GET',
         permission='read',
-        accept='text/html',
-        renderer='amnesia:templates/role/show.pt'
-    )
-    def get(self):
-        role = self.context.role
-
-        return {
-            'role': role
-        }
-
-    @view_config(
-        request_method='GET',
-        permission='read',
         accept='application/json',
         renderer='json'
     )
     def get_json(self):
         role = self.context.role
-
         return RoleSchema().dump(role)
 
     #######
@@ -198,17 +175,15 @@ class RoleEntityCRUD(BaseView):
     )
     def put(self):
         params = self.request.POST.mixed()
-        schema = RoleSchema()
+        schema = self.schema(RoleSchema)
 
         try:
             data = schema.load(params)
         except ValidationError as error:
-            raise HTTPBadRequest(error.messages)
+            self.request.response.status_int = 400
+            return error.normalized_messages()
 
-        role = self.context.update(
-            name=data['name'],
-            description=data['description']
-        )
+        role = self.context.update(data)
 
         if not role:
             raise HTTPInternalServerError()

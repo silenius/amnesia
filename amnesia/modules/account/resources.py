@@ -254,8 +254,8 @@ class RoleResource(Resource):
     def query(self, order_by=None, limit=None, offset=None):
         return sql.select(Role)
 
-    def create(self, name, description):
-        role = Role(name=name, description=description)
+    def create(self, data):
+        role = Role(**data)
 
         try:
             self.dbsession.add(role)
@@ -306,12 +306,12 @@ class RoleEntity(Resource):
 
         return q
 
-    def update(self, name, description=None):
+    def update(self, data):
         if self.role.locked or self.role.virtual:
             return False
 
-        self.role.name = name
-        self.role.description = description
+        self.role.name = data['name']
+        self.role.description = data['description']
 
         try:
             self.dbsession.add(self.role)
@@ -321,6 +321,9 @@ class RoleEntity(Resource):
             return False
 
     def delete(self):
+        if self.role.locked or self.role.virtual:
+            return False
+
         try:
             self.dbsession.delete(self.role)
             self.dbsession.flush()
