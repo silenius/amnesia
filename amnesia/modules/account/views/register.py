@@ -27,7 +27,7 @@ class Register(BaseView):
     @view_config(request_method='POST')
     def post(self):
         form_data = self.request.POST.mixed()
-        schema = AccountSchema()
+        schema = self.schema(AccountSchema)
 
         try:
             result = schema.load(form_data)
@@ -48,7 +48,7 @@ class Register(BaseView):
             self.request.response.status_int = 400
             return errors
 
-        if (not self.request.has_permission('manage_roles')):
+        if not self.request.has_permission('manage_roles'):
             result.pop('enabled', None)
 
         new_account = self.context.register(result)

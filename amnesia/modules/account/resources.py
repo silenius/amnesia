@@ -3,7 +3,10 @@ import os
 import operator
 
 from binascii import hexlify
-from typing import Optional
+from typing import (
+    Literal,
+    Optional
+)
 
 from pyramid.authorization import DENY_ALL
 from pyramid.authorization import Everyone
@@ -62,9 +65,9 @@ class AuthResource(Resource):
 
 class DatabaseAuthResource(AuthResource):
 
-    def __getitem__(self, path):
+    def __getitem__(self, path: str):
         if path.isdigit():
-            account = self.get_user(path)
+            account = self.get_user(int(path))
             if account:
                 return AccountEntity(self.request, account)
 
@@ -84,7 +87,7 @@ class DatabaseAuthResource(AuthResource):
 
         return result
 
-    def get_user(self, user_id):
+    def get_user(self, user_id: int) -> Account:
         return self.dbsession.get(Account, user_id)
 
     def find_login(self, login, **kwargs):
@@ -95,7 +98,7 @@ class DatabaseAuthResource(AuthResource):
         except (NoResultFound, MultipleResultsFound):
             return None
 
-    def find_email(self, email):
+    def find_email(self, email: str) -> Account | None:
         stmt = sql.select(Account).filter(
             sql.func.lower(email) == sql.func.lower(Account.email)
         )
@@ -105,7 +108,7 @@ class DatabaseAuthResource(AuthResource):
         except (NoResultFound, MultipleResultsFound):
             return None
 
-    def find_token(self, token):
+    def find_token(self, token: str) -> Account | None:
         stmt = sql.select(Account).filter_by(lost_token=token)
 
         try:
@@ -113,13 +116,13 @@ class DatabaseAuthResource(AuthResource):
         except (NoResultFound, MultipleResultsFound):
             return None
 
-    def check_user_password(self, user, password):
+    def check_user_password(self, user: Account, password: str) -> bool:
         try:
             return bcrypt_check_password(password, user.password)
         except ValueError:
             return False
 
-    def register(self, data):
+    def register(self, data) -> Account | Literal[False]:
         new_account = Account(**data)
 
         try:
