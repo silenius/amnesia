@@ -1,6 +1,6 @@
 import logging
-import os
 import operator
+import secrets
 
 from binascii import hexlify
 from typing import (
@@ -133,7 +133,7 @@ class DatabaseAuthResource(AuthResource):
             return False
 
     def send_token(self, principal):
-        principal.lost_token = hexlify(os.urandom(16)).decode('utf-8')
+        principal.lost_token = secrets.token_hex(16)
 
         mailer = self.request.mailer
 
@@ -159,7 +159,7 @@ The Belgian Biodiversity Platform'''.format(
 
         message = Message(
             subject='Lost password',
-            sender='noreply@biodiversity.be',
+            sender='noreply@bebif.be',
             recipients=[principal.email],
             body=body
         )

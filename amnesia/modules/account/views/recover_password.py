@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from marshmallow import ValidationError
 
 from pyramid.httpexceptions import HTTPNotFound
@@ -58,8 +56,8 @@ class RecoverPassword(BaseView):
 
         if not principal:
             errors = {'token': 'Invalid token'}
-        elif not recaptcha.verify(self.request, result['captcha_token']):
-            errors = {'captcha': 'Captcha validation failed'}
+#        elif not recaptcha.verify(self.request, result['captcha_token']):
+#            errors = {'captcha': 'Captcha validation failed'}
         elif not self.context.reset_password(principal, result['password']):
             errors = {'password': 'Cannot reset password'}
         else:

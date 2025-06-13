@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from marshmallow import ValidationError
 
 from pyramid.httpexceptions import HTTPInternalServerError
@@ -18,27 +16,24 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_defaults(context=AuthResource, name='lost', permission='lost',
-               renderer='amnesia:templates/account/lost.pt')
+@view_defaults(
+    context=AuthResource, 
+    name='lost',
+    permission='lost',
+    renderer='json'
+)
 class ForgotPassword(BaseView):
-
-    form_tmpl = 'amnesia:templates/account/_form_lost.pt'
-
-    def form(self, data=None, errors=None):
-        return render_form(self.form_tmpl, self.request, data, errors=errors)
-
-    @view_config(request_method='GET')
-    def get(self):
-        return {'form': self.form()}
 
     @view_config(request_method='POST')
     def post(self):
         form_data = self.request.POST.mixed()
+        schema = self.schema(ForgotPasswordSchema)
 
         try:
-            result = ForgotPasswordSchema().load(form_data)
+            result = schema.load(form_data)
         except ValidationError as error:
-            return {'form': self.form(form_data, error.messages)}
+            self.request.response.status_int = 400
+            return error.normalized_messages()
 
         principal = self.context.find_email(result['email'])
 
@@ -46,8 +41,8 @@ class ForgotPassword(BaseView):
             errors = {'email': "Cannot find specified email in database"}
         elif principal.lost_token:
             errors = {'email': "You have already requested this email. Please check your inbox"}
-        elif not recaptcha.verify(self.request, result['captcha_token']):
-            errors = {'captcha': 'Captcha validation failed'}
+#        elif not recaptcha.verify(self.request, result['captcha_token']):
+#            errors = {'captcha': 'Captcha validation failed'}
         elif self.context.send_token(principal):
             self.request.override_renderer = 'amnesia:templates/account/lost_sent.pt'
             return {'principal': principal}

@@ -20,7 +20,7 @@ def includeme(config):
     context=AuthResource,
     name='register',
     permission='register',
-    renderer='amnesia:templates/account/register.pt'
+    renderer='json',
 )
 class Register(BaseView):
 
@@ -39,8 +39,8 @@ class Register(BaseView):
             errors = {'login': 'Login already exists'}
         elif self.context.find_email(result['email']):
             errors = {'email': 'Email already exists'}
-        elif not recaptcha.verify(self.request, result['captcha_token']):
-            errors = {'captcha': 'Captcha validation failed'}
+#        elif not recaptcha.verify(self.request, result['captcha_token']):
+#            errors = {'captcha': 'Captcha validation failed'}
         else:
             errors = None
 
@@ -53,7 +53,8 @@ class Register(BaseView):
 
         new_account = self.context.register(result)
 
-        if not new_account:
-            raise HTTPInternalServerError()
+        if new_account:
+            self.request.response.status_int = 201
+            return schema.dump(new_account)
 
-        return {'new_account': new_account}
+        raise HTTPInternalServerError()
