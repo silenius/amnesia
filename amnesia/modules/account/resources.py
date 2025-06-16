@@ -2,7 +2,6 @@ import logging
 import operator
 import secrets
 
-from binascii import hexlify
 from typing import (
     Literal,
     Optional
