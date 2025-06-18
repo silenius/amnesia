@@ -53,6 +53,12 @@ def includeme(config):
                 cascade='all, delete-orphan'
             ),
 
+            'contents': orm.relationship(
+                Content,
+                innerjoin=True,
+                lazy='dynamic',
+                back_populates='owner'
+            )
         }
     )
 

@@ -103,8 +103,7 @@ def includeme(config):
                 Account,
                 lazy='joined',
                 innerjoin=True,
-                backref=orm.backref('contents', lazy='dynamic',
-                                    cascade='all, delete-orphan')
+                back_populates='contents'
             ),
 
             'state': orm.relationship(
@@ -127,10 +126,10 @@ def includeme(config):
 
             'parent': orm.relationship(
                 lambda: Folder,
+                back_populates='children',
                 foreign_keys=tables['content'].c.container_id,
                 innerjoin=True,
                 uselist=False,
-                backref=orm.backref('children', cascade='all, delete-orphan')
             ),
 
             #####################
@@ -180,7 +179,8 @@ def add_all_props(mapper, class_):
             class_.container_id, 
             root.c.level + 1
         ).join(
-            root, root.c.container_id == class_.id
+            root, 
+            root.c.container_id == class_.id
         )
     )
 
@@ -190,7 +190,8 @@ def add_all_props(mapper, class_):
         # TODO: replace sql.text() with "the SQLAlchemy way"
         sql.text('jsonb_object_agg(pr.key, pr.value ORDER BY p.level DESC)')
     ).select_from(
-        root_a, sql.func.jsonb_each(root_a.c.props).alias('pr')
+        root_a, 
+        sql.func.jsonb_each(root_a.c.props).alias('pr')
     ).where(
         sql.func.jsonb_typeof(root_a.c.props) == 'object'
     ).scalar_subquery()

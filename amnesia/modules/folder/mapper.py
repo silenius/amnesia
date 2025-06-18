@@ -39,6 +39,14 @@ def includeme(config):
         polymorphic_identity=get_type_id(config, 'folder'),
         inherit_condition=t_folder.c.content_id == t_content.c.id,
         properties={
+            'children': orm.relationship(
+                Content,
+                foreign_keys=t_content.c.container_id,
+                innerjoin=True,
+                cascade='all, delete-orphan',
+                back_populates='parent'
+            ),
+
             'alternate_index': orm.relationship(
                 lambda: Document,
                 primaryjoin=t_folder.c.index_content_id == t_doc.c.content_id,
@@ -52,7 +60,6 @@ def includeme(config):
                 ContentType,
                 secondary=tables['folder_polymorphic_loading']
             ),
-
         }
     )
 
