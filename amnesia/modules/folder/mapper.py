@@ -80,7 +80,7 @@ def add_count_children(mapper, class_):
         class_a.container_id == class_.id
     ).correlate_except(
         class_a 
-    )
+    ).scalar_subquery()
 
     mapper.add_property(
         'count_children',
